@@ -4,6 +4,7 @@ import axios from 'axios';
 import Navbar from './components/Navbar';
 import GalleryPage from './pages/GalleryPage';
 import AdminPage from './pages/AdminPage';
+import AdminGalleryPage from './pages/AdminGalleryPage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 
@@ -60,6 +61,10 @@ function App() {
           <Route 
             path="/gallery" 
             element={<GalleryPage />} 
+          />
+          <Route 
+            path="/admin/gallery" 
+            element={isAuthenticated ? <AdminGalleryPage /> : <Navigate to="/login" />} 
           />
         </Routes>
       </div>
