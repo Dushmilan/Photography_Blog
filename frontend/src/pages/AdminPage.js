@@ -275,7 +275,7 @@ const AdminPage = () => {
                     id="dropzone-file" 
                     type="file" 
                     className="hidden" 
-                    onChange={handleFileChange} 
+ 
                     multiple 
                     accept="image/*"
                   />
