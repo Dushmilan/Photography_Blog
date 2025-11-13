@@ -20,7 +20,7 @@ const Navbar = ({ isAuthenticated }) => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Show navbar on top of page or when scrolling up
       if (currentScrollY < 50) {
         setScrolled(currentScrollY > 10);
@@ -34,7 +34,7 @@ const Navbar = ({ isAuthenticated }) => {
         setScrolled(true);
         setNavbarVisible(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
@@ -51,31 +51,43 @@ const Navbar = ({ isAuthenticated }) => {
     <nav className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarVisible ? 'translate-y-0' : '-translate-y-full'} ${scrolled ? 'py-2 shadow-md' : 'py-5'}`}>
       <div className="container mx-auto px-4 flex items-center">
         <div className="flex-grow"></div>
-        
+
         {/* Desktop Navigation */}
         <ul className="nav-items hidden md:flex justify-center">
           <li>
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className={`nav-link flex items-center gap-1 ${isActive('/') ? 'active' : ''}`}
             >
               <FiHome className="text-sm" /> Home
             </Link>
           </li>
           <li>
-            <Link 
-              to="/gallery" 
+            <Link
+              to="/gallery"
               className={`nav-link flex items-center gap-1 ${isActive('/gallery') ? 'active' : ''}`}
             >
               <FiGrid className="text-sm" /> Gallery
             </Link>
           </li>
-          
+
+          {/* Show Admin Gallery only when authenticated */}
+          {isAuthenticated && (
+            <li>
+              <Link
+                to="/admin/gallery"
+                className={`nav-link flex items-center gap-1 ${isActive('/admin/gallery') ? 'active' : ''}`}
+              >
+                <FiImage className="text-sm" /> Admin Gallery
+              </Link>
+            </li>
+          )}
+
           {/* Show login only when not authenticated */}
           {!isAuthenticated && (
             <li>
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className={`nav-link flex items-center gap-1 ${isActive('/login') ? 'active' : ''}`}
               >
                 <FiLogIn className="text-sm" /> Login
@@ -84,7 +96,7 @@ const Navbar = ({ isAuthenticated }) => {
           )}
         </ul>
         <div className="flex-grow"></div>
-        
+
         {/* Mobile menu button */}
         <div className="md:hidden self-start mt-2">
           <button
@@ -96,14 +108,14 @@ const Navbar = ({ isAuthenticated }) => {
           </button>
         </div>
       </div>
-      
+
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden bg-white/90 backdrop-blur-sm py-4 px-4 border-t border-[#708090]/20 animate-slideDown">
           <ul className="flex flex-col gap-3 items-center">
             <li>
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -111,20 +123,33 @@ const Navbar = ({ isAuthenticated }) => {
               </Link>
             </li>
             <li>
-              <Link 
-                to="/gallery" 
+              <Link
+                to="/gallery"
                 className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/gallery') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 <FiGrid /> Gallery
               </Link>
             </li>
-            
+
+            {/* Show Admin Gallery only when authenticated */}
+            {isAuthenticated && (
+              <li>
+                <Link
+                  to="/admin/gallery"
+                  className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/admin/gallery') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <FiImage /> Admin Gallery
+                </Link>
+              </li>
+            )}
+
             {/* Only show login when not authenticated */}
             {!isAuthenticated && (
               <li>
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/login') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
                   onClick={() => setIsMenuOpen(false)}
                 >

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { verifyAccessToken } = require('../utils/jwt');
 
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
@@ -8,13 +9,13 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Access token required' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'photography-portfolio-secret', (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid or expired token' });
-    }
-    req.user = user;
+  try {
+    const decoded = await verifyAccessToken(token);
+    req.user = decoded;
     next();
-  });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
 };
 
 module.exports = authenticateToken;

@@ -1,0 +1,80 @@
+const jwt = require('jsonwebtoken');
+
+// Function to generate access token
+const generateAccessToken = (payload) => {
+  return jwt.sign(
+    { ...payload }, 
+    process.env.JWT_SECRET, 
+    { 
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
+      issuer: 'photography-blog-api',
+      audience: 'photography-blog-users'
+    }
+  );
+};
+
+// Function to generate refresh token
+const generateRefreshToken = (payload) => {
+  return jwt.sign(
+    { ...payload, type: 'refresh' }, 
+    process.env.JWT_REFRESH_SECRET, 
+    { 
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
+      issuer: 'photography-blog-api',
+      audience: 'photography-blog-users'
+    }
+  );
+};
+
+// Function to verify access token
+const verifyAccessToken = (token) => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        let message = 'Invalid token';
+        if (err.name === 'TokenExpiredError') {
+          message = 'Access token expired';
+        } else if (err.name === 'JsonWebTokenError') {
+          message = 'Invalid token format';
+        }
+        
+        return reject({ 
+          error: true, 
+          message,
+          expired: err.name === 'TokenExpiredError'
+        });
+      }
+      resolve(decoded);
+    });
+  });
+};
+
+// Function to verify refresh token
+const verifyRefreshToken = (token) => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+      if (err) {
+        let message = 'Invalid refresh token';
+        if (err.name === 'TokenExpiredError') {
+          message = 'Refresh token expired';
+        } else if (err.name === 'JsonWebTokenError') {
+          message = 'Invalid refresh token format';
+        }
+        
+        return reject({ 
+          error: true, 
+          message,
+          expired: err.name === 'TokenExpiredError'
+        });
+      }
+      resolve(decoded);
+    });
+  });
+};
+
+module.exports = {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyAccessToken,
+  verifyRefreshToken
+};

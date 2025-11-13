@@ -1,38 +1,33 @@
 # Project Summary
 
 ## Overall Goal
-Transform a photography portfolio website to use Google Photos API instead of local file upload and storage, while maintaining admin panel functionality for managing featured and slideshow photos, and keeping Supabase as the database for metadata and settings.
+Create a separate Admin Gallery page and update the navigation so that when signed in, users see both Gallery (public) and Admin Gallery (admin) links in the navbar.
 
 ## Key Knowledge
-- **Technology Stack**: React (frontend), Node.js/Express (backend), Supabase (database), Google Photos API
-- **Architecture**: Backend fetches photos from Google Photos API, Supabase stores photo metadata and featured/slideshow status
-- **Database**: Supabase is intentionally kept as the database (not MongoDB as mentioned in old README)
-- **Build Commands**: `npm install` in both frontend and backend directories, then run with appropriate start scripts
-- **API Structure**: New `/api/google-photos` endpoints handle Google Photos integration
-- **Frontend Components**: GalleryPage, HomePage, and AdminPage updated to work with Google Photos URLs
-- **Admin Functionality**: Users can still mark photos as featured or slideshow, but can no longer upload local files
+- Frontend is built with React and React Router DOM
+- Admin functionality is authenticated using token-based auth stored in localStorage
+- Project structure: backend (Node.js) and frontend (React) with separate route handling
+- Navigation is handled by Navbar.js component which conditionally renders links based on authentication status
+- AdminPage.js previously contained both dashboard and admin gallery functionality
+- New route structure: `/gallery` (public), `/admin/gallery` (authenticated admin gallery)
+- Google Photos API integration is used for photo management
 
 ## Recent Actions
-1. [DONE] **Removed upload functionality**: Eliminated file upload routes, multer configuration, Sharp image processing, and related UI components
-2. [DONE] **Added Google Photos API integration**: Created utility class and backend routes to fetch photos from Google Photos
-3. [DONE] **Updated frontend components**: Modified GalleryPage, HomePage, and AdminPage to work with Google Photos URLs
-4. [DONE] **Maintained database functionality**: Kept Supabase integration for storing photo metadata and featured/slideshow settings
-5. [DONE] **Fixed ESLint errors**: Removed undefined references in AdminPage.js by recreating the file without upload functionality
-6. [DONE] **Preserved admin controls**: Kept functionality to manage featured and slideshow photos through the database
-7. [DONE] **Created slideshow functionality**: HomePage maintains auto-advancing slideshow using Google Photos content
+- ✅ Created new AdminGalleryPage.js component containing all admin gallery functionality (view, rename, delete, toggle photo statuses)
+- ✅ Updated App.js to include new route: `/admin/gallery` requiring authentication
+- ✅ Modified Navbar.js to conditionally show "Gallery" (always visible) and "Admin Gallery" (authenticated only)
+- ✅ Refactored AdminPage.js to remove the admin gallery section and add a link to the new Admin Gallery page
+- ✅ Ensured all photo management functions (rename, delete, status toggling) work in the new standalone Admin Gallery page
 
 ## Current Plan
-- [DONE] Remove MongoDB references (though project actually used Supabase)
-- [DONE] Remove file upload and local storage functionality
-- [DONE] Integrate Google Photos API backend
-- [DONE] Update frontend components to use Google Photos
-- [DONE] Maintain admin panel photo management (featured/slideshow)
-- [DONE] Verify all functionality works with new architecture
-- [DONE] Fix ESLint errors and cleanup code
-
-The project is now successfully transformed to use Google Photos API while maintaining essential admin functionality for managing photo collections.
+1. [DONE] Create new AdminGalleryPage component
+2. [DONE] Move admin gallery functionality from AdminPage.js to AdminGalleryPage.js
+3. [DONE] Update App.js to include the new AdminGallery route
+4. [DONE] Update Navbar.js to conditionally show Gallery and AdminGallery based on authentication status
+5. [DONE] Refactor AdminPage.js to remove the admin gallery section
+6. [DONE] Test the new navigation logic
 
 ---
 
 ## Summary Metadata
-**Update time**: 2025-11-13T18:14:15.017Z 
+**Update time**: 2025-11-13T18:44:40.424Z 
