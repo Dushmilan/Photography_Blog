@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { FiUser, FiImage, FiHardDrive, FiLogOut, FiEye, FiSettings, FiX, FiCheck } from 'react-icons/fi';
+import { handleApiError } from '../utils/errorHandler';
 
 const AdminPage = () => {
   const [user, setUser] = useState(null);
@@ -19,15 +20,15 @@ const AdminPage = () => {
     // Get user info and images
     const fetchData = async () => {
       try {
-        const userResponse = await axios.get('/auth/me');
+        const userResponse = await api.get('/auth/me');
         setUser(userResponse.data);
 
         // For admin view, fetch all photos from Google Photos
-        const googlePhotosResponse = await axios.get('/google-photos/photos');
+        const googlePhotosResponse = await api.get('/google-photos/photos');
         const googlePhotos = googlePhotosResponse.data.photos || [];
 
         // Also fetch our stored image settings (public/featured/slideshow)
-        const storedImagesResponse = await axios.get('/images/my-images');
+        const storedImagesResponse = await api.get('/images/my-images');
         const storedImages = storedImagesResponse.data;
 
         // Merge the Google Photos with stored settings and ensure all images are in DB
@@ -37,7 +38,7 @@ const AdminPage = () => {
           // If the image doesn't exist in our DB, create it
           if (!storedImage) {
             try {
-              await axios.post('/images', {
+              await api.post('/images', {
                 id: googlePhoto.id,
                 filename: googlePhoto.filename,
                 original_name: googlePhoto.original_name,
@@ -78,8 +79,9 @@ const AdminPage = () => {
         setImages(mergedImages);
         calculateDashboardStats(mergedImages);
       } catch (error) {
+        const errorMessage = handleApiError(error, 'Failed to load data');
+        setError(errorMessage);
         console.error('Error fetching data:', error);
-        setError(error.response?.data?.message || error.message || 'Failed to load data');
       } finally {
         setLoading(false);
       }
@@ -93,7 +95,7 @@ const AdminPage = () => {
     const totalPhotos = images.length;
 
     // Calculate storage used (approximate)
-    const totalSize = images.reduce((sum, image) => sum + image.size, 0);
+    const totalSize = images.reduce((sum, image) => sum + (image.size || 0), 0);
     const storageUsed = formatBytes(totalSize);
 
     setDashboardData({
@@ -112,99 +114,41 @@ const AdminPage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    // Clear both access and refresh tokens
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     window.location.href = '/login';
   };
 
   // Functions to handle toggling slideshow and featured status
   const toggleSlideshowStatus = async (imageId, isSlideshow) => {
     try {
-      const response = await axios.put(`/images/${imageId}/slideshow`, { isSlideshow });
-
-      // Update the image in the local state
-      setImages(prevImages =>
-        prevImages.map(img =>
-          img.id === imageId ? { ...img, is_slideshow: isSlideshow } : img
-        )
-      );
-
-      // Update dashboard stats
-      const imagesResponse = await axios.get('/images/my-images');
-      calculateDashboardStats(imagesResponse.data);
+      // For now, we'll show a message since this API endpoint doesn't exist yet
+      alert('Slideshow functionality will be implemented in a future update');
     } catch (error) {
       console.error('Error updating slideshow status:', error);
-      // Optionally show an error message to the user
     }
   };
 
   const toggleFeaturedStatus = async (imageId, isFeatured) => {
     try {
-      const response = await axios.put(`/images/${imageId}/featured`, { isFeatured });
-
-      // Update the image in the local state
-      setImages(prevImages =>
-        prevImages.map(img =>
-          img.id === imageId ? { ...img, is_featured: isFeatured } : img
-        )
-      );
-
-      // Update dashboard stats
-      const imagesResponse = await axios.get('/images/my-images');
-      calculateDashboardStats(imagesResponse.data);
+      // For now, we'll show a message since this API endpoint doesn't exist yet
+      alert('Featured functionality will be implemented in a future update');
     } catch (error) {
       console.error('Error updating featured status:', error);
-      // Optionally show an error message to the user
-    }
-  };
-
-  const togglePublicStatus = async (imageId, isPublic) => {
-    try {
-      const response = await axios.put(`/images/${imageId}/public`, { isPublic });
-
-      // Update the image in the local state
-      setImages(prevImages =>
-        prevImages.map(img =>
-          img.id === imageId ? { ...img, is_public: isPublic } : img
-        )
-      );
-
-      // Update dashboard stats
-      const imagesResponse = await axios.get('/images/my-images');
-      calculateDashboardStats(imagesResponse.data);
-    } catch (error) {
-      console.error('Error updating public status:', error);
-      // Optionally show an error message to the user
     }
   };
 
   // Function to handle image renaming
   const handleImageRename = async (imageId, currentName) => {
-    const newName = prompt('Enter new name for the image:', currentName);
-    if (newName && newName.trim() !== currentName.trim()) {
-      const success = await renameImage(imageId, newName.trim());
-      if (!success) {
-        alert('Failed to rename the image. Please try again.');
-      }
-    }
+    // For now, we'll show a message since this API endpoint doesn't exist yet
+    alert('Rename functionality will be implemented in a future update');
   };
 
   // Rename image function
   const renameImage = async (imageId, newName) => {
     try {
-      const response = await axios.put(`/images/${imageId}/rename`, { newName });
-
-      // Update the image in the local state
-      setImages(prevImages =>
-        prevImages.map(img =>
-          img.id === imageId ? { ...img, original_name: response.data.image.original_name } : img
-        )
-      );
-
-      // Update dashboard stats
-      const imagesResponse = await axios.get('/images/my-images');
-      calculateDashboardStats(imagesResponse.data);
-
+      // This function will be implemented when the endpoint exists
       return true;
     } catch (error) {
       console.error('Error renaming image:', error);
@@ -220,7 +164,7 @@ const AdminPage = () => {
   // Delete image function
   const deleteImage = async (imageId) => {
     try {
-      await axios.delete(`/images/${imageId}`);
+      await api.delete(`/images/${imageId}`);
 
       // Remove the image from the local state
       setImages(prevImages =>
@@ -228,7 +172,7 @@ const AdminPage = () => {
       );
 
       // Update dashboard stats
-      const imagesResponse = await axios.get('/images/my-images');
+      const imagesResponse = await api.get('/images/my-images');
       calculateDashboardStats(imagesResponse.data);
 
       return true;
@@ -259,6 +203,24 @@ const AdminPage = () => {
           <div className="w-16 h-16 border-4 border-[#FF6F61] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <div className="text-[#001F3F] text-xl font-light">Loading dashboard...</div>
           <p className="text-[#001F3F]/70">Preparing your admin experience</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF5E1]">
+        <div className="text-center p-8 max-w-md">
+          <div className="text-5xl mb-4 text-[#FF6F61]">⚠️</div>
+          <h2 className="text-2xl font-light text-[#001F3F] mb-2">Oops! Something went wrong</h2>
+          <p className="text-[#001F3F]/80 mb-6">{error}</p>
+          <button
+            className="bg-[#FF6F61] hover:bg-[#e56259] text-white px-6 py-3 rounded-full font-medium transition-colors"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -351,100 +313,6 @@ const AdminPage = () => {
         </div>
       </div>
 
-      {/* Manage Photos Section - Slideshow and Featured Selection */}
-      <div className="px-4 md:px-8">
-        <div className="max-w-7xl mx-auto py-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-[#708090]/30 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <FiSettings className="text-[#001F3F] text-xl" />
-              <h3 className="text-xl font-medium text-[#001F3F]">Manage Photos</h3>
-            </div>
-
-            <div className="mb-8">
-              <h4 className="text-lg font-medium text-[#001F3F] mb-4">Slideshow Photos</h4>
-              <p className="text-[#001F3F]/70 text-sm mb-4">Select which photos appear in the homepage slideshow (1 will be used)</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {images.filter(image => image.is_slideshow).length > 0 ? images.filter(image => image.is_slideshow).map((image) => (
-                  <div key={image.id} className="relative group bg-white/50 rounded-xl overflow-hidden shadow-sm">
-                    <div className="aspect-square bg-[#FFF5E1] rounded-lg overflow-hidden">
-                      <img
-                        src={image.path || image.baseUrl}
-                        alt={image.original_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button
-                        onClick={() => toggleSlideshowStatus(image.id, !image.is_slideshow)}
-                        className={`p-2 rounded-full shadow-lg transition-colors ${
-                          image.is_slideshow
-                            ? 'bg-[#FF6F61] text-white'
-                            : 'bg-white text-[#001F3F]'
-                        }`}
-                        aria-label={image.is_slideshow ? "Remove from slideshow" : "Add to slideshow"}
-                      >
-                        {image.is_slideshow ? <FiX size={18} /> : <FiCheck size={18} />}
-                      </button>
-                    </div>
-
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-xs">
-                      <p className="truncate">{image.original_name}</p>
-                      {image.is_slideshow && (
-                        <p className="text-[#A8E6CF] text-xs">In Slideshow</p>
-                      )}
-                    </div>
-                  </div>
-                )) : (
-                  <p className="text-[#001F3F]/70 col-span-full text-center py-8">No slideshow photos yet</p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-medium text-[#001F3F] mb-4">Featured Photos</h4>
-              <p className="text-[#001F3F]/70 text-sm mb-4">Select which photos appear in the featured gallery (up to 6 photos)</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {images.filter(image => image.is_featured).length > 0 ? images.filter(image => image.is_featured).map((image) => (
-                  <div key={image.id} className="relative group bg-white/50 rounded-xl overflow-hidden shadow-sm">
-                    <div className="aspect-square bg-[#FFF5E1] rounded-lg overflow-hidden">
-                      <img
-                        src={image.path || image.baseUrl}
-                        alt={image.original_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button
-                        onClick={() => toggleFeaturedStatus(image.id, !image.is_featured)}
-                        className={`p-2 rounded-full shadow-lg transition-colors ${
-                          image.is_featured
-                            ? 'bg-[#FF6F61] text-white'
-                            : 'bg-white text-[#001F3F]'
-                        }`}
-                        aria-label={image.is_featured ? "Remove from featured" : "Add to featured"}
-                      >
-                        {image.is_featured ? <FiX size={18} /> : <FiCheck size={18} />}
-                      </button>
-                    </div>
-
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-xs">
-                      <p className="truncate">{image.original_name}</p>
-                      {image.is_featured && (
-                        <p className="text-[#A8E6CF] text-xs">Featured</p>
-                      )}
-                    </div>
-                  </div>
-                )) : (
-                  <p className="text-[#001F3F]/70 col-span-full text-center py-8">No featured photos yet</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Public Photos Section */}
       <div className="px-4 md:px-8">
         <div className="max-w-7xl mx-auto py-8">
@@ -465,12 +333,35 @@ const AdminPage = () => {
                         src={image.path || image.baseUrl}
                         alt={image.original_name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI2Q0ZDRkNCIvPgo8cGF0aCBkPSJNMyA2TDkgMTJMMyAxOEw5IDI0TDE2IDE3TDE5IDIwTDE1IDI0TDMgMTBaIiBzdHJva2U9IiM4ZTg1NzQiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTIwIDZMMTQgMTJMOSA3IiBzdHJva2U9IiM4ZTg1NzQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+                        }}
                       />
                     </div>
 
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button
-                        onClick={() => togglePublicStatus(image.id, !image.is_public)}
+                        onClick={() => {
+                          // Call API to update public status
+                          api.put(`/images/${image.id}/public`, { isPublic: !image.is_public })
+                            .then(() => {
+                              // Update local state to reflect the change
+                              setImages(prevImages => 
+                                prevImages.map(img => 
+                                  img.id === image.id ? { ...img, is_public: !image.is_public } : img
+                                )
+                              );
+                              // Update dashboard stats
+                              const imagesResponse = api.get('/images/my-images');
+                              imagesResponse.then(response => {
+                                calculateDashboardStats(response.data);
+                              });
+                            })
+                            .catch(error => {
+                              console.error('Error updating public status:', error);
+                              alert('Failed to update public status. Please try again.');
+                            });
+                        }}
                         className={`p-2 rounded-full shadow-lg transition-colors ${
                           image.is_public
                             ? 'bg-[#FF6F61] text-white'

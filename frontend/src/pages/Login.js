@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { FiUser, FiLock, FiEye, FiEyeOff, FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 const Login = ({ setIsAuthenticated }) => {
@@ -14,19 +14,23 @@ const Login = ({ setIsAuthenticated }) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+
     try {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
-      const requestData = isLogin 
-        ? { username, password } 
+      const requestData = isLogin
+        ? { username, password }
         : { username, password }; // No email needed for registration
-      
-      const response = await axios.post(endpoint, requestData);
-      
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
+      const response = await api.post(endpoint, requestData);
+
+      if (response.data.accessToken && response.data.refreshToken) {
+        // Store both access and refresh tokens
+        localStorage.setItem('access_token', response.data.accessToken);
+        localStorage.setItem('refresh_token', response.data.refreshToken);
+        
         setIsAuthenticated(true);
+      } else {
+        setError('Login response did not contain required tokens');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred');
@@ -53,7 +57,7 @@ const Login = ({ setIsAuthenticated }) => {
             {isLogin ? 'Sign in to access your portfolio' : 'Join our community of photographers'}
           </p>
         </div>
-        
+
         {error && (
           <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-6 text-center border border-red-200 flex items-center justify-center animate-pulse">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -62,9 +66,9 @@ const Login = ({ setIsAuthenticated }) => {
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-5">
-          
+
           <div className="relative">
             <label className="block text-[#001F3F] text-sm font-medium mb-2" htmlFor="username">
               Username
@@ -84,7 +88,7 @@ const Login = ({ setIsAuthenticated }) => {
               />
             </div>
           </div>
-          
+
           <div className="relative">
             <label className="block text-[#001F3F] text-sm font-medium mb-2" htmlFor="password">
               Password
@@ -115,13 +119,13 @@ const Login = ({ setIsAuthenticated }) => {
               </button>
             </div>
           </div>
-          
+
           <button
               type="submit"
               disabled={isLoading}
               className={`w-full flex items-center justify-center py-3 px-4 rounded-xl font-medium text-white transition-all duration-300 ${
-                isLoading 
-                  ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed' 
+                isLoading
+                  ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-[#FF6F61] via-[#FF9933] to-[#A8E6CF] hover:from-[#e56259] hover:via-[#ff8a14] hover:to-[#7fc9ae] transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl'
               }`}
             >
@@ -144,7 +148,7 @@ const Login = ({ setIsAuthenticated }) => {
             )}
           </button>
         </form>
-        
+
         <div className="mt-8 text-center">
           <button
             onClick={() => {
@@ -164,7 +168,7 @@ const Login = ({ setIsAuthenticated }) => {
             )}
           </button>
         </div>
-        
+
         <div className="mt-8 pt-6 border-t border-[#708090]/20 text-center">
           <p className="text-[#001F3F]/60 text-sm">
             By signing in, you agree to our <a href="#" className="text-[#A8E6CF] hover:underline">Terms</a> and <a href="#" className="text-[#A8E6CF] hover:underline">Privacy Policy</a>

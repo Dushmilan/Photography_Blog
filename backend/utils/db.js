@@ -1,4 +1,6 @@
 // Database utility functions for Supabase
+const { handleDbError } = require('./errorHandler');
+
 class Database {
   constructor(supabase) {
     this.supabase = supabase;
@@ -8,10 +10,10 @@ class Database {
   async createUser(userData) {
     // For debugging, let's log the data being inserted
     console.log('Creating user with data:', userData);
-    
+
     const { data, error } = await this.supabase
       .from('users')
-      .insert([{ 
+      .insert([{
         username: userData.username,
         password: userData.password
       }])
@@ -21,7 +23,7 @@ class Database {
     if (error) {
       console.error('Error creating user:', error);
       console.error('Error details:', error.details, error.hint);
-      throw new Error(error.message);
+      throw handleDbError(error);
     }
     console.log('User created successfully:', data);
     return data;
@@ -40,12 +42,12 @@ class Database {
       console.log('User not found by ID:', userId);
       return null; // Return null if no user found
     }
-    
+
     if (error) {
       console.error('Error finding user by ID:', error);
-      throw new Error(error.message);
+      throw handleDbError(error);
     }
-    
+
     console.log('Found user by ID:', data);
     return data;
   }
@@ -63,12 +65,12 @@ class Database {
       console.log('User not found:', username);
       return null; // Return null if no user found
     }
-    
+
     if (error) {
       console.error('Error finding user:', error);
-      throw new Error(error.message);
+      throw handleDbError(error);
     }
-    
+
     console.log('Found user:', data);
     return data;
   }
@@ -85,10 +87,10 @@ class Database {
         thumbnail_path: imageData.thumbnail_path || imageData.path,  // Use provided thumbnail_path or fallback to path
         small_path: imageData.small_path || imageData.path,      // Use provided small_path or fallback to path
         medium_path: imageData.medium_path || imageData.path,     // Use provided medium_path or fallback to path
-        size: imageData.size,
+        size: imageData.size || 0,
         mimetype: imageData.mimetype,
-        width: imageData.width,
-        height: imageData.height,
+        width: imageData.width || 0,
+        height: imageData.height || 0,
         photographer_id: imageData.photographer_id,
         is_featured: imageData.is_featured || false,
         is_slideshow: imageData.is_slideshow || false,
@@ -108,18 +110,11 @@ class Database {
           .select('*')
           .eq('id', imageData.id)
           .single();
-          
+
         return existingData;
       }
       
-      // If the error is due to not-null constraint, we might need to alter the table
-      if (error.code === '23502') {
-        console.error('Hint: You may need to run this SQL in Supabase to allow NULL values:');
-        console.error('ALTER TABLE images ALTER COLUMN thumbnail_path DROP NOT NULL;');
-        console.error('ALTER TABLE images ALTER COLUMN small_path DROP NOT NULL;');
-        console.error('ALTER TABLE images ALTER COLUMN medium_path DROP NOT NULL;');
-      }
-      throw new Error(error.message);
+      throw handleDbError(error);
     }
     return data;
   }
@@ -133,7 +128,7 @@ class Database {
 
     if (error) {
       console.error('Error fetching all images:', error);
-      throw new Error(error.message);
+      throw handleDbError(error);
     }
     console.log('Successfully fetched', data.length, 'images');
     return data;
@@ -146,7 +141,7 @@ class Database {
       .eq('photographer_id', photographerId)
       .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -157,7 +152,7 @@ class Database {
       .eq('id', imageId)
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -170,7 +165,7 @@ class Database {
 
     if (error) {
       console.error('Error deleting image from DB:', error);
-      throw new Error(error.message);
+      throw handleDbError(error);
     }
     console.log('Successfully deleted image with ID:', imageId);
     return data;
@@ -184,7 +179,7 @@ class Database {
       .eq('photographer_id', photographerId)
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -197,7 +192,7 @@ class Database {
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -210,7 +205,7 @@ class Database {
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -223,7 +218,7 @@ class Database {
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -234,7 +229,7 @@ class Database {
       .eq('is_featured', true)
       .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -245,7 +240,7 @@ class Database {
       .eq('is_slideshow', true)
       .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -256,7 +251,7 @@ class Database {
       .eq('is_public', true)
       .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 
@@ -269,7 +264,7 @@ class Database {
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) throw handleDbError(error);
     return data;
   }
 }
