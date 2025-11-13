@@ -11,8 +11,8 @@ router.get('/photos', authenticate, async (req, res) => {
     const googlePhotosInitialized = req.app.locals.googlePhotosInitialized;
 
     if (!googlePhotos || !googlePhotosInitialized) {
-      return res.status(500).json({ 
-        message: 'Google Photos API not initialized. Please configure credentials.' 
+      return res.status(500).json({
+        message: 'Google Photos API not initialized. Please configure credentials.'
       });
     }
 
@@ -60,8 +60,8 @@ router.get('/albums', authenticate, async (req, res) => {
     const googlePhotosInitialized = req.app.locals.googlePhotosInitialized;
 
     if (!googlePhotos || !googlePhotosInitialized) {
-      return res.status(500).json({ 
-        message: 'Google Photos API not initialized. Please configure credentials.' 
+      return res.status(500).json({
+        message: 'Google Photos API not initialized. Please configure credentials.'
       });
     }
 
@@ -81,8 +81,8 @@ router.get('/albums/:albumId/photos', authenticate, async (req, res) => {
     const googlePhotosInitialized = req.app.locals.googlePhotosInitialized;
 
     if (!googlePhotos || !googlePhotosInitialized) {
-      return res.status(500).json({ 
-        message: 'Google Photos API not initialized. Please configure credentials.' 
+      return res.status(500).json({
+        message: 'Google Photos API not initialized. Please configure credentials.'
       });
     }
 
@@ -119,6 +119,103 @@ router.get('/albums/:albumId/photos', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Error fetching photos from Google Photos album:', error);
     res.status(500).json({ message: 'Error fetching photos from Google Photos album', error: error.message });
+  }
+});
+
+// OAuth2 endpoints
+router.get('/auth', (req, res) => {
+  try {
+    const googlePhotos = req.app.locals.googlePhotos;
+    const googlePhotosInitialized = req.app.locals.googlePhotosInitialized;
+
+    if (!googlePhotos || !googlePhotosInitialized) {
+      return res.status(500).json({
+        message: 'Google Photos API not initialized. Please configure credentials.'
+      });
+    }
+
+    // Generate the OAuth2 URL for Google Photos access
+    const authUrl = googlePhotos.getAuthUrl();
+    res.json({ authUrl });
+  } catch (error) {
+    console.error('Error generating Google Photos auth URL:', error);
+    res.status(500).json({ message: 'Error generating Google Photos auth URL', error: error.message });
+  }
+});
+
+// Old callback route for backwards compatibility
+router.get('/auth/callback', async (req, res) => {
+  try {
+    const { code } = req.query;
+    
+    if (!code) {
+      return res.status(400).json({ message: 'Authorization code not provided' });
+    }
+
+    const googlePhotos = req.app.locals.googlePhotos;
+    const googlePhotosInitialized = req.app.locals.googlePhotosInitialized;
+
+    if (!googlePhotos || !googlePhotosInitialized) {
+      return res.status(500).json({
+        message: 'Google Photos API not initialized. Please configure credentials.'
+      });
+    }
+
+    // Exchange the authorization code for tokens
+    const tokens = await googlePhotos.getTokenFromCode(code);
+
+    // In a production app, you would save the refresh token to your database
+    // For now, we'll just return a success message
+    res.json({ 
+      message: 'Successfully authenticated with Google Photos',
+      // Include tokens in response (in production, save them server-side)
+      tokens: {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expiry_date: tokens.expiry_date
+      }
+    });
+  } catch (error) {
+    console.error('Error during Google Photos OAuth callback:', error);
+    res.status(500).json({ message: 'Error during Google Photos OAuth callback', error: error.message });
+  }
+});
+
+// New callback route to match the client secret redirect URI
+router.get('/callback', async (req, res) => {
+  try {
+    const { code } = req.query;
+    
+    if (!code) {
+      return res.status(400).json({ message: 'Authorization code not provided' });
+    }
+
+    const googlePhotos = req.app.locals.googlePhotos;
+    const googlePhotosInitialized = req.app.locals.googlePhotosInitialized;
+
+    if (!googlePhotos || !googlePhotosInitialized) {
+      return res.status(500).json({
+        message: 'Google Photos API not initialized. Please configure credentials.'
+      });
+    }
+
+    // Exchange the authorization code for tokens
+    const tokens = await googlePhotos.getTokenFromCode(code);
+
+    // In a production app, you would save the refresh token to your database
+    // For now, we'll just return a success message
+    res.json({ 
+      message: 'Successfully authenticated with Google Photos',
+      // Include tokens in response (in production, save them server-side)
+      tokens: {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expiry_date: tokens.expiry_date
+      }
+    });
+  } catch (error) {
+    console.error('Error during Google Photos OAuth callback:', error);
+    res.status(500).json({ message: 'Error during Google Photos OAuth callback', error: error.message });
   }
 });
 

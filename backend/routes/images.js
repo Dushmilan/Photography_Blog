@@ -109,4 +109,13 @@ router.post('/', authenticate, catchAsync(async (req, res) => {
   res.status(201).json({ image: newImage });
 }));
 
+// Get slideshow images
+router.get('/slideshow', catchAsync(async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const imageClass = new Image(supabase);
+
+  const slideshowImages = await imageClass.getSlideshowImages();
+  res.json(slideshowImages);
+}));
+
 module.exports = router;
