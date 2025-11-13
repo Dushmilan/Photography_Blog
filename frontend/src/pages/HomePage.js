@@ -165,7 +165,7 @@ const HomePage = () => {
             }}
           >
             <img
-              src={`http://localhost:5000${image.path}`}
+              src={image.path || image.baseUrl}
               alt={image.original_name}
               className="w-full h-full object-cover"
               onClick={() => setShowLightbox(true)}
@@ -239,7 +239,7 @@ const HomePage = () => {
                 className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
               >
                 <img
-                  src={`http://localhost:5000${image.path}`}
+                  src={image.path || image.baseUrl}
                   alt={image.original_name}
                   className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                 />
@@ -369,7 +369,7 @@ const HomePage = () => {
         >
           <div className="lightbox-content">
             <img
-              src={`http://localhost:5000${images[currentIndex].path}`}
+              src={images[currentIndex].path || images[currentIndex].baseUrl}
               alt={images[currentIndex].original_name}
               className="lightbox-image"
               onClick={(e) => e.stopPropagation()}

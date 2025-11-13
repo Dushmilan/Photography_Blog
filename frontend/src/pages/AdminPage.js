@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { FiUser, FiImage, FiHardDrive, FiLogOut, FiUpload, FiEye, FiSettings, FiX, FiCheck } from 'react-icons/fi';
+import { FiUser, FiImage, FiHardDrive, FiLogOut, FiEye, FiSettings, FiX, FiCheck } from 'react-icons/fi';
 
 const AdminPage = () => {
   const [user, setUser] = useState(null);
@@ -11,10 +11,6 @@ const AdminPage = () => {
     totalPhotos: 0,
     storageUsed: '0 MB'
   });
-  const [files, setFiles] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
   const [error, setError] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   
@@ -62,71 +58,6 @@ const AdminPage = () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-  };
-
-  // Upload functionality
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    // Filter out non-image files and validate size
-    const imageFiles = selectedFiles.filter(file => {
-      return file.type.startsWith('image/') && file.size <= 25 * 1024 * 1024; // Max 25MB
-    });
-    setFiles(prev => [...prev, ...imageFiles]);
-  };
-
-  const removeFile = (index) => {
-    const newFiles = [...files];
-    newFiles.splice(index, 1);
-    setFiles(newFiles);
-  };
-
-  const uploadFiles = async () => {
-    if (files.length === 0) {
-      setError('Please select at least one image to upload');
-      return;
-    }
-
-    setUploading(true);
-    setUploadProgress(0);
-    setError('');
-
-    const formData = new FormData();
-    files.forEach(file => {
-      formData.append('images', file);
-    });
-
-    try {
-      const response = await axios.post('/images/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress: (progressEvent) => {
-          const progress = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadProgress(progress);
-        }
-      });
-
-      if (response.status === 201) {
-        setUploadSuccess(true);
-        setFiles([]);
-        // Refresh dashboard stats
-        calculateDashboardStats(response.data.images);
-        setImages(response.data.images);
-        setTimeout(() => {
-          setUploadSuccess(false);
-        }, 3000);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Upload failed');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const clearAll = () => {
-    setFiles([]);
   };
 
   const handleLogout = () => {
@@ -314,12 +245,7 @@ const AdminPage = () => {
             </div>
           </div>
 
-          {/* Upload Section */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-[#708090]/30 shadow-sm mb-10">
-            <div className="flex items-center gap-3 mb-6">
-              <FiUpload className="text-[#001F3F] text-xl" />
-              <h3 className="text-xl font-medium text-[#001F3F]">Upload Photos</h3>
-            </div>
+
             
             {error && (
               <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 border border-red-200 flex items-center animate-pulse">
@@ -330,11 +256,7 @@ const AdminPage = () => {
               </div>
             )}
 
-            {uploadSuccess && (
-              <div className="bg-green-100 text-green-700 p-3 rounded-lg mb-4 flex items-center border border-green-200">
-                <FiCheck className="mr-2" /> Upload successful!
-              </div>
-            )}
+
 
             <div className="mb-6">
               <label className="block text-[#001F3F] text-sm font-medium mb-2">
@@ -431,7 +353,7 @@ const AdminPage = () => {
             )}
           </div>
         </div>
-      </div>
+      
 
       {/* Manage Photos Section - Slideshow and Featured Selection */}
       <div className="px-4 md:px-8">
@@ -450,7 +372,7 @@ const AdminPage = () => {
                   <div key={image.id} className="relative group bg-white/50 rounded-xl overflow-hidden shadow-sm">
                     <div className="aspect-square bg-[#FFF5E1] rounded-lg overflow-hidden">
                       <img
-                        src={`http://localhost:5000${image.path}`}
+                        src={image.path || image.baseUrl}
                         alt={image.original_name}
                         className="w-full h-full object-cover"
                       />
@@ -491,7 +413,7 @@ const AdminPage = () => {
                   <div key={image.id} className="relative group bg-white/50 rounded-xl overflow-hidden shadow-sm">
                     <div className="aspect-square bg-[#FFF5E1] rounded-lg overflow-hidden">
                       <img
-                        src={`http://localhost:5000${image.path}`}
+                        src={image.path || image.baseUrl}
                         alt={image.original_name}
                         className="w-full h-full object-cover"
                       />
@@ -546,7 +468,7 @@ const AdminPage = () => {
                     <div key={image.id} className="bg-white rounded-xl border border-[#708090]/30 shadow-sm overflow-hidden transition-transform hover:shadow-md">
                       <div className="aspect-square bg-[#FFF5E1] overflow-hidden">
                         <img
-                          src={`http://localhost:5000${image.path}`}
+                          src={image.path || image.baseUrl}
                           alt={image.original_name}
                           className="w-full h-full object-cover"
                         />
@@ -631,8 +553,8 @@ const AdminPage = () => {
               ) : (
                 <div className="text-center py-12">
                   <div className="text-5xl mb-4">📷</div>
-                  <h4 className="text-lg font-medium text-[#001F3F] mb-2">No Photos Uploaded</h4>
-                  <p className="text-[#001F3F]/70">Upload some images to get started</p>
+                  <h4 className="text-lg font-medium text-[#001F3F] mb-2">No Photos Available</h4>
+                  <p className="text-[#001F3F]/70">Connect to Google Photos to get started</p>
                 </div>
               )}
             </div>

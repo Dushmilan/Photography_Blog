@@ -3,6 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
+const GooglePhotosAPI = require('./utils/googlePhotos');
 
 dotenv.config();
 
@@ -13,8 +14,7 @@ app.use(cors());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Serve static images
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -29,6 +29,25 @@ if (supabaseUrl && supabaseKey) {
   process.exit(1);
 }
 
+// Initialize Google Photos API
+const googlePhotos = new GooglePhotosAPI();
+
+googlePhotos.initialize()
+  .then(success => {
+    if (success) {
+      app.locals.googlePhotos = googlePhotos;
+      app.locals.googlePhotosInitialized = true;
+      console.log('Google Photos API initialized and ready');
+    } else {
+      app.locals.googlePhotosInitialized = false;
+      console.log('Google Photos API not initialized - will only use database functionality');
+    }
+  })
+  .catch(err => {
+    app.locals.googlePhotosInitialized = false;
+    console.error('Failed to initialize Google Photos API:', err);
+  });
+
 // Make supabase available globally via app
 app.locals.supabase = supabase;
 
@@ -36,6 +55,7 @@ app.locals.supabase = supabase;
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/images', require('./routes/images'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/google-photos', require('./routes/googlePhotos')); // New route for Google Photos
 
 const PORT = process.env.PORT || 5000;
 

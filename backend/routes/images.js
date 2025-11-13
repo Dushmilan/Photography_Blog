@@ -1,8 +1,4 @@
 const express = require('express');
-const multer = require('multer');
-const sharp = require('sharp');
-const path = require('path');
-const fs = require('fs').promises;
 const authenticate = require('../middleware/auth');
 const Image = require('../models/Image');
 
@@ -39,47 +35,7 @@ const upload = multer({
   }
 });
 
-// Upload images
-router.post('/upload', authenticate, upload.array('images', 10), async (req, res) => {
-  try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'No images uploaded' });
-    }
 
-    const uploadedImages = [];
-    const supabase = req.app.locals.supabase;
-    const imageClass = new Image(supabase);
-
-    for (const file of req.files) {
-      // Get original image dimensions
-      const metadata = await sharp(file.path).metadata();
-
-      // Prepare image data for database - using relative paths for hosting
-      const imageData = {
-        filename: file.filename,
-        original_name: file.originalname,
-        path: `/uploads/${file.filename}`, // Store relative path for frontend access
-        size: file.size,
-        mimetype: file.mimetype,
-        width: metadata.width,
-        height: metadata.height,
-        photographer_id: req.user.userId
-      };
-
-      // Save image info to database
-      const image = await imageClass.create(imageData);
-      uploadedImages.push(image);
-    }
-
-    res.status(201).json({
-      message: 'Images uploaded successfully',
-      images: uploadedImages
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
 
 // Get all images (public access)
 router.get('/', async (req, res) => {

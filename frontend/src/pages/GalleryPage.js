@@ -9,7 +9,7 @@ const GalleryPage = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isSlideshow, setIsSlideshow] = useState(false);
-  const [filter, setFilter] = useState('all'); // For future filtering functionality
+  const [filter, setFilter] = useState('all'); 
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -18,12 +18,23 @@ const GalleryPage = () => {
 
   const fetchImages = async () => {
     try {
-      const response = await axios.get('/images');
-      setImages(response.data);
+      // First try to fetch from Google Photos
+      const response = await axios.get('/google-photos/photos');
+      // For now, using Google Photos API to get public images
+      // In a real scenario, you might want to distinguish between public and private images
+      setImages(response.data.photos || []);
       setLoading(false);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load images');
-      setLoading(false);
+      // If Google Photos fails, fallback to database images
+      try {
+        console.log('Google Photos failed, trying database images');
+        const response = await axios.get('/images');
+        setImages(response.data);
+        setLoading(false);
+      } catch (dbErr) {
+        setError(dbErr.response?.data?.message || 'Failed to load images from both sources');
+        setLoading(false);
+      }
     }
   };
 
@@ -165,7 +176,7 @@ const GalleryPage = () => {
               }}
             >
               <img
-                src={`http://localhost:5000${image.path}`}
+                src={image.path || image.baseUrl}
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 alt={image.original_name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -176,8 +187,8 @@ const GalleryPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
                 <h3 className="font-medium truncate">{image.original_name}</h3>
                 <div className="flex justify-between items-center mt-2">
-                  <span className="text-xs">{image.width}×{image.height}</span>
-                  <span className="text-xs">{Math.round(image.size / 1024)}KB</span>
+                  <span className="text-xs">{image.width || image.mediaMetadata?.width}×{image.height || image.mediaMetadata?.height}</span>
+                  <span className="text-xs">{Math.round((image.size || image.mediaMetadata?.photo?.imageFileSize || 0) / 1024)}KB</span>
                 </div>
               </div>
               
@@ -226,7 +237,7 @@ const GalleryPage = () => {
         >
           <div className="lightbox-content">
             <img
-              src={`http://localhost:5000${images[currentSlide].path}`}
+              src={images[currentSlide].path || images[currentSlide].baseUrl}
               alt={images[currentSlide].original_name}
               className="lightbox-image"
               onClick={(e) => e.stopPropagation()}
@@ -270,8 +281,8 @@ const GalleryPage = () => {
             <div className="absolute bottom-4 left-0 right-0 text-center bg-black/40 text-white py-3 px-4 rounded-lg max-w-md mx-auto backdrop-blur-sm transition-all duration-300">
               <div className="text-sm font-medium truncate mb-1">{images[currentSlide].original_name}</div>
               <div className="flex justify-between items-center text-xs mb-2">
-                <span>{images[currentSlide].width}×{images[currentSlide].height}</span>
-                <span>{Math.round(images[currentSlide].size / 1024)}KB</span>
+                <span>{images[currentSlide].width || images[currentSlide].mediaMetadata?.width}×{images[currentSlide].height || images[currentSlide].mediaMetadata?.height}</span>
+                <span>{Math.round((images[currentSlide].size || images[currentSlide].mediaMetadata?.photo?.imageFileSize || 0) / 1024)}KB</span>
               </div>
               <div className="flex justify-center gap-3 mt-1">
                 <span className="text-xs">({currentSlide + 1} of {images.length})</span>
@@ -291,7 +302,7 @@ const GalleryPage = () => {
                     e.stopPropagation();
                     // Download the image directly
                     const link = document.createElement('a');
-                    link.href = `http://localhost:5000${images[currentSlide].path}`;
+                    link.href = images[currentSlide].path || images[currentSlide].baseUrl;
                     link.download = images[currentSlide].original_name;
                     document.body.appendChild(link);
                     link.click();
