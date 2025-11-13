@@ -39,6 +39,7 @@ router.get('/photos', authenticate, async (req, res) => {
       photographer_id: req.user.userId, // Associate with authenticated user
       is_featured: false, // Default value - will be updated based on user preferences
       is_slideshow: false, // Default value - will be updated based on user preferences
+      is_public: false, // Default value - will be updated based on user preferences
       created_at: photo.mediaMetadata?.creationTime || new Date().toISOString()
     })) || [];
 
@@ -107,6 +108,7 @@ router.get('/albums/:albumId/photos', authenticate, async (req, res) => {
       photographer_id: req.user.userId, // Associate with authenticated user
       is_featured: false, // Default value - will be updated based on user preferences
       is_slideshow: false, // Default value - will be updated based on user preferences
+      is_public: false, // Default value - will be updated based on user preferences
       created_at: photo.mediaMetadata?.creationTime || new Date().toISOString()
     })) || [];
 

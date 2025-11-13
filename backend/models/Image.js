@@ -38,12 +38,20 @@ class Image {
     return await this.db.updateImageSlideshowStatus(imageId, photographerId, isSlideshow);
   }
 
+  async updatePublicStatus(imageId, photographerId, isPublic) {
+    return await this.db.updateImagePublicStatus(imageId, photographerId, isPublic);
+  }
+
   async getFeaturedImages() {
     return await this.db.getFeaturedImages();
   }
 
   async getSlideshowImages() {
     return await this.db.getSlideshowImages();
+  }
+
+  async getPublicImages() {
+    return await this.db.getPublicImages();
   }
 
   async updateImageName(imageId, photographerId, newName) {

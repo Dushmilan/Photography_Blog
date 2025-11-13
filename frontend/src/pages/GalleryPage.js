@@ -18,23 +18,13 @@ const GalleryPage = () => {
 
   const fetchImages = async () => {
     try {
-      // First try to fetch from Google Photos
-      const response = await axios.get('/google-photos/photos');
-      // For now, using Google Photos API to get public images
-      // In a real scenario, you might want to distinguish between public and private images
-      setImages(response.data.photos || []);
+      // Fetch public images from the database
+      const response = await axios.get('/images/public');
+      setImages(response.data || []);
       setLoading(false);
     } catch (err) {
-      // If Google Photos fails, fallback to database images
-      try {
-        console.log('Google Photos failed, trying database images');
-        const response = await axios.get('/images');
-        setImages(response.data);
-        setLoading(false);
-      } catch (dbErr) {
-        setError(dbErr.response?.data?.message || 'Failed to load images from both sources');
-        setLoading(false);
-      }
+      setError(err.response?.data?.message || 'Failed to load public images');
+      setLoading(false);
     }
   };
 
@@ -86,7 +76,7 @@ const GalleryPage = () => {
         goToPrevious();
       } else if (e.key === 'ArrowRight') {
         goToNext();
-      } else if (e.key === ' ') { // Spacebar to toggle slideshow
+      } else if (e.key === ' ') { 
         e.preventDefault();
         setIsSlideshow(prev => !prev);
       }

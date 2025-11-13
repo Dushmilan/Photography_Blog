@@ -4,222 +4,116 @@ const Image = require('../models/Image');
 
 const router = express.Router();
 
-// Set up multer for file uploads
-const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    // Create uploads folder if it doesn't exist
-    const uploadsDir = path.join(__dirname, '../uploads');
-    await fs.mkdir(uploadsDir, { recursive: true });
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    // Create a unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'img-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 25 * 1024 * 1024 // 25MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Only allow image files
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-      cb(new Error('Only image files are allowed!'));
-    }
-  }
-});
-
-
-
-// Get all images (public access)
-router.get('/', async (req, res) => {
-  try {
-    const supabase = req.app.locals.supabase;
-    const imageClass = new Image(supabase);
-    
-    const images = await imageClass.findAll();
-    console.log('Fetched images:', images);
-    res.json(images);
-  } catch (error) {
-    console.error('Error fetching images:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-// Get slideshow images (public access)
-router.get('/slideshow', async (req, res) => {
-  try {
-    const supabase = req.app.locals.supabase;
-    const imageClass = new Image(supabase);
-    
-    const images = await imageClass.getSlideshowImages();
-    res.json(images);
-  } catch (error) {
-    console.error('Error fetching slideshow images:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-// Get featured images (public access)
-router.get('/featured', async (req, res) => {
-  try {
-    const supabase = req.app.locals.supabase;
-    const imageClass = new Image(supabase);
-    
-    const images = await imageClass.getFeaturedImages();
-    res.json(images);
-  } catch (error) {
-    console.error('Error fetching featured images:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-// Get images for authenticated user only
+// Get all images for authenticated user (admin view) - this gets images from DB
 router.get('/my-images', authenticate, async (req, res) => {
   try {
     const supabase = req.app.locals.supabase;
     const imageClass = new Image(supabase);
-    
+
     const images = await imageClass.findByPhotographerId(req.user.userId);
     res.json(images);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error fetching user images:', error);
+    res.status(500).json({ message: 'Error fetching user images', error: error.message });
   }
 });
 
-// Delete an image
-router.delete('/:id', authenticate, async (req, res) => {
+// Get public images for public gallery
+router.get('/public', async (req, res) => {
   try {
-    console.log('Attempting to delete image with ID:', req.params.id);
-    console.log('Authenticated user ID:', req.user.userId);
-    
     const supabase = req.app.locals.supabase;
     const imageClass = new Image(supabase);
 
-    // Check if image belongs to the authenticated user
-    const image = await imageClass.findByIdAndPhotographer(req.params.id, req.user.userId);
-
-    if (!image) {
-      console.log('Image not found or does not belong to user');
-      return res.status(404).json({ message: 'Image not found' });
-    }
-
-    console.log('Found image to delete:', image);
-    
-    // Convert relative path to absolute path for file deletion
-    const absolutePath = path.join(__dirname, '../', image.path);
-    console.log('Deleting file at path:', absolutePath);
-    
-    // Delete the image file from disk
-    await fs.unlink(absolutePath).catch((err) => {
-      console.error('Error deleting file:', err);
-    }); // Original file
-
-    // Delete from database
-    console.log('Deleting from database with ID:', req.params.id);
-    await imageClass.deleteById(req.params.id);
-
-    res.json({ message: 'Image deleted successfully' });
+    const publicImages = await imageClass.getPublicImages();
+    res.json(publicImages);
   } catch (error) {
-    console.error('Error deleting image:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error fetching public images:', error);
+    res.status(500).json({ message: 'Error fetching public images', error: error.message });
   }
 });
 
-// Update featured status
-router.put('/:id/featured', authenticate, async (req, res) => {
+// Update public status of an image
+router.put('/:id/public', authenticate, async (req, res) => {
   try {
+    const supabase = req.app.locals.supabase;
+    const imageClass = new Image(supabase);
     const { id } = req.params;
-    const { isFeatured } = req.body;
-    
-    const supabase = req.app.locals.supabase;
-    const imageClass = new Image(supabase);
+    const { isPublic } = req.body;
 
-    // Check if image belongs to the authenticated user
+    // Verify the image belongs to the authenticated user
     const image = await imageClass.findByIdAndPhotographer(id, req.user.userId);
-
     if (!image) {
-      return res.status(404).json({ message: 'Image not found' });
+      return res.status(404).json({ message: 'Image not found or does not belong to user' });
     }
 
-    // Update featured status
-    const updatedImage = await imageClass.updateFeaturedStatus(id, req.user.userId, isFeatured);
-    
-    res.json({ 
-      message: `Image ${isFeatured ? 'added to' : 'removed from'} featured`, 
-      image: updatedImage 
-    });
+    const updatedImage = await imageClass.updatePublicStatus(id, req.user.userId, isPublic);
+    res.json({ image: updatedImage });
   } catch (error) {
-    console.error('Error updating featured status:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error updating image public status:', error);
+    res.status(500).json({ message: 'Error updating image public status', error: error.message });
   }
 });
 
-// Update slideshow status
-router.put('/:id/slideshow', authenticate, async (req, res) => {
+// Get a specific image by ID
+router.get('/:id', authenticate, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { isSlideshow } = req.body;
-    
     const supabase = req.app.locals.supabase;
     const imageClass = new Image(supabase);
+    const { id } = req.params;
 
-    // Check if image belongs to the authenticated user
-    const image = await imageClass.findByIdAndPhotographer(id, req.user.userId);
-
+    const image = await imageClass.findById(id);
     if (!image) {
       return res.status(404).json({ message: 'Image not found' });
     }
 
-    // Update slideshow status
-    const updatedImage = await imageClass.updateSlideshowStatus(id, req.user.userId, isSlideshow);
-    
-    res.json({ 
-      message: `Image ${isSlideshow ? 'added to' : 'removed from'} slideshow`, 
-      image: updatedImage 
-    });
+    res.json(image);
   } catch (error) {
-    console.error('Error updating slideshow status:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error fetching image:', error);
+    res.status(500).json({ message: 'Error fetching image', error: error.message });
   }
 });
 
-// Update image name
-router.put('/:id/rename', authenticate, async (req, res) => {
+// Create a new image in the database
+router.post('/', authenticate, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { newName } = req.body;
-    
-    if (!newName || newName.trim() === '') {
-      return res.status(400).json({ message: 'New name is required' });
-    }
-    
     const supabase = req.app.locals.supabase;
     const imageClass = new Image(supabase);
+    const imageData = req.body;
 
-    // Check if image belongs to the authenticated user
-    const image = await imageClass.findByIdAndPhotographer(id, req.user.userId);
-
-    if (!image) {
-      return res.status(404).json({ message: 'Image not found' });
+    // Ensure the photographer_id matches the authenticated user
+    if (imageData.photographer_id !== req.user.userId) {
+      return res.status(403).json({ message: 'Unauthorized to create image for another user' });
     }
 
-    // Update image name
-    const updatedImage = await imageClass.updateImageName(id, req.user.userId, newName.trim());
-    
-    res.json({ 
-      message: 'Image name updated successfully', 
-      image: updatedImage 
+    // Check if image already exists
+    const existingImage = await imageClass.findById(imageData.id);
+    if (existingImage) {
+      return res.status(200).json({ message: 'Image already exists', image: existingImage });
+    }
+
+    // Create the image
+    const newImage = await imageClass.create({
+      id: imageData.id,
+      filename: imageData.filename,
+      original_name: imageData.original_name,
+      path: imageData.path,
+      thumbnail_path: imageData.thumbnail_path,
+      small_path: imageData.small_path,
+      medium_path: imageData.medium_path,
+      size: imageData.size,
+      mimetype: imageData.mimetype,
+      width: imageData.width,
+      height: imageData.height,
+      photographer_id: imageData.photographer_id,
+      is_featured: imageData.is_featured,
+      is_slideshow: imageData.is_slideshow,
+      is_public: imageData.is_public
     });
+
+    res.status(201).json({ image: newImage });
   } catch (error) {
-    console.error('Error updating image name:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error creating image:', error);
+    res.status(500).json({ message: 'Error creating image', error: error.message });
   }
 });
 
