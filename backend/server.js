@@ -4,7 +4,6 @@ const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 const compression = require('compression');
-const GooglePhotosAPI = require('./utils/googlePhotos');
 const { globalErrorHandler } = require('./utils/errorHandler');
 
 dotenv.config();
@@ -44,24 +43,7 @@ if (supabaseUrl && supabaseKey) {
   process.exit(1);
 }
 
-// Initialize Google Photos API
-const googlePhotos = new GooglePhotosAPI();
 
-googlePhotos.initialize()
-  .then(success => {
-    if (success) {
-      app.locals.googlePhotos = googlePhotos;
-      app.locals.googlePhotosInitialized = true;
-      console.log('Google Photos API initialized and ready');
-    } else {
-      app.locals.googlePhotosInitialized = false;
-      console.log('Google Photos API not initialized - will only use database functionality');
-    }
-  })
-  .catch(err => {
-    app.locals.googlePhotosInitialized = false;
-    console.error('Failed to initialize Google Photos API:', err);
-  });
 
 // Make supabase available globally via app
 app.locals.supabase = supabase;
@@ -70,8 +52,8 @@ app.locals.supabase = supabase;
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tokens', require('./routes/tokens')); // New route for token management
 app.use('/api/images', require('./routes/images'));
+app.use('/api/imagekit', require('./routes/imagekit')); // New route for ImageKit integration
 app.use('/api/contact', require('./routes/contact'));
-app.use('/api/google-photos', require('./routes/googlePhotos')); // New route for Google Photos
 
 // Global error handling middleware (should be last)
 app.use(globalErrorHandler);

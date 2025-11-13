@@ -32,7 +32,7 @@ The `images` table stores image metadata and settings.
 
 ```sql
 CREATE TABLE images (
-  id VARCHAR(255) PRIMARY KEY, -- Google Photos ID
+  id VARCHAR(255) PRIMARY KEY, -- ImageKit File ID
   filename VARCHAR(500),
   original_name VARCHAR(500),
   path TEXT,
@@ -60,13 +60,13 @@ CREATE INDEX idx_images_created_at ON images(created_at);
 ```
 
 ### Fields Description:
-- `id`: Primary key, Google Photos ID (to handle external image sources)
+- `id`: Primary key, ImageKit File ID (unique identifier from ImageKit service)
 - `filename`: Original filename
 - `original_name`: Display name for the image
-- `path`: URL/path to the original image
-- `thumbnail_path`: URL/path to the thumbnail version
-- `small_path`: URL/path to the small version
-- `medium_path`: URL/path to the medium version
+- `path`: URL/path to the original image (full ImageKit URL)
+- `thumbnail_path`: URL/path to the thumbnail version (ImageKit transformed URL)
+- `small_path`: URL/path to the small version (ImageKit transformed URL)
+- `medium_path`: URL/path to the medium version (ImageKit transformed URL)
 - `size`: File size in bytes
 - `mimetype`: MIME type of the image
 - `width`: Image width in pixels
@@ -143,8 +143,8 @@ $$ LANGUAGE sql STABLE;
 ### Performance Considerations
 
 1. **Image Caching**: Consider implementing a caching layer for frequently accessed images
-2. **CDN Integration**: For better global performance, images should be served from a CDN
+2. **CDN Integration**: ImageKit provides built-in CDN for global performance
 3. **Pagination**: Always implement pagination for image galleries to avoid loading large datasets
 4. **Async Operations**: Heavy operations like image processing should be done via background jobs
 
-This schema is designed to work with the Google Photos integration, where the `id` field matches Google Photos media item IDs, allowing for efficient synchronization between the application and Google Photos API.
+This schema is designed to work with the ImageKit integration, where the `id` field matches ImageKit file IDs, allowing for efficient storage and retrieval of image assets with CDN delivery and transformation capabilities.

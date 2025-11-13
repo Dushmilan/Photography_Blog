@@ -35,10 +35,14 @@ const ENDPOINTS = {
     CREATE: '/images',
     UPDATE_PUBLIC: (id) => `/images/${id}/public`,
   },
-  GOOGLE_PHOTOS: {
-    PHOTOS: '/google-photos/photos',
-    ALBUMS: '/google-photos/albums',
-    ALBUM_PHOTOS: (albumId) => `/google-photos/albums/${albumId}/photos`,
+  IMAGEKIT: {
+    IMAGES: '/imagekit/images',
+    UPLOAD: '/imagekit/upload',
+    AUTH_PARAMETERS: '/imagekit/auth-parameters',
+    TRANSFORM: (imageId) => `/imagekit/image/${imageId}/transform`,
+    DELETE: (imageId) => `/imagekit/image/${imageId}`,
+    UPDATE: (imageId) => `/imagekit/image/${imageId}`,
+    GET_IMAGE: (imageId) => `/imagekit/image/${imageId}`,
   },
 };
 

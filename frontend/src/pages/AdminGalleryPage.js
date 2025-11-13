@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiImage, FiX, FiCheck, FiUser, FiLogOut } from 'react-icons/fi';
-import axios from 'axios';
+import api from '../utils/api';
+import { ENDPOINTS } from '../config/apiConfig';
 
 const AdminGalleryPage = () => {
   const [user, setUser] = useState(null);
@@ -13,63 +14,14 @@ const AdminGalleryPage = () => {
     // Get user info and images
     const fetchData = async () => {
       try {
-        const userResponse = await axios.get('/auth/me');
+        const userResponse = await api.get('/auth/me');
         setUser(userResponse.data);
 
-        // For admin view, fetch all photos from Google Photos
-        const googlePhotosResponse = await axios.get('/google-photos/photos');
-        const googlePhotos = googlePhotosResponse.data.photos || [];
-
-        // Also fetch our stored image settings (public/featured/slideshow)
-        const storedImagesResponse = await axios.get('/images/my-images');
+        // For admin view, fetch images from the database (they are now stored in our DB with ImageKit paths)
+        const storedImagesResponse = await api.get('/images/my-images');
         const storedImages = storedImagesResponse.data;
 
-        // Merge the Google Photos with stored settings and ensure all images are in DB
-        const mergedImages = await Promise.all(googlePhotos.map(async (googlePhoto) => {
-          const storedImage = storedImages.find(stored => stored.id === googlePhoto.id);
-
-          // If the image doesn't exist in our DB, create it
-          if (!storedImage) {
-            try {
-              await axios.post('/images', {
-                id: googlePhoto.id,
-                filename: googlePhoto.filename,
-                original_name: googlePhoto.original_name,
-                path: googlePhoto.path,
-                thumbnail_path: googlePhoto.thumbnail_path,
-                small_path: googlePhoto.small_path,
-                medium_path: googlePhoto.medium_path,
-                size: googlePhoto.size,
-                mimetype: googlePhoto.mimetype,
-                width: googlePhoto.width,
-                height: googlePhoto.height,
-                photographer_id: googlePhoto.photographer_id,
-                is_featured: googlePhoto.is_featured,
-                is_slideshow: googlePhoto.is_slideshow,
-                is_public: googlePhoto.is_public
-              });
-            } catch (err) {
-              // Image might already exist, continue
-              console.log('Image may already exist in DB:', err.message);
-            }
-
-            return {
-              ...googlePhoto,
-              is_featured: googlePhoto.is_featured || false,
-              is_slideshow: googlePhoto.is_slideshow || false,
-              is_public: googlePhoto.is_public || false,
-            };
-          }
-
-          return {
-            ...googlePhoto,
-            is_featured: storedImage?.is_featured || googlePhoto.is_featured || false,
-            is_slideshow: storedImage?.is_slideshow || googlePhoto.is_slideshow || false,
-            is_public: storedImage?.is_public || googlePhoto.is_public || false,
-          };
-        }));
-
-        setImages(mergedImages);
+        setImages(storedImages);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError(error.response?.data?.message || error.message || 'Failed to load data');
@@ -82,8 +34,9 @@ const AdminGalleryPage = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    // Clear both access and refresh tokens
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     window.location.href = '/login';
   };
 
@@ -356,7 +309,7 @@ const AdminGalleryPage = () => {
                 <div className="text-center py-12">
                   <div className="text-5xl mb-4">📷</div>
                   <h4 className="text-lg font-medium text-[#001F3F] mb-2">No Photos Available</h4>
-                  <p className="text-[#001F3F]/70">Connect to Google Photos to get started</p>
+                  <p className="text-[#001F3F]/70">Upload photos using ImageKit to get started</p>
                 </div>
               )}
             </div>

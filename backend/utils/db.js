@@ -80,7 +80,7 @@ class Database {
     const { data, error } = await this.supabase
       .from('images')
       .insert([{
-        id: imageData.id,  // Use the Google Photos ID as the primary key
+        id: imageData.id,  // Use the ImageKit File ID as the primary key
         filename: imageData.filename,
         original_name: imageData.original_name,
         path: imageData.path,
@@ -183,6 +183,19 @@ class Database {
     return data;
   }
 
+  async updateImage(imageId, updateData, photographerId) {
+    const { data, error } = await this.supabase
+      .from('images')
+      .update(updateData)
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .select()
+      .single();
+
+    if (error) throw handleDbError(error);
+    return data;
+  }
+
   async updateImageFeaturedStatus(imageId, photographerId, isFeatured) {
     const { data, error } = await this.supabase
       .from('images')
@@ -250,6 +263,19 @@ class Database {
       .select('*')
       .eq('is_public', true)
       .order('created_at', { ascending: false });
+
+    if (error) throw handleDbError(error);
+    return data;
+  }
+
+  async updateImage(imageId, updateData, photographerId) {
+    const { data, error } = await this.supabase
+      .from('images')
+      .update(updateData)
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .select()
+      .single();
 
     if (error) throw handleDbError(error);
     return data;

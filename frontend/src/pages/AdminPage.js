@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import { ENDPOINTS } from '../config/apiConfig';
 import { FiUser, FiImage, FiHardDrive, FiLogOut, FiEye, FiSettings, FiX, FiCheck } from 'react-icons/fi';
 import { handleApiError } from '../utils/errorHandler';
 
@@ -23,61 +24,12 @@ const AdminPage = () => {
         const userResponse = await api.get('/auth/me');
         setUser(userResponse.data);
 
-        // For admin view, fetch all photos from Google Photos
-        const googlePhotosResponse = await api.get('/google-photos/photos');
-        const googlePhotos = googlePhotosResponse.data.photos || [];
-
-        // Also fetch our stored image settings (public/featured/slideshow)
+        // For admin view, fetch images from the database (they are now stored in our DB with ImageKit paths)
         const storedImagesResponse = await api.get('/images/my-images');
         const storedImages = storedImagesResponse.data;
 
-        // Merge the Google Photos with stored settings and ensure all images are in DB
-        const mergedImages = await Promise.all(googlePhotos.map(async (googlePhoto) => {
-          const storedImage = storedImages.find(stored => stored.id === googlePhoto.id);
-
-          // If the image doesn't exist in our DB, create it
-          if (!storedImage) {
-            try {
-              await api.post('/images', {
-                id: googlePhoto.id,
-                filename: googlePhoto.filename,
-                original_name: googlePhoto.original_name,
-                path: googlePhoto.path,
-                thumbnail_path: googlePhoto.thumbnail_path,
-                small_path: googlePhoto.small_path,
-                medium_path: googlePhoto.medium_path,
-                size: googlePhoto.size,
-                mimetype: googlePhoto.mimetype,
-                width: googlePhoto.width,
-                height: googlePhoto.height,
-                photographer_id: googlePhoto.photographer_id,
-                is_featured: googlePhoto.is_featured,
-                is_slideshow: googlePhoto.is_slideshow,
-                is_public: googlePhoto.is_public
-              });
-            } catch (err) {
-              // Image might already exist, continue
-              console.log('Image may already exist in DB:', err.message);
-            }
-
-            return {
-              ...googlePhoto,
-              is_featured: googlePhoto.is_featured || false,
-              is_slideshow: googlePhoto.is_slideshow || false,
-              is_public: googlePhoto.is_public || false,
-            };
-          }
-
-          return {
-            ...googlePhoto,
-            is_featured: storedImage?.is_featured || googlePhoto.is_featured || false,
-            is_slideshow: storedImage?.is_slideshow || googlePhoto.is_slideshow || false,
-            is_public: storedImage?.is_public || googlePhoto.is_public || false,
-          };
-        }));
-
-        setImages(mergedImages);
-        calculateDashboardStats(mergedImages);
+        setImages(storedImages);
+        calculateDashboardStats(storedImages);
       } catch (error) {
         const errorMessage = handleApiError(error, 'Failed to load data');
         setError(errorMessage);
@@ -286,24 +238,24 @@ const AdminPage = () => {
             </div>
           </div>
 
-          {/* Google Photos Integration Notice - Instead of upload section */}
+          {/* ImageKit Upload Section */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-[#708090]/30 shadow-sm mb-10">
             <div className="flex items-center gap-3 mb-6">
               <FiSettings className="text-[#001F3F] text-xl" />
-              <h3 className="text-xl font-medium text-[#001F3F]">Google Photos Integration</h3>
+              <h3 className="text-xl font-medium text-[#001F3F]">Image Management</h3>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-blue-700">
-                    This portfolio now connects to your Google Photos library.
-                    Configure your Google Photos API credentials to start managing your photos.
+                  <p className="text-sm text-green-700">
+                    Your portfolio now uses ImageKit for secure image storage, CDN delivery, and real-time transformations.
+                    Upload and manage your photos directly from this admin panel.
                   </p>
                 </div>
               </div>
