@@ -1,6 +1,6 @@
 const express = require('express');
 const { generateAccessToken, verifyRefreshToken } = require('../utils/jwt');
-const { isValidRefreshToken, storeRefreshToken, removeRefreshToken } = require('../utils/tokenStore');
+const { isValidRefreshToken, storeRefreshToken, removeRefreshToken, blacklistToken } = require('../utils/tokenStore');
 const authenticate = require('../middleware/auth');
 
 const router = express.Router();
@@ -37,13 +37,17 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
-// Logout (revoke refresh token)
+// Logout (revoke refresh token and blacklist access token)
 router.post('/logout', authenticate, (req, res) => {
   const authHeader = req.headers['authorization'];
   const accessToken = authHeader && authHeader.split(' ')[1];
   
-  // In a real application with database storage, you might want to 
-  // invalidate the refresh token here as well if it was passed
+  // Blacklist the current access token
+  if (accessToken) {
+    blacklistToken(accessToken);
+  }
+  
+  // If a refresh token was passed, remove it from store
   const { refreshToken } = req.body;
   if (refreshToken) {
     removeRefreshToken(refreshToken);

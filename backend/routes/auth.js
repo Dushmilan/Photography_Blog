@@ -62,15 +62,23 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Generate token
-    const token = jwt.sign(
-      { userId: user.id, username: user.username },
-      process.env.JWT_SECRET || 'photography-portfolio-secret',
-      { expiresIn: '7d' }
-    );
+    // Generate tokens
+    const accessToken = generateAccessToken({
+      userId: user.id,
+      username: user.username
+    });
+
+    const refreshToken = generateRefreshToken({
+      userId: user.id,
+      username: user.username
+    });
+
+    // Store refresh token
+    storeRefreshToken(user.id, refreshToken);
 
     res.json({
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: user.id,
         username: user.username

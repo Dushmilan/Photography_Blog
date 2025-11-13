@@ -1,5 +1,6 @@
-// In-memory store for refresh tokens (in production, use database or Redis)
+// In-memory stores for refresh tokens and blacklisted tokens (in production, use database or Redis)
 const refreshTokenStore = new Map();
+const blacklistedTokens = new Set();
 
 // Add refresh token to store
 const storeRefreshToken = (userId, refreshToken) => {
@@ -37,10 +38,30 @@ const removeUserRefreshTokens = (userId) => {
   tokensToRemove.forEach(token => refreshTokenStore.delete(token));
 };
 
+// Blacklist a token (for access tokens or refresh tokens)
+const blacklistToken = (token) => {
+  blacklistedTokens.add(token);
+};
+
+// Check if a token is blacklisted
+const isTokenBlacklisted = (token) => {
+  return blacklistedTokens.has(token);
+};
+
+// Remove expired tokens from blacklist (tokens that have exceeded their max lifetime in the blacklist)
+const cleanupBlacklist = () => {
+  // This function could be called periodically to remove old blacklisted tokens
+  // For now, it's a placeholder for future implementation
+};
+
 module.exports = {
   storeRefreshToken,
   isValidRefreshToken,
   removeRefreshToken,
   removeUserRefreshTokens,
-  refreshTokenStore // Export for debugging/timing out old tokens if needed
+  blacklistToken,
+  isTokenBlacklisted,
+  cleanupBlacklist,
+  refreshTokenStore, // Export for debugging/timing out old tokens if needed
+  blacklistedTokens  // Export for debugging
 };

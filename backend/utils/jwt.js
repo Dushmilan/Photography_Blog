@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { isTokenBlacklisted } = require('./tokenStore');
 
 // Function to generate access token
 const generateAccessToken = (payload) => {
@@ -29,6 +30,15 @@ const generateRefreshToken = (payload) => {
 // Function to verify access token
 const verifyAccessToken = (token) => {
   return new Promise((resolve, reject) => {
+    // First check if the token is blacklisted
+    if (isTokenBlacklisted(token)) {
+      return reject({ 
+        error: true, 
+        message: 'Token has been revoked',
+        revoked: true
+      });
+    }
+    
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         let message = 'Invalid token';
@@ -52,6 +62,15 @@ const verifyAccessToken = (token) => {
 // Function to verify refresh token
 const verifyRefreshToken = (token) => {
   return new Promise((resolve, reject) => {
+    // First check if the token is blacklisted
+    if (isTokenBlacklisted(token)) {
+      return reject({ 
+        error: true, 
+        message: 'Refresh token has been revoked',
+        revoked: true
+      });
+    }
+    
     jwt.verify(token, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
       if (err) {
         let message = 'Invalid refresh token';

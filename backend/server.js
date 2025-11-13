@@ -53,6 +53,7 @@ app.locals.supabase = supabase;
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/tokens', require('./routes/tokens')); // New route for token management
 app.use('/api/images', require('./routes/images'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/google-photos', require('./routes/googlePhotos')); // New route for Google Photos
