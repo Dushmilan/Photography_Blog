@@ -135,7 +135,17 @@ class Database {
       console.error('Error fetching all images:', error);
       throw handleDbError(error);
     }
-    return data;
+
+    // Add default values for properties that frontend might expect
+    const processedData = data?.map(image => {
+      if (image) {
+        image.original_name = image.original_name || image.filename || extractFilenameFromPath(image.path);
+        image.filename = image.filename || extractFilenameFromPath(image.path);
+      }
+      return image;
+    }) || data;
+
+    return processedData;
   }
 
   async getImagesByPhotographerId(photographerId) {
@@ -150,7 +160,17 @@ class Database {
       .order('created_at', { ascending: false });
 
     if (error) throw handleDbError(error);
-    return data;
+
+    // Add default values for properties that frontend might expect
+    const processedData = data?.map(image => {
+      if (image) {
+        image.original_name = image.original_name || image.filename || extractFilenameFromPath(image.path);
+        image.filename = image.filename || extractFilenameFromPath(image.path);
+      }
+      return image;
+    }) || data;
+
+    return processedData;
   }
 
   async getImageById(imageId) {
@@ -175,13 +195,27 @@ class Database {
           .eq('id', imageId);
 
         if (allError) throw handleDbError(allError);
-        return allData?.[0] || null;
+        const result = allData?.[0] || null;
+
+        // Add default values for properties that frontend might expect
+        if (result) {
+          result.original_name = result.original_name || result.filename || extractFilenameFromPath(result.path);
+          result.filename = result.filename || extractFilenameFromPath(result.path);
+        }
+
+        return result;
       } else if (error.code === 'PGRST116' || error.code === '42P01') {
         // Record not found
         return null;
       } else {
         throw handleDbError(error);
       }
+    }
+
+    // Add default values for properties that frontend might expect
+    if (data) {
+      data.original_name = data.original_name || data.filename || extractFilenameFromPath(data.path);
+      data.filename = data.filename || extractFilenameFromPath(data.path);
     }
 
     return data;
@@ -202,6 +236,13 @@ class Database {
       console.error('Error deleting image from DB:', error);
       throw handleDbError(error);
     }
+
+    // Add default values for properties that frontend might expect
+    if (data) {
+      data.original_name = data.original_name || data.filename || extractFilenameFromPath(data.path);
+      data.filename = data.filename || extractFilenameFromPath(data.path);
+    }
+
     return data;
   }
 
@@ -229,13 +270,27 @@ class Database {
           .eq('photographer_id', photographerId);
 
         if (allError) throw handleDbError(allError);
-        return allData?.[0] || null;
+        const result = allData?.[0] || null;
+
+        // Add default values for properties that frontend might expect
+        if (result) {
+          result.original_name = result.original_name || result.filename || extractFilenameFromPath(result.path);
+          result.filename = result.filename || extractFilenameFromPath(result.path);
+        }
+
+        return result;
       } else if (error.code === 'PGRST116' || error.code === '42P01') {
         // Record not found
         return null;
       } else {
         throw handleDbError(error);
       }
+    }
+
+    // Add default values for properties that frontend might expect
+    if (data) {
+      data.original_name = data.original_name || data.filename || extractFilenameFromPath(data.path);
+      data.filename = data.filename || extractFilenameFromPath(data.path);
     }
 
     return data;
@@ -278,9 +333,41 @@ class Database {
         // Image doesn't exist in database at all, create it first
         console.log(`Image with ID ${imageId} not found in database, creating new record...`);
 
+        // Try to get the actual image details from ImageKit to get proper URL
+        let imagePath = `/image/${imageId}`; // fallback path
+        try {
+          // Initialize ImageKit to get actual image details
+          const ImageKit = require('imagekit');
+          require('dotenv').config();
+
+          const imagekit = new ImageKit({
+            publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+            privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+            urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+          });
+
+          // Get the actual image details from ImageKit
+          const imageDetails = await new Promise((resolve, reject) => {
+            imagekit.getFileDetails(imageId, (error, fileDetails) => {
+              if (error) {
+                console.error('Error getting image details from ImageKit:', error);
+                resolve(null); // Continue with fallback
+              } else {
+                resolve(fileDetails);
+              }
+            });
+          });
+
+          if (imageDetails) {
+            imagePath = imageDetails.url || imageDetails.filePath || `/image/${imageId}`;
+          }
+        } catch (error) {
+          console.error('Error initializing ImageKit for image details:', error);
+          // Continue with fallback path
+        }
+
         // Create the image with minimal data and the update data
-        const imagePath = updateData.path || `/image/${imageId}`;
-        const newImage = await this.create({
+        const newImage = await this.createImage({
           id: imageId,
           path: imagePath,
           photographer_id: photographerId,
@@ -318,6 +405,13 @@ class Database {
     if (fetchError2) {
       console.error('Error fetching updated image after general update:', fetchError2);
       throw handleDbError(fetchError2);
+    }
+
+    // Add default values for properties that frontend might expect
+    if (fetchResult) {
+      // Add default values for expected properties that might be missing
+      fetchResult.original_name = fetchResult.original_name || fetchResult.filename || extractFilenameFromPath(fetchResult.path);
+      fetchResult.filename = fetchResult.filename || extractFilenameFromPath(fetchResult.path);
     }
 
     return fetchResult;
@@ -360,9 +454,41 @@ class Database {
         // Image doesn't exist in database at all, create it first
         console.log(`Image with ID ${imageId} not found in database, creating new record...`);
 
+        // Try to get the actual image details from ImageKit to get proper URL
+        let imagePath = `/image/${imageId}`; // fallback path
+        try {
+          // Initialize ImageKit to get actual image details
+          const ImageKit = require('imagekit');
+          require('dotenv').config();
+
+          const imagekit = new ImageKit({
+            publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+            privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+            urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+          });
+
+          // Get the actual image details from ImageKit
+          const imageDetails = await new Promise((resolve, reject) => {
+            imagekit.getFileDetails(imageId, (error, fileDetails) => {
+              if (error) {
+                console.error('Error getting image details from ImageKit:', error);
+                resolve(null); // Continue with fallback
+              } else {
+                resolve(fileDetails);
+              }
+            });
+          });
+
+          if (imageDetails) {
+            imagePath = imageDetails.url || imageDetails.filePath || `/image/${imageId}`;
+          }
+        } catch (error) {
+          console.error('Error initializing ImageKit for image details:', error);
+          // Continue with fallback path
+        }
+
         // Create the image with minimal data
-        const imagePath = `/image/${imageId}`;
-        const newImage = await this.create({
+        const newImage = await this.createImage({
           id: imageId,
           path: imagePath,
           photographer_id: photographerId,
@@ -400,6 +526,13 @@ class Database {
     if (fetchError2) {
       console.error('Error fetching updated image after featured status update:', fetchError2);
       throw handleDbError(fetchError2);
+    }
+
+    // Add default values for properties that frontend might expect
+    if (fetchResult) {
+      // Add default values for expected properties that might be missing
+      fetchResult.original_name = fetchResult.original_name || fetchResult.filename || extractFilenameFromPath(fetchResult.path);
+      fetchResult.filename = fetchResult.filename || extractFilenameFromPath(fetchResult.path);
     }
 
     return fetchResult;
@@ -442,9 +575,41 @@ class Database {
         // Image doesn't exist in database at all, create it first
         console.log(`Image with ID ${imageId} not found in database, creating new record...`);
 
+        // Try to get the actual image details from ImageKit to get proper URL
+        let imagePath = `/image/${imageId}`; // fallback path
+        try {
+          // Initialize ImageKit to get actual image details
+          const ImageKit = require('imagekit');
+          require('dotenv').config();
+
+          const imagekit = new ImageKit({
+            publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+            privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+            urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+          });
+
+          // Get the actual image details from ImageKit
+          const imageDetails = await new Promise((resolve, reject) => {
+            imagekit.getFileDetails(imageId, (error, fileDetails) => {
+              if (error) {
+                console.error('Error getting image details from ImageKit:', error);
+                resolve(null); // Continue with fallback
+              } else {
+                resolve(fileDetails);
+              }
+            });
+          });
+
+          if (imageDetails) {
+            imagePath = imageDetails.url || imageDetails.filePath || `/image/${imageId}`;
+          }
+        } catch (error) {
+          console.error('Error initializing ImageKit for image details:', error);
+          // Continue with fallback path
+        }
+
         // Create the image with minimal data
-        const imagePath = `/image/${imageId}`;
-        const newImage = await this.create({
+        const newImage = await this.createImage({
           id: imageId,
           path: imagePath,
           photographer_id: photographerId,
@@ -482,6 +647,13 @@ class Database {
     if (fetchError2) {
       console.error('Error fetching updated image after slideshow status update:', fetchError2);
       throw handleDbError(fetchError2);
+    }
+
+    // Add default values for properties that frontend might expect
+    if (fetchResult) {
+      // Add default values for expected properties that might be missing
+      fetchResult.original_name = fetchResult.original_name || fetchResult.filename || extractFilenameFromPath(fetchResult.path);
+      fetchResult.filename = fetchResult.filename || extractFilenameFromPath(fetchResult.path);
     }
 
     return fetchResult;
@@ -524,8 +696,40 @@ class Database {
         // Image doesn't exist in database at all, create it first
         console.log(`Image with ID ${imageId} not found in database, creating new record...`);
 
-        // Create the image with minimal data - we'll need to get more details from ImageKit if possible
-        const imagePath = `/image/${imageId}`;
+        // Try to get the actual image details from ImageKit to get proper URL
+        let imagePath = `/image/${imageId}`; // fallback path
+        try {
+          // Initialize ImageKit to get actual image details
+          const ImageKit = require('imagekit');
+          require('dotenv').config();
+
+          const imagekit = new ImageKit({
+            publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+            privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+            urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+          });
+
+          // Get the actual image details from ImageKit
+          const imageDetails = await new Promise((resolve, reject) => {
+            imagekit.getFileDetails(imageId, (error, fileDetails) => {
+              if (error) {
+                console.error('Error getting image details from ImageKit:', error);
+                resolve(null); // Continue with fallback
+              } else {
+                resolve(fileDetails);
+              }
+            });
+          });
+
+          if (imageDetails) {
+            imagePath = imageDetails.url || imageDetails.filePath || `/image/${imageId}`;
+          }
+        } catch (error) {
+          console.error('Error initializing ImageKit for image details:', error);
+          // Continue with fallback path
+        }
+
+        // Create the image with minimal data
         const newImage = await this.createImage({
           id: imageId,
           path: imagePath,
@@ -566,6 +770,13 @@ class Database {
       throw handleDbError(fetchError2);
     }
 
+    // Add default values for properties that frontend might expect
+    if (fetchResult) {
+      // Add default values for expected properties that might be missing
+      fetchResult.original_name = fetchResult.original_name || fetchResult.filename || extractFilenameFromPath(fetchResult.path);
+      fetchResult.filename = fetchResult.filename || extractFilenameFromPath(fetchResult.path);
+    }
+
     return fetchResult;
   }
 
@@ -577,7 +788,17 @@ class Database {
       .order('created_at', { ascending: false });
 
     if (error) throw handleDbError(error);
-    return data;
+
+    // Add default values for properties that frontend might expect
+    const processedData = data?.map(image => {
+      if (image) {
+        image.original_name = image.original_name || image.filename || extractFilenameFromPath(image.path);
+        image.filename = image.filename || extractFilenameFromPath(image.path);
+      }
+      return image;
+    }) || data;
+
+    return processedData;
   }
 
   async getSlideshowImages() {
@@ -588,7 +809,17 @@ class Database {
       .order('created_at', { ascending: false });
 
     if (error) throw handleDbError(error);
-    return data;
+
+    // Add default values for properties that frontend might expect
+    const processedData = data?.map(image => {
+      if (image) {
+        image.original_name = image.original_name || image.filename || extractFilenameFromPath(image.path);
+        image.filename = image.filename || extractFilenameFromPath(image.path);
+      }
+      return image;
+    }) || data;
+
+    return processedData;
   }
 
   async getPublicImages() {
@@ -599,8 +830,25 @@ class Database {
       .order('created_at', { ascending: false });
 
     if (error) throw handleDbError(error);
-    return data;
+
+    // Add default values for properties that frontend might expect
+    const processedData = data?.map(image => {
+      if (image) {
+        image.original_name = image.original_name || image.filename || extractFilenameFromPath(image.path);
+        image.filename = image.filename || extractFilenameFromPath(image.path);
+      }
+      return image;
+    }) || data;
+
+    return processedData;
   }
+}
+
+// Helper function to extract filename from path
+function extractFilenameFromPath(path) {
+  if (!path) return '';
+  const parts = path.split('/');
+  return parts[parts.length - 1] || '';
 }
 
 module.exports = Database;
