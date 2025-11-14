@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiImage, FiGrid, FiUpload, FiUser, FiLogIn, FiMail } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiImage, FiGrid, FiUpload, FiUser, FiLogIn, FiMail, FiInstagram } from 'react-icons/fi';
 
 const Navbar = ({ isAuthenticated }) => {
   const location = useLocation();
@@ -39,70 +39,86 @@ const Navbar = ({ isAuthenticated }) => {
   }, [location.pathname]);
 
   return (
-    <nav className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-2 shadow-md' : 'py-5'} bg-black`}>
-      <div className="container mx-auto px-4 flex items-center">
-        <div className="flex-grow"></div>
+    <nav className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-2 shadow-md' : 'py-5'} bg-black border-b-0`}>
+      <div className="container mx-auto px-4 flex items-center justify-between">
 
-        {/* Desktop Navigation */}
-        <ul className="nav-items hidden md:flex justify-center">
-          <li>
-            <Link
-              to="/"
-              className={`nav-link ${isActive('/') ? 'active text-white' : 'text-white'} font-medium`}
-            >
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/gallery"
-              className={`nav-link ${isActive('/gallery') ? 'active text-white' : 'text-white'} font-medium`}
-            >
-              Gallery
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/about"
-              className={`nav-link ${isActive('/about') ? 'active text-white' : 'text-white'} font-medium`}
-            >
-              About
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/contact"
-              className={`nav-link ${isActive('/contact') ? 'active text-white' : 'text-white'} font-medium`}
-            >
-              Contact
-            </Link>
-          </li>
-
-          {/* Show Admin Gallery only when authenticated */}
-          {isAuthenticated && (
+        {/* Left section with Home */}
+        <div className="flex items-center">
+          <ul className="nav-items hidden md:flex">
             <li>
               <Link
-                to="/admin/gallery"
-                className={`nav-link ${isActive('/admin/gallery') ? 'active text-white' : 'text-white'} font-medium`}
+                to="/"
+                className={`nav-link ${isActive('/') ? 'active text-white' : 'text-white'} font-medium`}
               >
-                Admin Gallery
+                Home
               </Link>
             </li>
-          )}
+          </ul>
+        </div>
 
-          {/* Show login only when not authenticated */}
-          {!isAuthenticated && (
+        {/* Right section with other navigation items */}
+        <div className="flex items-center">
+          <ul className="nav-items hidden md:flex">
             <li>
               <Link
-                to="/login"
-                className={`nav-link ${isActive('/login') ? 'active text-white' : 'text-white'} font-medium`}
+                to="/gallery"
+                className={`nav-link ${isActive('/gallery') ? 'active text-white' : 'text-white'} font-medium`}
               >
-                Login
+                Gallery
               </Link>
             </li>
-          )}
-        </ul>
-        <div className="flex-grow"></div>
+            <li>
+              <Link
+                to="/about"
+                className={`nav-link ${isActive('/about') ? 'active text-white' : 'text-white'} font-medium`}
+              >
+                About
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/contact"
+                className={`nav-link ${isActive('/contact') ? 'active text-white' : 'text-white'} font-medium`}
+              >
+                Contact
+              </Link>
+            </li>
+            <li>
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-link text-white font-medium"
+              >
+                <FiInstagram size={20} className="inline mr-1 relative top-[4px]" />
+              </a>
+            </li>
+
+            {/* Show Admin Gallery only when authenticated */}
+            {isAuthenticated && (
+              <li>
+                <Link
+                  to="/admin/gallery"
+                  className={`nav-link ${isActive('/admin/gallery') ? 'active text-white' : 'text-white'} font-medium`}
+                >
+                  Admin Gallery
+                </Link>
+              </li>
+            )}
+
+            {/* Show login only when not authenticated */}
+            {!isAuthenticated && (
+              <li>
+                <Link
+                  to="/login"
+                  className={`nav-link ${isActive('/login') ? 'active text-white' : 'text-white'} font-medium`}
+                >
+                  Login
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
 
         {/* Mobile menu button - now with white color */}
         <div className="md:hidden self-start mt-2">
@@ -155,6 +171,17 @@ const Navbar = ({ isAuthenticated }) => {
               >
                 Contact
               </Link>
+            </li>
+            <li>
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-link py-2 px-4 rounded-lg hover:bg-gray-800 text-white font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <FiInstagram size={20} className="inline mr-1 relative top-[2px]" /> Instagram
+              </a>
             </li>
 
             {/* Show Admin Gallery only when authenticated */}
