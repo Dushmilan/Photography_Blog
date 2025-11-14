@@ -42,7 +42,7 @@ const AdminGalleryPage = () => {
   // Functions to handle toggling slideshow and featured status
   const toggleSlideshowStatus = async (imageId, isSlideshow) => {
     try {
-      const response = await api.put(`/imagekit/image/${imageId}`, { is_slideshow: isSlideshow });
+      const response = await api.put(`/images/${imageId}/slideshow`, { isSlideshow });
 
       // Update the image in the local state
       setImages(prevImages =>
@@ -58,7 +58,7 @@ const AdminGalleryPage = () => {
 
   const toggleFeaturedStatus = async (imageId, isFeatured) => {
     try {
-      const response = await api.put(`/imagekit/image/${imageId}`, { is_featured: isFeatured });
+      const response = await api.put(`/images/${imageId}/featured`, { isFeatured });
 
       // Update the image in the local state
       setImages(prevImages =>
@@ -75,7 +75,7 @@ const AdminGalleryPage = () => {
   // Update togglePublicStatus to use correct API endpoint
   const togglePublicStatus = async (imageId, isPublic) => {
     try {
-      const response = await api.put(`/imagekit/image/${imageId}`, { is_public: isPublic });
+      const response = await api.put(`/images/${imageId}/public`, { isPublic });
 
       // Update the image in the local state
       setImages(prevImages =>
@@ -174,18 +174,28 @@ const AdminGalleryPage = () => {
                                   : 'bg-[#708090]/20 text-[#001F3F]'
                               }`}
                             >
-                              {image.is_public ? 'Public' : 'Private'}
+                              {image.is_public ? 'Public ✓' : 'Private'}
                             </button>
-                            {image.is_slideshow && (
-                              <span className="inline-block px-2 py-1 bg-[#FF6F61]/20 text-[#FF6F61] rounded text-xs">
-                                Slideshow
-                              </span>
-                            )}
-                            {image.is_featured && (
-                              <span className="inline-block px-2 py-1 bg-[#A8E6CF]/20 text-[#001F3F] rounded text-xs">
-                                Featured
-                              </span>
-                            )}
+                            <button
+                              onClick={() => toggleFeaturedStatus(image.id, !image.is_featured)}
+                              className={`px-2 py-1 rounded text-xs ${
+                                image.is_featured
+                                  ? 'bg-[#FFD700]/30 text-[#001F3F]'
+                                  : 'bg-[#708090]/20 text-[#001F3F]'
+                              }`}
+                            >
+                              {image.is_featured ? 'Featured ✓' : 'Featured'}
+                            </button>
+                            <button
+                              onClick={() => toggleSlideshowStatus(image.id, !image.is_slideshow)}
+                              className={`px-2 py-1 rounded text-xs ${
+                                image.is_slideshow
+                                  ? 'bg-[#FF6F61]/20 text-[#FF6F61]'
+                                  : 'bg-[#708090]/20 text-[#001F3F]'
+                              }`}
+                            >
+                              {image.is_slideshow ? 'Slideshow ✓' : 'Slideshow'}
+                            </button>
                           </div>
                         </div>
                       </div>

@@ -34,162 +34,49 @@ router.put('/:id/public', authenticate, catchAsync(async (req, res) => {
   }
 
   const supabase = req.app.locals.supabase;
-  const ImageService = require('../models/ImageService');
-  const imageService = new ImageService(supabase);
+  const imageClass = new Image(supabase);
 
-  // Verify the image exists in ImageKit first
-  const ImageKit = require('imagekit');
-  require('dotenv').config();
-
-  // Validate environment variables for ImageKit
-  if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
-    throw new AppError('ImageKit configuration is missing', 500);
-  }
-
-  const imagekit = new ImageKit({
-    publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
-  });
-
-  // Check if the image exists in ImageKit
-  let imagekitFile = null;
-  try {
-    imagekitFile = await new Promise((resolve, reject) => {
-      // Validate that the ID is not empty or null before calling ImageKit
-      if (!id) {
-        console.log(`Invalid image ID provided: ${id}`);
-        resolve(null);
-        return;
-      }
-
-      imagekit.getFileDetails(id, (error, fileDetails) => {
-        if (error) {
-          // Log error but don't throw - continue to allow DB metadata updates
-          console.error(`Image not found in ImageKit (ID: ${id}):`, error.message || error);
-          resolve(null);
-        } else {
-          resolve(fileDetails);
-        }
-      });
-    });
-  } catch (error) {
-    console.log(`Could not verify image ${id} in ImageKit, proceeding with database update. Error:`, error.message || error);
-  }
-
-  // Create update data for upsert
-  const updateData = {
-    id: id,
-    photographer_id: req.user.userId,
-    is_public: isPublic
-  };
-
-  // Upsert the image metadata
-  const updatedImage = await imageService.upsertImageMetadata(updateData);
+  // Update the public status of the image
+  const updatedImage = await imageClass.updatePublicStatus(id, req.user.userId, isPublic);
   res.json({ image: updatedImage });
 }));
 
-// Get a specific image by ID
-router.get('/:id', authenticate, catchAsync(async (req, res) => {
+// Update featured status of an image
+router.put('/:id/featured', authenticate, catchAsync(async (req, res) => {
   const { id } = req.params;
+  const { isFeatured } = req.body;
 
-  // Validate image ID
-  if (!id) {
-    throw new AppError('Image ID is required', 400);
+  // Validate input data
+  if (typeof isFeatured !== 'boolean') {
+    throw new AppError('isFeatured must be a boolean value', 400);
   }
 
   const supabase = req.app.locals.supabase;
-  const ImageService = require('../models/ImageService');
-  const imageService = new ImageService(supabase);
+  const imageClass = new Image(supabase);
 
-  // First try to get from database (for metadata)
-  let dbImage = null;
-  try {
-    dbImage = await imageService.findById(id);
-  } catch (error) {
-    // If DB query fails, continue without DB metadata
-    console.log('No database metadata found for image, proceeding with ImageKit data only');
-  }
-
-  // Verify the image exists in ImageKit
-  const ImageKit = require('imagekit');
-  require('dotenv').config();
-
-  // Validate environment variables for ImageKit
-  if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
-    throw new AppError('ImageKit configuration is missing', 500);
-  }
-
-  const imagekit = new ImageKit({
-    publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
-  });
-
-  // Check if the image exists in ImageKit
-  let imagekitImage = null;
-  try {
-    imagekitImage = await new Promise((resolve, reject) => {
-      // Validate that the ID is not empty or null before calling ImageKit
-      if (!id) {
-        console.log(`Invalid image ID provided: ${id}`);
-        resolve(null);
-        return;
-      }
-
-      imagekit.getFileDetails(id, (error, fileDetails) => {
-        if (error) {
-          console.error('Image not found in ImageKit:', error);
-          resolve(null); // Continue with DB data only
-        } else {
-          resolve(fileDetails);
-        }
-      });
-    });
-  } catch (error) {
-    console.log(`Could not get image ${id} from ImageKit, proceeding with database data only. Error:`, error.message || error);
-  }
-
-  if (!imagekitImage && !dbImage) {
-    throw new AppError('Image not found', 404);
-  }
-
-  // If we couldn't get from ImageKit but have DB data, use that
-  if (!imagekitImage && dbImage) {
-    // Use the DB record with minimal defaults
-    imagekitImage = {
-      fileId: dbImage.id,
-      url: dbImage.path,
-      filePath: dbImage.path,
-      name: dbImage.filename || 'Unknown',
-      size: dbImage.size || 0,
-      type: dbImage.mimetype || 'unknown',
-      width: dbImage.width || 0,
-      height: dbImage.height || 0,
-      createdAt: dbImage.created_at
-    };
-  }
-
-  // Combine ImageKit data with DB metadata if available
-  const image = {
-    id: imagekitImage?.fileId || dbImage?.id,
-    path: imagekitImage?.url || imagekitImage?.filePath || dbImage?.path,
-    filename: imagekitImage?.name || dbImage?.filename || 'Unknown',
-    size: imagekitImage?.size || dbImage?.size || 0,
-    mimetype: imagekitImage?.type || dbImage?.mimetype || 'unknown',
-    width: imagekitImage?.width || dbImage?.width || 0,
-    height: imagekitImage?.height || dbImage?.height || 0,
-    photographer_id: req.user.userId,
-    created_at: imagekitImage?.createdAt || dbImage?.created_at || new Date().toISOString(),
-    // DB metadata if available, default values otherwise
-    is_featured: dbImage?.is_featured || false,
-    is_slideshow: dbImage?.is_slideshow || false,
-    is_public: dbImage?.is_public || false,
-    ...dbImage // Include any other metadata from DB
-  };
-
-  res.json(image);
+  // Update the featured status of the image
+  const updatedImage = await imageClass.updateFeaturedStatus(id, req.user.userId, isFeatured);
+  res.json({ image: updatedImage });
 }));
+
+// Update slideshow status of an image
+router.put('/:id/slideshow', authenticate, catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { isSlideshow } = req.body;
+
+  // Validate input data
+  if (typeof isSlideshow !== 'boolean') {
+    throw new AppError('isSlideshow must be a boolean value', 400);
+  }
+
+  const supabase = req.app.locals.supabase;
+  const imageClass = new Image(supabase);
+
+  // Update the slideshow status of the image
+  const updatedImage = await imageClass.updateSlideshowStatus(id, req.user.userId, isSlideshow);
+  res.json({ image: updatedImage });
+}));
+
 
 // Create a new image in the database
 router.post('/', authenticate, catchAsync(async (req, res) => {
@@ -410,6 +297,108 @@ router.get('/features', catchAsync(async (req, res) => {
   // Fetch featured images
   const featuredImages = await imageService.getFeaturedImages();
   res.json(featuredImages);
+}));
+
+// Get a specific image by ID
+router.get('/:id', authenticate, catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  // Validate image ID
+  if (!id) {
+    throw new AppError('Image ID is required', 400);
+  }
+
+  const supabase = req.app.locals.supabase;
+  const ImageService = require('../models/ImageService');
+  const imageService = new ImageService(supabase);
+
+  // First try to get from database (for metadata)
+  let dbImage = null;
+  try {
+    dbImage = await imageService.findById(id);
+  } catch (error) {
+    // If DB query fails, continue without DB metadata
+    console.log('No database metadata found for image, proceeding with ImageKit data only');
+  }
+
+  // Verify the image exists in ImageKit
+  const ImageKit = require('imagekit');
+  require('dotenv').config();
+
+  // Validate environment variables for ImageKit
+  if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+    throw new AppError('ImageKit configuration is missing', 500);
+  }
+
+  const imagekit = new ImageKit({
+    publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+  });
+
+  // Check if the image exists in ImageKit
+  let imagekitImage = null;
+  try {
+    imagekitImage = await new Promise((resolve, reject) => {
+      // Validate that the ID is not empty or null before calling ImageKit
+      if (!id) {
+        console.log(`Invalid image ID provided: ${id}`);
+        resolve(null);
+        return;
+      }
+
+      imagekit.getFileDetails(id, (error, fileDetails) => {
+        if (error) {
+          console.error('Image not found in ImageKit:', error);
+          resolve(null); // Continue with DB data only
+        } else {
+          resolve(fileDetails);
+        }
+      });
+    });
+  } catch (error) {
+    console.log(`Could not get image ${id} from ImageKit, proceeding with database data only. Error:`, error.message || error);
+  }
+
+  if (!imagekitImage && !dbImage) {
+    throw new AppError('Image not found', 404);
+  }
+
+  // If we couldn't get from ImageKit but have DB data, use that
+  if (!imagekitImage && dbImage) {
+    // Use the DB record with minimal defaults
+    imagekitImage = {
+      fileId: dbImage.id,
+      url: dbImage.path,
+      filePath: dbImage.path,
+      name: dbImage.filename || 'Unknown',
+      size: dbImage.size || 0,
+      type: dbImage.mimetype || 'unknown',
+      width: dbImage.width || 0,
+      height: dbImage.height || 0,
+      createdAt: dbImage.created_at
+    };
+  }
+
+  // Combine ImageKit data with DB metadata if available
+  const image = {
+    id: imagekitImage?.fileId || dbImage?.id,
+    path: imagekitImage?.url || imagekitImage?.filePath || dbImage?.path,
+    filename: imagekitImage?.name || dbImage?.filename || 'Unknown',
+    size: imagekitImage?.size || dbImage?.size || 0,
+    mimetype: imagekitImage?.type || dbImage?.mimetype || 'unknown',
+    width: imagekitImage?.width || dbImage?.width || 0,
+    height: imagekitImage?.height || dbImage?.height || 0,
+    photographer_id: req.user.userId,
+    created_at: imagekitImage?.createdAt || dbImage?.created_at || new Date().toISOString(),
+    // DB metadata if available, default values otherwise
+    is_featured: dbImage?.is_featured || false,
+    is_slideshow: dbImage?.is_slideshow || false,
+    is_public: dbImage?.is_public || false,
+    ...dbImage // Include any other metadata from DB
+  };
+
+  res.json(image);
 }));
 
 module.exports = router;
