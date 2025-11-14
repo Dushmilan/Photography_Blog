@@ -4,6 +4,12 @@ module.exports = {
   ],
   theme: {
     extend: {
+      columns: {
+        1: '1',
+        2: '2',
+        3: '3',
+        4: '4',
+      },
       colors: {
         cream: {
           50: '#FFFDF9',
