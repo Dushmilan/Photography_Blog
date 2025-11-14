@@ -140,7 +140,6 @@ router.post('/', authenticate, catchAsync(async (req, res) => {
     id: imageData.id,
     path: imageData.path || imageData.url || imageData.file_path || '', // Use the most likely field names
     photographer_id: imageData.photographer_id,
-    is_featured: imageData.is_featured || false,
     is_slideshow: imageData.is_slideshow || false,
     is_public: imageData.is_public || false
   });
@@ -270,16 +269,6 @@ router.get('/gallery', catchAsync(async (req, res) => {
   res.json(galleryImages);
 }));
 
-// Get images for Features component
-router.get('/features', catchAsync(async (req, res) => {
-  const supabase = req.app.locals.supabase;
-  const ImageService = require('../models/ImageService');
-  const imageService = new ImageService(supabase);
-
-  // Fetch featured images
-  const featuredImages = await imageService.getFeaturedImages();
-  res.json(featuredImages);
-}));
 
 // Get a specific image by ID
 router.get('/:id', authenticate, catchAsync(async (req, res) => {
@@ -374,7 +363,6 @@ router.get('/:id', authenticate, catchAsync(async (req, res) => {
     photographer_id: req.user.userId,
     created_at: imagekitImage?.createdAt || dbImage?.created_at || new Date().toISOString(),
     // DB metadata if available, default values otherwise
-    is_featured: dbImage?.is_featured || false,
     is_slideshow: dbImage?.is_slideshow || false,
     is_public: dbImage?.is_public || false,
     ...dbImage // Include any other metadata from DB

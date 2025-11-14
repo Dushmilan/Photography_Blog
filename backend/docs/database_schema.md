@@ -44,7 +44,6 @@ CREATE TABLE images (
   width INTEGER DEFAULT 0,
   height INTEGER DEFAULT 0,
   photographer_id UUID REFERENCES users(id),
-  is_featured BOOLEAN DEFAULT FALSE,
   is_slideshow BOOLEAN DEFAULT FALSE,
   is_public BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -53,7 +52,6 @@ CREATE TABLE images (
 
 -- Create indexes
 CREATE INDEX idx_images_photographer_id ON images(photographer_id);
-CREATE INDEX idx_images_is_featured ON images(is_featured);
 CREATE INDEX idx_images_is_slideshow ON images(is_slideshow);
 CREATE INDEX idx_images_is_public ON images(is_public);
 CREATE INDEX idx_images_created_at ON images(created_at);
@@ -72,7 +70,6 @@ CREATE INDEX idx_images_created_at ON images(created_at);
 - `width`: Image width in pixels
 - `height`: Image height in pixels
 - `photographer_id`: Foreign key to the user who owns this image
-- `is_featured`: Whether the image is marked as featured
 - `is_slideshow`: Whether the image is in the homepage slideshow
 - `is_public`: Whether the image is visible in the public gallery
 - `created_at`: Timestamp when the image record was created
@@ -111,21 +108,11 @@ CREATE POLICY "Users can delete their own images" ON images
 To help with common operations, we can create helper functions:
 
 ```sql
--- Function to get featured images for a photographer
-CREATE OR REPLACE FUNCTION get_featured_images(photographer_uuid UUID)
-RETURNS SETOF images AS $$
-  SELECT * FROM images 
-  WHERE photographer_id = photographer_uuid 
-  AND is_featured = TRUE
-  ORDER BY created_at DESC
-  LIMIT 6;
-$$ LANGUAGE sql STABLE;
-
 -- Function to get slideshow images for a photographer
 CREATE OR REPLACE FUNCTION get_slideshow_images(photographer_uuid UUID)
 RETURNS SETOF images AS $$
-  SELECT * FROM images 
-  WHERE photographer_id = photographer_uuid 
+  SELECT * FROM images
+  WHERE photographer_id = photographer_uuid
   AND is_slideshow = TRUE
   ORDER BY created_at DESC
   LIMIT 1;
