@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiChevronLeft, FiChevronRight, FiX, FiStar, FiEye, FiShare2, FiMail, FiInstagram, FiFacebook, FiCamera, FiAward, FiHeart } from 'react-icons/fi';
-import axios from 'axios';
+import api from '../utils/api';
 
 const HomePage = () => {
   const [images, setImages] = useState([]);
@@ -9,6 +9,14 @@ const HomePage = () => {
   const [showLightbox, setShowLightbox] = useState(false);
   const [loading, setLoading] = useState(true);
   const [slideshowActive, setSlideshowActive] = useState(true);
+  // Contact form state
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [contactStatus, setContactStatus] = useState(null); // null, 'loading', 'success', 'error'
 
   useEffect(() => {
     fetchImages();
@@ -18,8 +26,8 @@ const HomePage = () => {
     try {
       // Fetch slideshow and featured images separately
       const [slideshowResponse, featuredResponse] = await Promise.all([
-        axios.get('/images/slideshow'),
-        axios.get('/images/featured')
+        api.get('/images/slideshow'),
+        api.get('/images/features')
       ]);
       
       // Use slideshow images for the slideshow
@@ -29,13 +37,13 @@ const HomePage = () => {
       
       // If no slideshow images, fetch all images as fallback
       if (slideshowResponse.data.length === 0) {
-        const allImagesResponse = await axios.get('/images');
+        const allImagesResponse = await api.get('/images/public');
         setImages(allImagesResponse.data);
       }
-      
+
       // If no featured images, fetch all images as fallback
       if (featuredResponse.data.length === 0) {
-        const allImagesResponse = await axios.get('/images');
+        const allImagesResponse = await api.get('/images/public');
         setFeaturedImages(allImagesResponse.data.slice(0, 6));
       }
       
@@ -72,6 +80,47 @@ const HomePage = () => {
   const goToSlide = (index) => {
     setCurrentIndex(index);
     setSlideshowActive(false); // Pause slideshow when user interacts
+  };
+
+  // Contact form handler
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      setContactStatus('error');
+      alert('Please fill in all required fields (name, email, and message).');
+      return;
+    }
+
+    setContactStatus('loading');
+
+    try {
+      const response = await api.post('/contact', contactForm);
+
+      if (response.data.success) {
+        setContactStatus('success');
+        // Reset form
+        setContactForm({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+
+        // Show success message for a few seconds then reset
+        setTimeout(() => {
+          setContactStatus(null);
+        }, 3000);
+      } else {
+        setContactStatus('error');
+        alert('Failed to send message: ' + (response.data.message || 'Unknown error'));
+      }
+    } catch (error) {
+      setContactStatus('error');
+      console.error('Contact form error:', error);
+      alert('An error occurred while sending your message. Please try again.');
+    }
   };
 
   // Keyboard navigation
@@ -327,34 +376,69 @@ const HomePage = () => {
 
             <div>
               <h3 className="text-xl font-medium text-[#001F3F] mb-4">Send a Message</h3>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleContactSubmit}>
                 <div>
                   <input
                     type="text"
-                    placeholder="Your Name"
+                    placeholder="Your Name *"
                     className="w-full px-4 py-3 rounded-lg border border-[#708090]/30 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-white/80 backdrop-blur-sm"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                    required
                   />
                 </div>
                 <div>
                   <input
                     type="email"
-                    placeholder="Your Email"
+                    placeholder="Your Email *"
                     className="w-full px-4 py-3 rounded-lg border border-[#708090]/30 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-white/80 backdrop-blur-sm"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Subject"
+                    className="w-full px-4 py-3 rounded-lg border border-[#708090]/30 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-white/80 backdrop-blur-sm"
+                    value={contactForm.subject}
+                    onChange={(e) => setContactForm({...contactForm, subject: e.target.value})}
                   />
                 </div>
                 <div>
                   <textarea
                     rows="4"
-                    placeholder="Your Message"
+                    placeholder="Your Message *"
                     className="w-full px-4 py-3 rounded-lg border border-[#708090]/30 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-white/80 backdrop-blur-sm"
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                    required
                   ></textarea>
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3 bg-gradient-to-r from-[#FF6F61] to-[#FF9933] text-white rounded-lg font-medium hover:from-[#FF5F51] hover:to-[#E58929] transition-all shadow-lg hover:shadow-xl"
+                  disabled={contactStatus === 'loading'}
+                  className={`w-full py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl ${
+                    contactStatus === 'loading'
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : 'bg-gradient-to-r from-[#FF6F61] to-[#FF9933] text-white hover:from-[#FF5F51] hover:to-[#E58929]'
+                  }`}
                 >
-                  Send Message
+                  {contactStatus === 'loading' ? 'Sending...' : 'Send Message'}
                 </button>
+
+                {contactStatus === 'success' && (
+                  <div className="p-3 bg-green-100 text-green-700 rounded-lg border border-green-200">
+                    Message sent successfully! Thank you for contacting me.
+                  </div>
+                )}
+
+                {contactStatus === 'error' && (
+                  <div className="p-3 bg-red-100 text-red-700 rounded-lg border border-red-200">
+                    Error sending message. Please try again.
+                  </div>
+                )}
               </form>
             </div>
           </div>

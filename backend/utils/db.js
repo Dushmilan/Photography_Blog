@@ -81,16 +81,7 @@ class Database {
       .from('images')
       .insert([{
         id: imageData.id,  // Use the ImageKit File ID as the primary key
-        filename: imageData.filename,
-        original_name: imageData.original_name,
-        path: imageData.path,
-        thumbnail_path: imageData.thumbnail_path || imageData.path,  // Use provided thumbnail_path or fallback to path
-        small_path: imageData.small_path || imageData.path,      // Use provided small_path or fallback to path
-        medium_path: imageData.medium_path || imageData.path,     // Use provided medium_path or fallback to path
-        size: imageData.size || 0,
-        mimetype: imageData.mimetype,
-        width: imageData.width || 0,
-        height: imageData.height || 0,
+        path: imageData.path || imageData.filename || '', // Use path, fallback to filename
         photographer_id: imageData.photographer_id,
         is_featured: imageData.is_featured || false,
         is_slideshow: imageData.is_slideshow || false,
@@ -113,7 +104,7 @@ class Database {
 
         return existingData;
       }
-      
+
       throw handleDbError(error);
     }
     return data;
@@ -123,7 +114,7 @@ class Database {
     console.log('Fetching all images from database');
     const { data, error } = await this.supabase
       .from('images')
-      .select('*')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -137,7 +128,7 @@ class Database {
   async getImagesByPhotographerId(photographerId) {
     const { data, error } = await this.supabase
       .from('images')
-      .select('*')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('photographer_id', photographerId)
       .order('created_at', { ascending: false });
 
@@ -148,7 +139,7 @@ class Database {
   async getImageById(imageId) {
     const { data, error } = await this.supabase
       .from('images')
-      .select('*')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('id', imageId)
       .single();
 
@@ -161,7 +152,8 @@ class Database {
     const { data, error } = await this.supabase
       .from('images')
       .delete()
-      .eq('id', imageId);
+      .eq('id', imageId)
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at'); // Return the deleted record
 
     if (error) {
       console.error('Error deleting image from DB:', error);
@@ -174,7 +166,7 @@ class Database {
   async getImageByIdAndPhotographer(imageId, photographerId) {
     const { data, error } = await this.supabase
       .from('images')
-      .select('*')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
       .single();
@@ -189,7 +181,7 @@ class Database {
       .update(updateData)
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
-      .select()
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .single();
 
     if (error) throw handleDbError(error);
@@ -202,7 +194,7 @@ class Database {
       .update({ is_featured: isFeatured })
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
-      .select()
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .single();
 
     if (error) throw handleDbError(error);
@@ -215,7 +207,7 @@ class Database {
       .update({ is_slideshow: isSlideshow })
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
-      .select()
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .single();
 
     if (error) throw handleDbError(error);
@@ -228,7 +220,7 @@ class Database {
       .update({ is_public: isPublic })
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
-      .select()
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .single();
 
     if (error) throw handleDbError(error);
@@ -238,7 +230,7 @@ class Database {
   async getFeaturedImages() {
     const { data, error } = await this.supabase
       .from('images')
-      .select('*')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('is_featured', true)
       .order('created_at', { ascending: false });
 
@@ -249,7 +241,7 @@ class Database {
   async getSlideshowImages() {
     const { data, error } = await this.supabase
       .from('images')
-      .select('*')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('is_slideshow', true)
       .order('created_at', { ascending: false });
 
@@ -260,35 +252,9 @@ class Database {
   async getPublicImages() {
     const { data, error } = await this.supabase
       .from('images')
-      .select('*')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('is_public', true)
       .order('created_at', { ascending: false });
-
-    if (error) throw handleDbError(error);
-    return data;
-  }
-
-  async updateImage(imageId, updateData, photographerId) {
-    const { data, error } = await this.supabase
-      .from('images')
-      .update(updateData)
-      .eq('id', imageId)
-      .eq('photographer_id', photographerId)
-      .select()
-      .single();
-
-    if (error) throw handleDbError(error);
-    return data;
-  }
-
-  async updateImageName(imageId, photographerId, newName) {
-    const { data, error } = await this.supabase
-      .from('images')
-      .update({ original_name: newName })
-      .eq('id', imageId)
-      .eq('photographer_id', photographerId)
-      .select()
-      .single();
 
     if (error) throw handleDbError(error);
     return data;

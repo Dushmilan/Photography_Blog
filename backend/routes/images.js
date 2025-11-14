@@ -50,24 +50,7 @@ router.get('/:id', authenticate, catchAsync(async (req, res) => {
   if (!image) {
     throw new AppError('Image not found', 404);
   }
-
   res.json(image);
-}));
-
-// Delete an image
-router.delete('/:id', authenticate, catchAsync(async (req, res) => {
-  const supabase = req.app.locals.supabase;
-  const imageClass = new Image(supabase);
-  const { id } = req.params;
-
-  // Verify the image belongs to the authenticated user
-  const image = await imageClass.findByIdAndPhotographer(id, req.user.userId);
-  if (!image) {
-    throw new AppError('Image not found or does not belong to user', 404);
-  }
-
-  await imageClass.deleteById(id);
-  res.json({ message: 'Image deleted successfully' });
 }));
 
 // Create a new image in the database
@@ -109,13 +92,43 @@ router.post('/', authenticate, catchAsync(async (req, res) => {
   res.status(201).json({ image: newImage });
 }));
 
-// Get slideshow images
+// Get images for Slideshow component
 router.get('/slideshow', catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
   const imageClass = new Image(supabase);
 
   const slideshowImages = await imageClass.getSlideshowImages();
   res.json(slideshowImages);
+}));
+
+// Get all images for Admin_Gallery
+router.get('/admin-gallery', authenticate, catchAsync(async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const imageClass = new Image(supabase);
+
+  // Fetch all images from the database
+  const allImages = await imageClass.findAll();
+  res.json(allImages);
+}));
+
+// Get images for Gallery component
+router.get('/gallery', catchAsync(async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const imageClass = new Image(supabase);
+
+  // Fetch public images for gallery
+  const galleryImages = await imageClass.getPublicImages();
+  res.json(galleryImages);
+}));
+
+// Get images for Features component
+router.get('/features', catchAsync(async (req, res) => {
+  const supabase = req.app.locals.supabase;
+  const imageClass = new Image(supabase);
+
+  // Fetch featured images
+  const featuredImages = await imageClass.getFeaturedImages();
+  res.json(featuredImages);
 }));
 
 module.exports = router;

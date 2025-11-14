@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "setup-db": "node setup-database.js",
     "test:imagekit": "node test-imagekit.js",
     "test:imagekit:comprehensive": "node test-imagekit-comprehensive.js"
   },

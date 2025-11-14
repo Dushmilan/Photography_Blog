@@ -38,9 +38,18 @@ const handleDbError = (error) => {
         message = `Table does not exist: ${error.table}`;
         statusCode = 500;
         break;
-      default:
-        message = error.message || 'Database error occurred';
+      case 'PGRST103': // PostgREST error for single() when multiple rows returned
+        message = 'Multiple rows returned when single row was expected';
         statusCode = 500;
+        break;
+      default:
+        if (error.message && error.message.includes('Cannot coerce the result to a single JSON object')) {
+          message = 'Multiple rows returned when single row was expected - check your query constraints';
+          statusCode = 500;
+        } else {
+          message = error.message || 'Database error occurred';
+          statusCode = 500;
+        }
     }
   } else {
     message = error.message || message;

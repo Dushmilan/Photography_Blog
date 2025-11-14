@@ -1,11 +1,13 @@
 # Photography Portfolio Website
 
-A full-stack photography portfolio website with upload and gallery functionality, built with React, Node.js, Express, and MongoDB.
+A full-stack photography portfolio website with gallery, featured, and slideshow functionality, built with React, Node.js, Express, and Supabase PostgreSQL. The system now focuses on image management and display without direct upload/delete/rename functionality.
 
 ## Features
 
-- **Photo Upload**: Drag-and-drop interface for uploading multiple photos with preview
 - **Photo Gallery**: Responsive masonry grid layout with lightbox view
+- **Admin Gallery**: Centralized view of all images with status management
+- **Featured Images**: Special gallery section for highlighted photos
+- **Slideshow**: Automated slideshow on homepage with featured photos
 - **Authentication**: Simple login system for photographers
 - **Image Optimization**: Automatic resizing and compression for faster loading
 - **Responsive Design**: Works on all device sizes
@@ -15,14 +17,13 @@ A full-stack photography portfolio website with upload and gallery functionality
 
 - **Frontend**: React.js, Tailwind CSS, React Router
 - **Backend**: Node.js, Express.js
-- **Database**: MongoDB
-- **Image Processing**: Sharp
-- **File Upload**: Multer
+- **Database**: Supabase PostgreSQL
+- **Image Processing**: ImageKit.io
 
 ## Prerequisites
 
 - Node.js (v14 or higher)
-- MongoDB (either local installation or MongoDB Atlas account)
+- Supabase account (for PostgreSQL database)
 
 ## Installation
 
@@ -30,7 +31,7 @@ A full-stack photography portfolio website with upload and gallery functionality
 
 1. Navigate to the backend directory:
 ```bash
-cd photography-portfolio/backend
+cd Photography_Blog/backend
 ```
 
 2. Install dependencies:
@@ -38,29 +39,21 @@ cd photography-portfolio/backend
 npm install
 ```
 
-3. Create a `.env` file in the backend directory with your MongoDB connection string:
+3. Create a `.env` file in the backend directory with your Supabase credentials:
 
-**Option 1: Using MongoDB Atlas (Cloud)**
 ```env
-MONGODB_URI=mongodb+srv://your_username:your_password@cluster0.k6mqjpx.mongodb.net/photography-portfolio?retryWrites=true&w=majority&appName=Cluster0
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-or-service-role-key
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 PORT=5000
 ```
-**Important**: If using MongoDB Atlas, you need to:
-- Create a MongoDB Atlas account at https://www.mongodb.com/atlas
-- Create a new cluster
-- Set up database access (username and password)
-- Add your IP address to the network access list (whitelist)
-  - Go to Network Access → Add IP Address → Add Current IP Address or "0.0.0.0/0" for any IP
 
-**Option 2: Using Local MongoDB (Recommended for Development)**
-- Install MongoDB Community Edition from https://www.mongodb.com/try/download/community
-- Start the MongoDB service
-```env
-MONGODB_URI=mongodb://127.0.0.1:27017/photography-portfolio
-JWT_SECRET=your-super-secret-jwt-key-change-in-production
-PORT=5000
-```
+To get your Supabase credentials:
+- Create a Supabase account at https://supabase.com/
+- Create a new project
+- Get your URL from the Project Settings → API Settings
+- Get your anon key from the Project Settings → API Settings
+- Set up your database tables following the schema in the project documentation
 
 4. Start the backend server:
 ```bash
@@ -73,7 +66,7 @@ npm start    # For production
 
 1. Navigate to the frontend directory:
 ```bash
-cd photography-portfolio/frontend
+cd Photography_Blog/frontend
 ```
 
 2. Install dependencies:
@@ -91,8 +84,9 @@ npm start
 1. Open your browser and go to `http://localhost:3000` to view the public gallery
 2. To access the admin panel, go to `http://localhost:3000/login`
 3. Register a new account or use an existing one
-4. Use the admin panel to upload and manage your photos
-5. View your public gallery at the root URL
+4. Use the admin panel to manage your photos (set public, featured, slideshow status)
+5. View your public gallery and featured photos at the root URL
+6. All images are managed from the Admin Gallery page
 
 ## API Endpoints
 
@@ -101,33 +95,48 @@ npm start
 - `POST /api/auth/login` - Login
 - `GET /api/auth/me` - Get current user info (requires authentication)
 
+### Token Management
+- `POST /api/tokens/refresh` - Refresh access token (requires refresh token)
+
 ### Images
-- `GET /api/images` - Get all images (public access)
+- `GET /api/images/admin-gallery` - Get all images for admin gallery (requires authentication)
 - `GET /api/images/my-images` - Get authenticated user's images (requires authentication)
-- `POST /api/images/upload` - Upload images (requires authentication)
-- `DELETE /api/images/:id` - Delete an image (requires authentication)
+- `GET /api/images/public` - Get public images (no authentication required)
+- `GET /api/images/gallery` - Get images for gallery component (no authentication required)
+- `GET /api/images/features` - Get featured images (no authentication required)
+- `GET /api/images/slideshow` - Get slideshow images (no authentication required)
+- `GET /api/images/:id` - Get a specific image (requires authentication)
+- `POST /api/images` - Create a new image record (requires authentication)
+- `PUT /api/images/:id/public` - Update image public status (requires authentication)
+
+### ImageKit Integration
+- `GET /api/imagekit/images` - Get images from ImageKit (requires authentication)
+- `GET /api/imagekit/auth-parameters` - Get ImageKit authentication parameters (requires authentication)
+- `PUT /api/imagekit/image/:id` - Update image in ImageKit (requires authentication)
+- `GET /api/imagekit/image/:id` - Get specific image from ImageKit (requires authentication)
+- `GET /api/imagekit/image/:id/transform` - Transform image in ImageKit (requires authentication)
+
+### Contact
+- `POST /api/contact` - Send contact form message
 
 ## Project Structure
 
 ```
-photography-portfolio/
+Photography_Blog/
 ├── backend/
 │   ├── models/           # Database models
 │   ├── routes/           # API routes
-│   ├── controllers/      # Route controllers
 │   ├── middleware/       # Authentication middleware
 │   ├── utils/            # Utility functions
-│   ├── uploads/          # Uploaded images (created automatically)
-│   │   ├── thumbnails/   # Thumbnail images
-│   │   ├── small/        # Small size images
-│   │   └── medium/       # Medium size images
+│   ├── docs/             # Documentation files
 │   └── server.js         # Main server file
 └── frontend/
     ├── public/           # Static assets
     ├── src/
     │   ├── components/   # React components
+    │   ├── config/       # Configuration files
     │   ├── pages/        # Page components
-    │   ├── utils/        # Utility functions
+    │   ├── utils/        # Utility functions (API, error handling)
     │   ├── assets/       # Images and other assets
     │   ├── App.js        # Main app component
     │   └── index.js      # App entry point
@@ -140,25 +149,38 @@ Create `.env` files in both backend and frontend directories as needed.
 
 Backend (.env):
 ```env
-MONGODB_URI=mongodb://127.0.0.1:27017/photography-portfolio
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-or-service-role-key
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 PORT=5000
 ```
 
 ## Image Handling
 
-The application automatically creates multiple sizes of each uploaded image:
-- Original size (for full-quality viewing)
-- Medium size (1200px width, 90% quality) for lightbox
-- Small size (600px width, 85% quality) for responsive loading
-- Thumbnail (300px width, 80% quality) for gallery grid
+The application integrates with ImageKit.io for image processing and optimization:
+- Original image is stored in ImageKit
+- Multiple optimized sizes (thumbnail, small, medium) are automatically created
+- Images are optimized for fast loading
+- Responsive image serving based on device size
+- All images are fetched to Admin Gallery for centralized management
+- Gallery, Features, and Slideshow components display images based on their status
 
 ## Security
 
-- JWT-based authentication
-- Image file validation
-- File size limits (10MB per image)
+- JWT-based authentication with access/refresh token system
+- Rate limiting to prevent abuse
+- Compression enabled for API responses
 - Protected routes with middleware
+
+## Key Changes
+
+Compared to the previous version:
+- Removed image upload endpoint (`POST /api/imagekit/upload`)
+- Removed image deletion functionality (`DELETE /api/images/:id` and `DELETE /api/imagekit/image/:id`)
+- Removed image renaming functionality
+- Added dedicated endpoints for Admin Gallery, Gallery, Features, and Slideshow components
+- Admin Gallery now fetches all images for centralized management
+- Enhanced image status management (public, featured, slideshow)
 
 ## Deployment
 

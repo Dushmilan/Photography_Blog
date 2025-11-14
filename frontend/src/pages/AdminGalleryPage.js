@@ -8,7 +8,6 @@ const AdminGalleryPage = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   useEffect(() => {
     // Get user info and images
@@ -17,8 +16,8 @@ const AdminGalleryPage = () => {
         const userResponse = await api.get('/auth/me');
         setUser(userResponse.data);
 
-        // For admin view, fetch images from the database (they are now stored in our DB with ImageKit paths)
-        const storedImagesResponse = await api.get('/images/my-images');
+        // For admin view, fetch all images from the database
+        const storedImagesResponse = await api.get('/images/admin-gallery');
         const storedImages = storedImagesResponse.data;
 
         setImages(storedImages);
@@ -43,7 +42,7 @@ const AdminGalleryPage = () => {
   // Functions to handle toggling slideshow and featured status
   const toggleSlideshowStatus = async (imageId, isSlideshow) => {
     try {
-      const response = await axios.put(`/images/${imageId}/slideshow`, { isSlideshow });
+      const response = await api.put(`/imagekit/image/${imageId}`, { is_slideshow: isSlideshow });
 
       // Update the image in the local state
       setImages(prevImages =>
@@ -59,7 +58,7 @@ const AdminGalleryPage = () => {
 
   const toggleFeaturedStatus = async (imageId, isFeatured) => {
     try {
-      const response = await axios.put(`/images/${imageId}/featured`, { isFeatured });
+      const response = await api.put(`/imagekit/image/${imageId}`, { is_featured: isFeatured });
 
       // Update the image in the local state
       setImages(prevImages =>
@@ -73,9 +72,10 @@ const AdminGalleryPage = () => {
     }
   };
 
+  // Update togglePublicStatus to use correct API endpoint
   const togglePublicStatus = async (imageId, isPublic) => {
     try {
-      const response = await axios.put(`/images/${imageId}/public`, { isPublic });
+      const response = await api.put(`/imagekit/image/${imageId}`, { is_public: isPublic });
 
       // Update the image in the local state
       setImages(prevImages =>
@@ -87,70 +87,6 @@ const AdminGalleryPage = () => {
       console.error('Error updating public status:', error);
       // Optionally show an error message to the user
     }
-  };
-
-  const renameImage = async (imageId, newName) => {
-    try {
-      const response = await axios.put(`/images/${imageId}/rename`, { newName });
-
-      // Update the image in the local state
-      setImages(prevImages =>
-        prevImages.map(img =>
-          img.id === imageId ? { ...img, original_name: response.data.image.original_name } : img
-        )
-      );
-
-      return true;
-    } catch (error) {
-      console.error('Error renaming image:', error);
-      return false;
-    }
-  };
-
-  const deleteImage = async (imageId) => {
-    try {
-      await axios.delete(`/images/${imageId}`);
-
-      // Remove the image from the local state
-      setImages(prevImages =>
-        prevImages.filter(img => img.id !== imageId)
-      );
-
-      return true;
-    } catch (error) {
-      console.error('Error deleting image:', error);
-      return false;
-    }
-  };
-
-  // Function to handle image renaming
-  const handleImageRename = async (imageId, currentName) => {
-    const newName = prompt('Enter new name for the image:', currentName);
-    if (newName && newName.trim() !== currentName.trim()) {
-      const success = await renameImage(imageId, newName.trim());
-      if (!success) {
-        alert('Failed to rename the image. Please try again.');
-      }
-    }
-  };
-
-  // Function to handle image deletion
-  const handleImageDelete = async (imageId, imageName) => {
-    setConfirmDeleteId(imageId);
-  };
-
-  // Confirm deletion
-  const confirmDelete = async (imageId) => {
-    const success = await deleteImage(imageId);
-    if (!success) {
-      alert('Failed to delete the image. Please try again.');
-    }
-    setConfirmDeleteId(null);
-  };
-
-  // Cancel deletion
-  const cancelDelete = () => {
-    setConfirmDeleteId(null);
   };
 
   // Helper function to format bytes
@@ -205,7 +141,7 @@ const AdminGalleryPage = () => {
 
             <div>
               <h4 className="text-lg font-medium text-[#001F3F] mb-4">All Photos</h4>
-              <p className="text-[#001F3F]/70 text-sm mb-4">Manage all your photos - rename or delete as needed</p>
+              <p className="text-[#001F3F]/70 text-sm mb-4">Manage all your photos - set public, featured, or slideshow status</p>
 
               {images.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
@@ -221,33 +157,9 @@ const AdminGalleryPage = () => {
 
                       <div className="p-4">
                         <div className="flex justify-between items-start mb-3">
-                          <h5 className="font-medium text-[#001F3F] truncate flex-grow mr-2" title={image.original_name}>
+                          <h5 className="font-medium text-[#001F3F] truncate" title={image.original_name}>
                             {image.original_name}
                           </h5>
-
-                          <div className="flex space-x-1">
-                            <button
-                              onClick={() => handleImageRename(image.id, image.original_name)}
-                              className="p-1.5 rounded-md bg-[#A8E6CF]/20 text-[#001F3F] hover:bg-[#A8E6CF]/40 transition-colors"
-                              aria-label="Rename image"
-                              title="Rename"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                              </svg>
-                            </button>
-
-                            <button
-                              onClick={() => handleImageDelete(image.id, image.original_name)}
-                              className="p-1.5 rounded-md bg-[#FF6F61]/20 text-[#FF6F61] hover:bg-[#FF6F61]/40 transition-colors"
-                              aria-label="Delete image"
-                              title="Delete"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                          </div>
                         </div>
 
                         <div className="text-xs text-[#001F3F]/70 mt-2">
@@ -277,31 +189,6 @@ const AdminGalleryPage = () => {
                           </div>
                         </div>
                       </div>
-
-                      {/* Delete Confirmation Dialog */}
-                      {confirmDeleteId === image.id && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
-                            <h3 className="text-lg font-medium text-[#001F3F] mb-2">Confirm Delete</h3>
-                            <p className="text-[#001F3F]/80 mb-6">Are you sure you want to delete "{image.original_name}"? This action cannot be undone.</p>
-
-                            <div className="flex justify-end gap-3">
-                              <button
-                                onClick={cancelDelete}
-                                className="px-4 py-2 text-[#001F3F] hover:bg-[#A8E6CF]/20 rounded-lg transition-colors"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={() => confirmDelete(image.id)}
-                                className="px-4 py-2 bg-[#FF6F61] text-white hover:bg-[#e56259] rounded-lg transition-colors"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -309,7 +196,7 @@ const AdminGalleryPage = () => {
                 <div className="text-center py-12">
                   <div className="text-5xl mb-4">📷</div>
                   <h4 className="text-lg font-medium text-[#001F3F] mb-2">No Photos Available</h4>
-                  <p className="text-[#001F3F]/70">Upload photos using ImageKit to get started</p>
+                  <p className="text-[#001F3F]/70">No images in the system</p>
                 </div>
               )}
             </div>

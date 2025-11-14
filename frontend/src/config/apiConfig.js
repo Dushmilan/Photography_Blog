@@ -34,6 +34,10 @@ const ENDPOINTS = {
     MY_IMAGES: '/images/my-images',
     CREATE: '/images',
     UPDATE_PUBLIC: (id) => `/images/${id}/public`,
+    GALLERY: '/images/gallery',
+    FEATURES: '/images/features',
+    SLIDESHOW: '/images/slideshow',
+    ADMIN_GALLERY: '/images/admin-gallery',
   },
   IMAGEKIT: {
     IMAGES: '/imagekit/images',

@@ -59,9 +59,6 @@ class Image {
     return await this.db.getPublicImages();
   }
 
-  async updateImageName(imageId, photographerId, newName) {
-    return await this.db.updateImageName(imageId, photographerId, newName);
-  }
 
   // Get user images with pagination
   async getUserImages(userId, options = {}) {
@@ -88,8 +85,8 @@ class Image {
     }
 
     const updates = {};
-    if (updateData.original_name !== undefined) {
-      updates.original_name = updateData.original_name;
+    if (updateData.path !== undefined) {
+      updates.path = updateData.path;
     }
     if (updateData.is_featured !== undefined) {
       updates.is_featured = updateData.is_featured;

@@ -75,8 +75,14 @@ const AdminPage = () => {
   // Functions to handle toggling slideshow and featured status
   const toggleSlideshowStatus = async (imageId, isSlideshow) => {
     try {
-      // For now, we'll show a message since this API endpoint doesn't exist yet
-      alert('Slideshow functionality will be implemented in a future update');
+      const response = await api.put(`/imagekit/image/${imageId}`, { is_slideshow: isSlideshow });
+
+      // Update the image in the local state
+      setImages(prevImages =>
+        prevImages.map(img =>
+          img.id === imageId ? { ...img, is_slideshow: isSlideshow } : img
+        )
+      );
     } catch (error) {
       console.error('Error updating slideshow status:', error);
     }
@@ -84,8 +90,14 @@ const AdminPage = () => {
 
   const toggleFeaturedStatus = async (imageId, isFeatured) => {
     try {
-      // For now, we'll show a message since this API endpoint doesn't exist yet
-      alert('Featured functionality will be implemented in a future update');
+      const response = await api.put(`/imagekit/image/${imageId}`, { is_featured: isFeatured });
+
+      // Update the image in the local state
+      setImages(prevImages =>
+        prevImages.map(img =>
+          img.id === imageId ? { ...img, is_featured: isFeatured } : img
+        )
+      );
     } catch (error) {
       console.error('Error updating featured status:', error);
     }
@@ -93,14 +105,27 @@ const AdminPage = () => {
 
   // Function to handle image renaming
   const handleImageRename = async (imageId, currentName) => {
-    // For now, we'll show a message since this API endpoint doesn't exist yet
-    alert('Rename functionality will be implemented in a future update');
+    const newName = prompt('Enter new name for the image:', currentName);
+    if (newName && newName.trim() !== currentName.trim()) {
+      const success = await renameImage(imageId, newName.trim());
+      if (!success) {
+        alert('Failed to rename the image. Please try again.');
+      } else {
+        // Update the local state to reflect the new name
+        setImages(prevImages =>
+          prevImages.map(img =>
+            img.id === imageId ? { ...img, original_name: newName.trim() } : img
+          )
+        );
+      }
+    }
   };
 
   // Rename image function
   const renameImage = async (imageId, newName) => {
     try {
-      // This function will be implemented when the endpoint exists
+      const response = await api.put(`/imagekit/image/${imageId}`, { original_name: newName });
+
       return true;
     } catch (error) {
       console.error('Error renaming image:', error);
@@ -116,7 +141,8 @@ const AdminPage = () => {
   // Delete image function
   const deleteImage = async (imageId) => {
     try {
-      await api.delete(`/images/${imageId}`);
+      // Delete from both ImageKit and database via the imagekit endpoint
+      await api.delete(`/imagekit/image/${imageId}`);
 
       // Remove the image from the local state
       setImages(prevImages =>
@@ -295,7 +321,7 @@ const AdminPage = () => {
                       <button
                         onClick={() => {
                           // Call API to update public status
-                          api.put(`/images/${image.id}/public`, { isPublic: !image.is_public })
+                          api.put(`/imagekit/image/${image.id}`, { is_public: !image.is_public })
                             .then(() => {
                               // Update local state to reflect the change
                               setImages(prevImages => 
