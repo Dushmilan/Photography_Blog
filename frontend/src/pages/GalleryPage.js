@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 import { FiX, FiChevronLeft, FiChevronRight, FiShare2, FiDownload, FiInfo } from 'react-icons/fi';
-import { handleApiError, handleUnexpectedError } from '../utils/errorHandler';
+import { handleApiError, handleUnexpectedError, showError } from '../utils/errorHandler';
+import { useError } from '../contexts/ErrorContext';
 import { getImageUrl, formatFileSize, getImageDimensions, getAspectRatio, preloadImages } from '../utils/imageUtils';
 
 const GalleryPage = () => {
@@ -15,6 +16,8 @@ const GalleryPage = () => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  const { addError } = useError();
 
   // Debounce search term to avoid excessive API calls
   useEffect(() => {
@@ -35,13 +38,12 @@ const GalleryPage = () => {
       const response = await api.get('/images/public');
       setImages(response.data || []);
     } catch (err) {
-      const errorInfo = handleApiError(err, 'Failed to load public images');
-      setError(errorInfo.message);
-      setErrorType(errorInfo.type);
+      // Show error notification and get error info for potential fallback display
+      showError(err, 'Failed to load public images', 'error', addError);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [addError]);
 
   useEffect(() => {
     fetchImages();
@@ -143,39 +145,7 @@ const GalleryPage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFF5E1]">
-        <div className="text-center p-8 max-w-md">
-          <div className="text-5xl mb-4 text-[#FF6F61]">⚠️</div>
-          <h2 className="text-2xl font-light text-[#001F3F] mb-2">Oops! Something went wrong</h2>
-          <p className="text-[#001F3F]/80 mb-6">{error}</p>
-
-          {errorType === 'network' && (
-            <p className="text-[#001F3F]/60 mb-6">Please check your internet connection and try again.</p>
-          )}
-
-          <div className="space-y-3">
-            <button
-              className="bg-[#FF6F61] hover:bg-[#e56259] text-white px-6 py-3 rounded-full font-medium transition-colors w-full"
-              onClick={fetchImages}
-            >
-              Try Again
-            </button>
-            <button
-              className="text-[#708090] hover:text-[#001F3F] px-6 py-2 rounded-full font-medium transition-colors w-full"
-              onClick={() => {
-                setError('');
-                setErrorType('');
-              }}
-            >
-              Dismiss Error
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Error notifications are now handled globally through the ErrorContext
 
   return (
     <>

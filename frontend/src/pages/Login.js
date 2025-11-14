@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import api from '../utils/api';
 import { FiUser, FiLock, FiEye, FiEyeOff, FiLogIn, FiUserPlus } from 'react-icons/fi';
-import { handleApiError, handleUnexpectedError } from '../utils/errorHandler';
+import { handleApiError, handleUnexpectedError, showError } from '../utils/errorHandler';
+import { useError } from '../contexts/ErrorContext';
 
 const Login = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState('');
@@ -11,6 +12,8 @@ const Login = ({ setIsAuthenticated }) => {
   const [isLogin, setIsLogin] = useState(true); // true for login, false for register
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { addError } = useError();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,9 +52,8 @@ const Login = ({ setIsAuthenticated }) => {
         throw new Error('Login response did not contain required tokens');
       }
     } catch (err) {
-      const errorInfo = handleApiError(err, isLogin ? 'Login failed' : 'Registration failed');
-      setError(errorInfo.message);
-      setErrorType(errorInfo.type);
+      // Show error notification and get error info for potential fallback display
+      showError(err, isLogin ? 'Login failed' : 'Registration failed', 'error', addError);
     } finally {
       setIsLoading(false);
     }
@@ -76,17 +78,7 @@ const Login = ({ setIsAuthenticated }) => {
           </p>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-6 text-center border border-red-200 flex items-center justify-center animate-pulse">
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
-            </svg>
-            {error}
-            {errorType === 'network' && (
-              <p className="text-xs mt-1 text-red-600">Please check your internet connection</p>
-            )}
-          </div>
-        )}
+        {/* Error notifications are now handled globally through the ErrorContext */}
 
         <form onSubmit={handleSubmit} className="space-y-5">
 

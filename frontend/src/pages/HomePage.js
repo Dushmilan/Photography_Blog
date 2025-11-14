@@ -203,28 +203,28 @@ const HomePage = () => {
       </header>
 
       {/* Hero Slideshow */}
-      <section className="relative w-full h-[70vh] overflow-hidden">
+      <section className="relative w-[85%] h-[70vh] mx-auto overflow-hidden rounded-xl shadow-lg">
         {/* Slideshow slides */}
         {images.map((image, index) => (
-          <div 
+          <div
             key={image.id}
             className={`absolute top-0 left-0 w-full h-full ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-            style={{ 
+            style={{
               transition: 'opacity 1.2s ease-in-out',
             }}
           >
             <img
               src={image.path || image.baseUrl}
               alt={image.original_name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-xl"
               onClick={() => setShowLightbox(true)}
             />
-            
+
             {/* Info overlay */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
               <div className="max-w-6xl mx-auto">
                 <h3 className="text-xl md:text-2xl font-light mb-1">{image.original_name}</h3>
-                
+
               </div>
             </div>
           </div>
@@ -232,14 +232,14 @@ const HomePage = () => {
 
         {/* Slideshow controls */}
         <div className="absolute inset-y-0 flex items-center justify-between w-full px-4">
-          <button 
+          <button
             className="slideshow-control-btn group"
             onClick={goToPrevious}
             aria-label="Previous image"
           >
             <FiChevronLeft className="group-hover:scale-125 transition-transform" />
           </button>
-          <button 
+          <button
             className="slideshow-control-btn group"
             onClick={goToNext}
             aria-label="Next image"
@@ -320,13 +320,13 @@ const HomePage = () => {
             About <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Me</span>
           </h2>
           <p className="text-lg text-[#001F3F] mb-6 opacity-90 leading-relaxed">
-            With over 10 years of experience in photography, I specialize in capturing the essence of life's precious moments. 
-            My work combines technical precision with emotional storytelling, creating images that resonate with viewers on a 
+            With over 10 years of experience in photography, I specialize in capturing the essence of life's precious moments.
+            My work combines technical precision with emotional storytelling, creating images that resonate with viewers on a
             deeper level.
           </p>
           <p className="text-lg text-[#001F3F] opacity-80 leading-relaxed">
-            From intimate portraits to breathtaking landscapes, I am passionate about showcasing the beauty that surrounds us 
-            every day. My approach is to blend artistic vision with the latest photography techniques to deliver unforgettable 
+            From intimate portraits to breathtaking landscapes, I am passionate about showcasing the beauty that surrounds us
+            every day. My approach is to blend artistic vision with the latest photography techniques to deliver unforgettable
             visual experiences.
           </p>
         </div>

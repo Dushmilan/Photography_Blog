@@ -7,6 +7,8 @@ import AdminPage from './pages/AdminPage';
 import AdminGalleryPage from './pages/AdminGalleryPage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
+import { ErrorProvider } from './contexts/ErrorContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -39,33 +41,37 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="App">
-        <Navbar isAuthenticated={isAuthenticated} />
-        <Routes>
-          <Route
-            path="/login"
-            element={!isAuthenticated ? <Login setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/admin" />}
-          />
-          <Route
-            path="/admin"
-            element={isAuthenticated ? <AdminPage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/"
-            element={<HomePage />}
-          />
-          <Route
-            path="/gallery"
-            element={<GalleryPage />}
-          />
-          <Route
-            path="/admin/gallery"
-            element={isAuthenticated ? <AdminGalleryPage /> : <Navigate to="/login" />}
-          />
-        </Routes>
-      </div>
-    </Router>
+    <ErrorProvider>
+      <ErrorBoundary>
+        <Router>
+          <div className="App">
+            <Navbar isAuthenticated={isAuthenticated} />
+            <Routes>
+              <Route
+                path="/login"
+                element={!isAuthenticated ? <Login setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/admin" />}
+              />
+              <Route
+                path="/admin"
+                element={isAuthenticated ? <AdminPage /> : <Navigate to="/login" />}
+              />
+              <Route
+                path="/"
+                element={<HomePage />}
+              />
+              <Route
+                path="/gallery"
+                element={<GalleryPage />}
+              />
+              <Route
+                path="/admin/gallery"
+                element={isAuthenticated ? <AdminGalleryPage /> : <Navigate to="/login" />}
+              />
+            </Routes>
+          </div>
+        </Router>
+      </ErrorBoundary>
+    </ErrorProvider>
   );
 }
 

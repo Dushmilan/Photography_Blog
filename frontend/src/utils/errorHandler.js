@@ -1,5 +1,5 @@
 // Error handling utility functions
-export const handleApiError = (error, customMessage = null) => {
+export const handleApiError = (error, customMessage = null, showNotification = true) => {
   let errorMessage = customMessage;
   let errorType = 'general';
 
@@ -74,7 +74,25 @@ export const handleApiError = (error, customMessage = null) => {
     method: error.config?.method
   });
 
+  // Show notification if requested
+  if (showNotification) {
+    // Note: This would typically be handled by calling useError hook in a component
+    // For now, we'll just return the error info and let the calling component handle notifications
+  }
+
   return { message: errorMessage, type: errorType };
+};
+
+// Enhanced error handler that shows notification and returns error info
+export const showError = (error, customMessage = null, notificationType = 'error', addError = null) => {
+  const errorInfo = handleApiError(error, customMessage, false); // Don't show notification from handleApiError
+
+  // Show notification if addError function is provided
+  if (addError && typeof addError === 'function') {
+    addError(errorInfo.message, errorInfo.type);
+  }
+
+  return errorInfo;
 };
 
 // Function to log errors (can be connected to logging service)
