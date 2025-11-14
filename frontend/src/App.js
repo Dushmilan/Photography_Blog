@@ -7,6 +7,8 @@ import AdminPage from './pages/AdminPage';
 import AdminGalleryPage from './pages/AdminGalleryPage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 import { ErrorProvider } from './contexts/ErrorContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -62,6 +64,14 @@ function App() {
               <Route
                 path="/gallery"
                 element={<GalleryPage />}
+              />
+              <Route
+                path="/about"
+                element={<AboutPage />}
+              />
+              <Route
+                path="/contact"
+                element={<ContactPage />}
               />
               <Route
                 path="/admin/gallery"

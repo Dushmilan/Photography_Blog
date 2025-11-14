@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiImage, FiGrid, FiUpload, FiUser, FiLogIn } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiImage, FiGrid, FiUpload, FiUser, FiLogIn, FiMail } from 'react-icons/fi';
 
 const Navbar = ({ isAuthenticated }) => {
   const location = useLocation();
@@ -70,6 +70,22 @@ const Navbar = ({ isAuthenticated }) => {
               <FiGrid className="text-sm" /> Gallery
             </Link>
           </li>
+          <li>
+            <Link
+              to="/about"
+              className={`nav-link flex items-center gap-1 ${isActive('/about') ? 'active' : ''}`}
+            >
+              <FiUser className="text-sm" /> About
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/contact"
+              className={`nav-link flex items-center gap-1 ${isActive('/contact') ? 'active' : ''}`}
+            >
+              <FiMail className="text-sm" /> Contact
+            </Link>
+          </li>
 
           {/* Show Admin Gallery only when authenticated */}
           {isAuthenticated && (
@@ -129,6 +145,24 @@ const Navbar = ({ isAuthenticated }) => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 <FiGrid /> Gallery
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/about"
+                className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/about') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <FiUser /> About
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/contact"
+                className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/contact') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <FiMail /> Contact
               </Link>
             </li>
 

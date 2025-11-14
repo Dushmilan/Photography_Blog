@@ -148,8 +148,20 @@ const GalleryPage = () => {
   // Error notifications are now handled globally through the ErrorContext
 
   return (
-    <>
-      <div className="gallery-header animate-slide-up">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFF5E1' }}>
+      {/* Header section */}
+      <header className="pt-20 pb-10 text-center px-4">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-light text-[#001F3F] mb-4 tracking-tight">
+            My <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Gallery</span>
+          </h1>
+          <p className="text-xl text-[#001F3F] max-w-2xl mx-auto opacity-90">
+            A curated collection of my finest work
+          </p>
+        </div>
+      </header>
+
+      <div className="gallery-header animate-slide-up px-4">
         {/* Search and filter controls */}
         <div className="mt-6 flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
           <div className="relative flex-grow">
@@ -355,7 +367,7 @@ const GalleryPage = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
