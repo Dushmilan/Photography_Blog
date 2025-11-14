@@ -1,33 +1,38 @@
 # Project Summary
 
 ## Overall Goal
-Fix an ImageKit integration issue in a Photography Blog backend where the admin gallery was failing due to route ordering conflicts and invalid fileId parameters, allowing the admin gallery to properly fetch all ImageKit files and manage them even when no database entries exist yet.
+Add functionality to manage image visibility across different sections of a photography blog - allowing admin users to add or remove images from the gallery, featured, and slideshow sections through the admin gallery interface.
 
 ## Key Knowledge
-- **Technology Stack**: Node.js backend with Express.js, Supabase as database, ImageKit for image hosting, using JWT authentication
-- **Architecture**: ImageKit stores actual images with metadata stored in Supabase database, route at `/api/images/admin-gallery` fetches all ImageKit files and merges with database metadata
-- **Route Issue**: Express routing was causing `/:id` route to intercept `/admin-gallery` requests due to ordering (parameterized routes must come after specific routes)
-- **Error Details**: "Your request contains invalid fileId parameter" error occurred when ImageKit API received invalid fileIds
-- **Build Commands**: `npm run dev` for development server
-- **Key Files**: `backend/routes/images.js` (main route file with ordering issue), `backend/models/ImageService.js` (data service), `backend/routes/imagekit.js` (ImageKit-specific routes)
+- **Tech Stack**: Node.js/Express backend with Supabase PostgreSQL database, React frontend with Tailwind CSS
+- **Image Storage**: ImageKit for image storage with database metadata tracking
+- **Authentication**: JWT-based authentication with refresh tokens
+- **Database Schema**: Images table with `is_public`, `is_featured`, and `is_slideshow` boolean flags
+- **API Structure**: RESTful endpoints under `/api/images` with proper authentication middleware
+- **Environment**: Project located at `C:\Users\LENOVO\Desktop\Photography_Blog`
 
 ## Recent Actions
-1. **[DONE]** Identified root cause: Route ordering in Express where `/:id` was intercepting `/admin-gallery` requests
-2. **[DONE]** Fixed ImageService to properly handle missing ImageKit files by validating fileIds before API calls
-3. **[DONE]** Updated all ImageKit `getFileDetails` calls to validate IDs before making API requests
-4. **[DONE]** Reordered routes in `images.js` by moving `/:id` route to the end of the file
-5. **[DONE]** Enhanced error handling in both `images.js` and `imagekit.js` routes with proper validation
-6. **[DONE]** Verified the admin gallery now works correctly by fetching all ImageKit files and enabling management functionality
+- **Backend Enhancement**: Added new API endpoints for updating image status:
+  - `PUT /images/:id/featured` - update featured status
+  - `PUT /images/:id/slideshow` - update slideshow status
+  - Improved `PUT /images/:id/public` endpoint to use proper model methods
+- **Frontend Update**: 
+  - Fixed incorrect API endpoint calls in AdminGalleryPage.js (changed from `/imagekit/image/:id` to correct `/images/:id/{public|featured|slideshow}`)
+  - Added dedicated toggle buttons for Public, Featured, and Slideshow statuses
+  - Implemented bidirectional toggling (both add and remove functionality)
+  - Enhanced UI with color-coded status indicators and visual feedback
+- **API Configuration**: Updated apiConfig.js to include new endpoint definitions for featured and slideshow updates
+- **Database Integration**: All endpoints properly interact with Supabase database through the Image model
 
 ## Current Plan
-- **[DONE]** Fix route ordering issue causing admin gallery to fail
-- **[DONE]** Improve ImageKit API error handling to prevent invalid fileId errors
-- **[DONE]** Ensure admin gallery can fetch all ImageKit files even when database is empty
-- **[DONE]** Enable proper database entry creation when users modify image status (featured/slideshow/public)
-- **[TODO]** Add comprehensive error logging for debugging future ImageKit integration issues
-- **[TODO]** Consider adding caching layer for better performance when fetching large numbers of images
+- [DONE] Implement backend API endpoints for featured and slideshow status management
+- [DONE] Fix frontend API endpoint calls to use correct routes
+- [DONE] Enhance AdminGalleryPage UI with toggle buttons for all status types
+- [DONE] Ensure bidirectional functionality (add/remove) for all image sections
+- [DONE] Test integration between all components
+- [DONE] Verify database schema compatibility and update procedures
 
 ---
 
 ## Summary Metadata
-**Update time**: 2025-11-14T05:13:11.785Z 
+**Update time**: 2025-11-14T05:21:38.523Z 
