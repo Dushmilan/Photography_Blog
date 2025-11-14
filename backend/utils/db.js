@@ -301,7 +301,7 @@ class Database {
       throw new Error('Image ID, photographer ID, and boolean isFeatured are required for updating featured status');
     }
 
-    // First, verify that the image exists and belongs to the photographer
+    // First, try to find if the image exists and belongs to the photographer
     const { data: existingImage, error: fetchError } = await this.supabase
       .from('images')
       .select('id, photographer_id')
@@ -309,18 +309,34 @@ class Database {
       .eq('photographer_id', photographerId)
       .single();
 
-    if (fetchError) {
-      if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
-        // Record not found - either image doesn't exist or doesn't belong to this user
-        throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
-      } else {
-        console.error('Error fetching image for featured status update:', fetchError);
-        throw handleDbError(fetchError);
-      }
-    }
+    // If the image doesn't exist for this specific photographer, check if it exists for another user
+    if (fetchError && (fetchError.code === 'PGRST116' || fetchError.code === '42P01')) {
+      // Image doesn't exist for this photographer, let's see if it exists for another user
+      const { data: otherUserImage, error: otherUserError } = await this.supabase
+        .from('images')
+        .select('id, photographer_id')
+        .eq('id', imageId)
+        .single();
 
-    if (!existingImage) {
-      throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+      if (otherUserError && otherUserError.code !== 'PGRST116' && otherUserError.code !== '42P01') {
+        // There's an actual database error, not just "not found"
+        console.error('Error checking image existence across all users:', otherUserError);
+        throw handleDbError(otherUserError);
+      }
+
+      if (otherUserImage && otherUserImage.photographer_id !== photographerId) {
+        // Image exists but belongs to a different photographer - unauthorized
+        throw new Error(`Image with ID ${imageId} belongs to a different photographer`);
+      }
+
+      if (!otherUserImage) {
+        // Image doesn't exist in database at all, which means it's not properly registered
+        throw new Error(`Image with ID ${imageId} does not exist in the database. Please upload or register the image first.`);
+      }
+    } else if (fetchError) {
+      // There's a different database error
+      console.error('Error fetching image for featured status update:', fetchError);
+      throw handleDbError(fetchError);
     }
 
     // Update the featured status
@@ -356,7 +372,7 @@ class Database {
       throw new Error('Image ID, photographer ID, and boolean isSlideshow are required for updating slideshow status');
     }
 
-    // First, verify that the image exists and belongs to the photographer
+    // First, try to find if the image exists and belongs to the photographer
     const { data: existingImage, error: fetchError } = await this.supabase
       .from('images')
       .select('id, photographer_id')
@@ -364,18 +380,34 @@ class Database {
       .eq('photographer_id', photographerId)
       .single();
 
-    if (fetchError) {
-      if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
-        // Record not found - either image doesn't exist or doesn't belong to this user
-        throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
-      } else {
-        console.error('Error fetching image for slideshow status update:', fetchError);
-        throw handleDbError(fetchError);
-      }
-    }
+    // If the image doesn't exist for this specific photographer, check if it exists for another user
+    if (fetchError && (fetchError.code === 'PGRST116' || fetchError.code === '42P01')) {
+      // Image doesn't exist for this photographer, let's see if it exists for another user
+      const { data: otherUserImage, error: otherUserError } = await this.supabase
+        .from('images')
+        .select('id, photographer_id')
+        .eq('id', imageId)
+        .single();
 
-    if (!existingImage) {
-      throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+      if (otherUserError && otherUserError.code !== 'PGRST116' && otherUserError.code !== '42P01') {
+        // There's an actual database error, not just "not found"
+        console.error('Error checking image existence across all users:', otherUserError);
+        throw handleDbError(otherUserError);
+      }
+
+      if (otherUserImage && otherUserImage.photographer_id !== photographerId) {
+        // Image exists but belongs to a different photographer - unauthorized
+        throw new Error(`Image with ID ${imageId} belongs to a different photographer`);
+      }
+
+      if (!otherUserImage) {
+        // Image doesn't exist in database at all, which means it's not properly registered
+        throw new Error(`Image with ID ${imageId} does not exist in the database. Please upload or register the image first.`);
+      }
+    } else if (fetchError) {
+      // There's a different database error
+      console.error('Error fetching image for slideshow status update:', fetchError);
+      throw handleDbError(fetchError);
     }
 
     // Update the slideshow status
@@ -411,7 +443,7 @@ class Database {
       throw new Error('Image ID, photographer ID, and boolean isPublic are required for updating public status');
     }
 
-    // First, verify that the image exists and belongs to the photographer
+    // First, try to find if the image exists and belongs to the photographer
     const { data: existingImage, error: fetchError } = await this.supabase
       .from('images')
       .select('id, photographer_id')
@@ -419,18 +451,34 @@ class Database {
       .eq('photographer_id', photographerId)
       .single();
 
-    if (fetchError) {
-      if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
-        // Record not found - either image doesn't exist or doesn't belong to this user
-        throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
-      } else {
-        console.error('Error fetching image for public status update:', fetchError);
-        throw handleDbError(fetchError);
-      }
-    }
+    // If the image doesn't exist for this specific photographer, check if it exists for another user
+    if (fetchError && (fetchError.code === 'PGRST116' || fetchError.code === '42P01')) {
+      // Image doesn't exist for this photographer, let's see if it exists for another user
+      const { data: otherUserImage, error: otherUserError } = await this.supabase
+        .from('images')
+        .select('id, photographer_id')
+        .eq('id', imageId)
+        .single();
 
-    if (!existingImage) {
-      throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+      if (otherUserError && otherUserError.code !== 'PGRST116' && otherUserError.code !== '42P01') {
+        // There's an actual database error, not just "not found"
+        console.error('Error checking image existence across all users:', otherUserError);
+        throw handleDbError(otherUserError);
+      }
+
+      if (otherUserImage && otherUserImage.photographer_id !== photographerId) {
+        // Image exists but belongs to a different photographer - unauthorized
+        throw new Error(`Image with ID ${imageId} belongs to a different photographer`);
+      }
+
+      if (!otherUserImage) {
+        // Image doesn't exist in database at all, which means it's not properly registered
+        throw new Error(`Image with ID ${imageId} does not exist in the database. Please upload or register the image first.`);
+      }
+    } else if (fetchError) {
+      // There's a different database error
+      console.error('Error fetching image for public status update:', fetchError);
+      throw handleDbError(fetchError);
     }
 
     // Update the public status

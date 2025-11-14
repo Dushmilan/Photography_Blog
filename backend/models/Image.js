@@ -70,6 +70,8 @@ class Image {
     } catch (error) {
       if (error.message && error.message.includes('not found or doesn\'t belong to this photographer')) {
         throw new AppError('Image not found or unauthorized to update', 404);
+      } else if (error.message && error.message.includes('does not exist in the database')) {
+        throw new AppError(error.message, 404);
       }
       throw error;
     }
@@ -85,6 +87,8 @@ class Image {
     } catch (error) {
       if (error.message && error.message.includes('not found or doesn\'t belong to this photographer')) {
         throw new AppError('Image not found or unauthorized to update', 404);
+      } else if (error.message && error.message.includes('does not exist in the database')) {
+        throw new AppError(error.message, 404);
       }
       throw error;
     }
@@ -100,6 +104,8 @@ class Image {
     } catch (error) {
       if (error.message && error.message.includes('not found or doesn\'t belong to this photographer')) {
         throw new AppError('Image not found or unauthorized to update', 404);
+      } else if (error.message && error.message.includes('does not exist in the database')) {
+        throw new AppError(error.message, 404);
       }
       throw error;
     }
