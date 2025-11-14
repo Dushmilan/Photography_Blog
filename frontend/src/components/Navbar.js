@@ -16,31 +16,22 @@ const Navbar = ({ isAuthenticated }) => {
     return location.pathname.startsWith(path);
   };
 
-  // Handle scroll effect for navbar visibility
+  // Handle scroll effect for navbar appearance (navbar stays at top but changes on scroll)
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // Show navbar on top of page or when scrolling up
-      if (currentScrollY < 50) {
-        setScrolled(currentScrollY > 10);
-        setNavbarVisible(true);
-      } else if (currentScrollY > lastScrollY) {
-        // Scrolling down
+      // Change navbar style when scrolling
+      if (currentScrollY > 10) {
         setScrolled(true);
-        setNavbarVisible(false);
       } else {
-        // Scrolling up
-        setScrolled(true);
-        setNavbarVisible(true);
+        setScrolled(false);
       }
-
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   // Close menu when route changes
   useEffect(() => {
@@ -48,7 +39,7 @@ const Navbar = ({ isAuthenticated }) => {
   }, [location.pathname]);
 
   return (
-    <nav className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarVisible ? 'translate-y-0' : '-translate-y-full'} ${scrolled ? 'py-2 shadow-md' : 'py-5'}`}>
+    <nav className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-2 shadow-md' : 'py-5'} bg-black`}>
       <div className="container mx-auto px-4 flex items-center">
         <div className="flex-grow"></div>
 
@@ -57,33 +48,33 @@ const Navbar = ({ isAuthenticated }) => {
           <li>
             <Link
               to="/"
-              className={`nav-link flex items-center gap-1 ${isActive('/') ? 'active' : ''}`}
+              className={`nav-link ${isActive('/') ? 'active text-white' : 'text-white'} font-medium`}
             >
-              <FiHome className="text-sm" /> Home
+              Home
             </Link>
           </li>
           <li>
             <Link
               to="/gallery"
-              className={`nav-link flex items-center gap-1 ${isActive('/gallery') ? 'active' : ''}`}
+              className={`nav-link ${isActive('/gallery') ? 'active text-white' : 'text-white'} font-medium`}
             >
-              <FiGrid className="text-sm" /> Gallery
+              Gallery
             </Link>
           </li>
           <li>
             <Link
               to="/about"
-              className={`nav-link flex items-center gap-1 ${isActive('/about') ? 'active' : ''}`}
+              className={`nav-link ${isActive('/about') ? 'active text-white' : 'text-white'} font-medium`}
             >
-              <FiUser className="text-sm" /> About
+              About
             </Link>
           </li>
           <li>
             <Link
               to="/contact"
-              className={`nav-link flex items-center gap-1 ${isActive('/contact') ? 'active' : ''}`}
+              className={`nav-link ${isActive('/contact') ? 'active text-white' : 'text-white'} font-medium`}
             >
-              <FiMail className="text-sm" /> Contact
+              Contact
             </Link>
           </li>
 
@@ -92,9 +83,9 @@ const Navbar = ({ isAuthenticated }) => {
             <li>
               <Link
                 to="/admin/gallery"
-                className={`nav-link flex items-center gap-1 ${isActive('/admin/gallery') ? 'active' : ''}`}
+                className={`nav-link ${isActive('/admin/gallery') ? 'active text-white' : 'text-white'} font-medium`}
               >
-                <FiImage className="text-sm" /> Admin Gallery
+                Admin Gallery
               </Link>
             </li>
           )}
@@ -104,65 +95,65 @@ const Navbar = ({ isAuthenticated }) => {
             <li>
               <Link
                 to="/login"
-                className={`nav-link flex items-center gap-1 ${isActive('/login') ? 'active' : ''}`}
+                className={`nav-link ${isActive('/login') ? 'active text-white' : 'text-white'} font-medium`}
               >
-                <FiLogIn className="text-sm" /> Login
+                Login
               </Link>
             </li>
           )}
         </ul>
         <div className="flex-grow"></div>
 
-        {/* Mobile menu button */}
+        {/* Mobile menu button - now with white color */}
         <div className="md:hidden self-start mt-2">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-[#001F3F] p-2 rounded-lg hover:bg-[#A8E6CF]/20 transition-colors"
+            className="text-white p-2 rounded-lg hover:bg-white/20 transition-colors"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
-            {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            {isMenuOpen ? <FiX size={24} color="white" /> : <FiMenu size={24} color="white" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation - now with black background */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white/90 backdrop-blur-sm py-4 px-4 border-t border-[#708090]/20 animate-slideDown">
+        <div className="md:hidden bg-black py-4 px-4 border-t border-gray-700 animate-slideDown">
           <ul className="flex flex-col gap-3 items-center">
             <li>
               <Link
                 to="/"
-                className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                <FiHome /> Home
+                Home
               </Link>
             </li>
             <li>
               <Link
                 to="/gallery"
-                className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/gallery') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/gallery') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                <FiGrid /> Gallery
+                Gallery
               </Link>
             </li>
             <li>
               <Link
                 to="/about"
-                className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/about') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/about') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                <FiUser /> About
+                About
               </Link>
             </li>
             <li>
               <Link
                 to="/contact"
-                className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/contact') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/contact') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                <FiMail /> Contact
+                Contact
               </Link>
             </li>
 
@@ -171,10 +162,10 @@ const Navbar = ({ isAuthenticated }) => {
               <li>
                 <Link
                   to="/admin/gallery"
-                  className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/admin/gallery') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                  className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/admin/gallery') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <FiImage /> Admin Gallery
+                  Admin Gallery
                 </Link>
               </li>
             )}
@@ -184,10 +175,10 @@ const Navbar = ({ isAuthenticated }) => {
               <li>
                 <Link
                   to="/login"
-                  className={`nav-link flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-[#A8E6CF]/20 hover:to-[#6B8C6B]/20 ${isActive('/login') ? 'active bg-gradient-to-r from-[#A8E6CF]/20 to-[#6B8C6B]/20' : ''}`}
+                  className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/login') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <FiLogIn /> Login
+                  Login
                 </Link>
               </li>
             )}

@@ -135,11 +135,11 @@ const GalleryPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFF5E1]">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="flex flex-col items-center animate-fade-in">
           <div className="w-16 h-16 border-4 border-[#FF6F61] border-t-transparent rounded-full animate-spin mb-4"></div>
-          <div className="text-[#001F3F] text-xl font-light">Loading gallery...</div>
-          <p className="text-[#001F3F]/70 mt-2">Preparing visual experiences</p>
+          <div className="text-white text-xl font-light">Loading gallery...</div>
+          <p className="text-white/70 mt-2">Preparing visual experiences</p>
         </div>
       </div>
     );
@@ -148,14 +148,14 @@ const GalleryPage = () => {
   // Error notifications are now handled globally through the ErrorContext
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFF5E1' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'black' }}>
       {/* Header section */}
       <header className="pt-20 pb-10 text-center px-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-light text-[#001F3F] mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-light text-white mb-4 tracking-tight">
             My <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Gallery</span>
           </h1>
-          <p className="text-xl text-[#001F3F] max-w-2xl mx-auto opacity-90">
+          <p className="text-xl text-white max-w-2xl mx-auto opacity-90">
             A curated collection of my finest work
           </p>
         </div>
@@ -168,12 +168,12 @@ const GalleryPage = () => {
             <input
               type="text"
               placeholder="Search photographs..."
-              className="w-full px-4 py-3 pl-12 rounded-full border border-[#708090] bg-white/80 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] focus:border-transparent"
+              className="w-full px-4 py-3 pl-12 rounded-full border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] focus:border-transparent"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <svg
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#708090]"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -242,10 +242,10 @@ const GalleryPage = () => {
       ) : (
         <div className="empty-gallery flex flex-col items-center justify-center min-h-[60vh] p-8">
           <div className="text-5xl mb-4 animate-float">📷</div>
-          <h2 className="text-2xl font-light mb-2 text-[#001F3F]">
+          <h2 className="text-2xl font-light mb-2 text-white">
             {debouncedSearchTerm ? 'No matching photos found' : 'No Photos Yet'}
           </h2>
-          <p className="text-center text-[#001F3F]/80 max-w-md mx-auto">
+          <p className="text-center text-white/80 max-w-md mx-auto">
             {debouncedSearchTerm
               ? `No photographs match your search for "${debouncedSearchTerm}"`
               : 'Check back later for new photographs'}

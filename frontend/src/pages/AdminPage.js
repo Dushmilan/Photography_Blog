@@ -176,11 +176,11 @@ const AdminPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFF5E1]">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#FF6F61] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-[#001F3F] text-xl font-light">Loading dashboard...</div>
-          <p className="text-[#001F3F]/70">Preparing your admin experience</p>
+          <div className="text-white text-xl font-light">Loading dashboard...</div>
+          <p className="text-white/70">Preparing your admin experience</p>
         </div>
       </div>
     );
@@ -188,11 +188,11 @@ const AdminPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFF5E1]">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center p-8 max-w-md">
           <div className="text-5xl mb-4 text-[#FF6F61]">⚠️</div>
-          <h2 className="text-2xl font-light text-[#001F3F] mb-2">Oops! Something went wrong</h2>
-          <p className="text-[#001F3F]/80 mb-6">{error}</p>
+          <h2 className="text-2xl font-light text-white mb-2">Oops! Something went wrong</h2>
+          <p className="text-white/80 mb-6">{error}</p>
           <button
             className="bg-[#FF6F61] hover:bg-[#e56259] text-white px-6 py-3 rounded-full font-medium transition-colors"
             onClick={() => window.location.reload()}
@@ -206,11 +206,11 @@ const AdminPage = () => {
 
   return (
     <>
-      <div className="gallery-header">
-        <h1 className="text-3xl">Admin Dashboard</h1>
-        <p className="text-[#001F3F]/80">Manage your photography portfolio</p>
+      <div className="gallery-header" style={{ backgroundColor: 'black' }}>
+        <h1 className="text-3xl text-white">Admin Dashboard</h1>
+        <p className="text-white/80">Manage your photography portfolio</p>
         <div className="flex items-center gap-6 mt-4 flex-wrap justify-center">
-          <div className="flex items-center gap-2 text-[#001F3F]">
+          <div className="flex items-center gap-2 text-white">
             <FiUser className="text-[#A8E6CF]" />
             <span>Logged in as: <span className="font-medium">{user?.username}</span></span>
           </div>
@@ -235,43 +235,43 @@ const AdminPage = () => {
         </div>
       </div>
 
-      <div className="px-4 md:px-8">
+      <div className="px-4 md:px-8" style={{ backgroundColor: 'black' }}>
         <div className="max-w-7xl mx-auto py-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-[#708090]/30 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-600/30 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF6F61] to-[#FF9933] flex items-center justify-center">
                   <FiImage className="text-white text-xl" />
                 </div>
                 <div>
-                  <p className="text-[#001F3F]/70 text-sm">Total Photos</p>
-                  <p className="text-2xl font-bold text-[#001F3F]">{dashboardData.totalPhotos}</p>
+                  <p className="text-white/70 text-sm">Total Photos</p>
+                  <p className="text-2xl font-bold text-white">{dashboardData.totalPhotos}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-[#708090]/30 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-600/30 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#A8E6CF] to-[#6B8C6B] flex items-center justify-center">
                   <FiHardDrive className="text-white text-xl" />
                 </div>
                 <div>
-                  <p className="text-[#001F3F]/70 text-sm">Storage Used</p>
-                  <p className="text-2xl font-bold text-[#001F3F]">{dashboardData.storageUsed}</p>
+                  <p className="text-white/70 text-sm">Storage Used</p>
+                  <p className="text-2xl font-bold text-white">{dashboardData.storageUsed}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* ImageKit Upload Section */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-[#708090]/30 shadow-sm mb-10">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-600/30 shadow-sm mb-10">
             <div className="flex items-center gap-3 mb-6">
-              <FiSettings className="text-[#001F3F] text-xl" />
-              <h3 className="text-xl font-medium text-[#001F3F]">Image Management</h3>
+              <FiSettings className="text-white text-xl" />
+              <h3 className="text-xl font-medium text-white">Image Management</h3>
             </div>
 
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+            <div className="bg-green-900/30 border border-green-800/50 rounded-xl p-4 mb-4">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -279,7 +279,7 @@ const AdminPage = () => {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-green-200">
                     Your portfolio now uses ImageKit for secure image storage, CDN delivery, and real-time transformations.
                     Upload and manage your photos directly from this admin panel.
                   </p>
@@ -292,21 +292,21 @@ const AdminPage = () => {
       </div>
 
       {/* Public Photos Section */}
-      <div className="px-4 md:px-8">
+      <div className="px-4 md:px-8" style={{ backgroundColor: 'black' }}>
         <div className="max-w-7xl mx-auto py-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-[#708090]/30 shadow-sm">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-600/30 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <FiSettings className="text-[#001F3F] text-xl" />
-              <h3 className="text-xl font-medium text-[#001F3F]">Public Photos</h3>
+              <FiSettings className="text-white text-xl" />
+              <h3 className="text-xl font-medium text-white">Public Photos</h3>
             </div>
 
             <div>
-              <h4 className="text-lg font-medium text-[#001F3F] mb-4">Gallery Photos</h4>
-              <p className="text-[#001F3F]/70 text-sm mb-4">Select which photos appear in the public gallery</p>
+              <h4 className="text-lg font-medium text-white mb-4">Gallery Photos</h4>
+              <p className="text-white/70 text-sm mb-4">Select which photos appear in the public gallery</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {images.filter(image => image.is_public).length > 0 ? images.filter(image => image.is_public).map((image) => (
-                  <div key={image.id} className="relative group bg-white/50 rounded-xl overflow-hidden shadow-sm">
-                    <div className="aspect-square bg-[#FFF5E1] rounded-lg overflow-hidden">
+                  <div key={image.id} className="relative group bg-gray-700/50 rounded-xl overflow-hidden shadow-sm">
+                    <div className="aspect-square bg-gray-900 rounded-lg overflow-hidden">
                       <img
                         src={image.path || image.baseUrl}
                         alt={image.original_name}
@@ -324,8 +324,8 @@ const AdminPage = () => {
                           api.put(`/imagekit/image/${image.id}`, { is_public: !image.is_public })
                             .then(() => {
                               // Update local state to reflect the change
-                              setImages(prevImages => 
-                                prevImages.map(img => 
+                              setImages(prevImages =>
+                                prevImages.map(img =>
                                   img.id === image.id ? { ...img, is_public: !image.is_public } : img
                                 )
                               );
@@ -343,7 +343,7 @@ const AdminPage = () => {
                         className={`p-2 rounded-full shadow-lg transition-colors ${
                           image.is_public
                             ? 'bg-[#FF6F61] text-white'
-                            : 'bg-white text-[#001F3F]'
+                            : 'bg-white text-black'
                         }`}
                         aria-label={image.is_public ? "Remove from public gallery" : "Add to public gallery"}
                       >
@@ -359,7 +359,7 @@ const AdminPage = () => {
                     </div>
                   </div>
                 )) : (
-                  <p className="text-[#001F3F]/70 col-span-full text-center py-8">No public photos yet</p>
+                  <p className="text-white/70 col-span-full text-center py-8">No public photos yet</p>
                 )}
               </div>
             </div>

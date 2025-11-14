@@ -5,7 +5,6 @@ import api from '../utils/api';
 const HomePage = () => {
   const [images, setImages] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showLightbox, setShowLightbox] = useState(false);
   const [loading, setLoading] = useState(true);
   const [slideshowActive, setSlideshowActive] = useState(true);
 
@@ -46,13 +45,13 @@ const HomePage = () => {
   }, [images.length, slideshowActive]);
 
   const goToPrevious = () => {
-    setCurrentIndex(prevIndex => 
+    setCurrentIndex(prevIndex =>
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
     );
   };
 
   const goToNext = () => {
-    setCurrentIndex(prevIndex => 
+    setCurrentIndex(prevIndex =>
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
     );
   };
@@ -70,8 +69,6 @@ const HomePage = () => {
         goToPrevious();
       } else if (e.key === 'ArrowRight') {
         goToNext();
-      } else if (e.key === 'Escape') {
-        setShowLightbox(false);
       } else if (e.key === ' ') { // Spacebar to toggle slideshow
         e.preventDefault();
         setSlideshowActive(prev => !prev);
@@ -79,29 +76,20 @@ const HomePage = () => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   if (loading || images.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFF5E1' }}>
-        {/* Header section */}
-        <header className="pt-20 pb-10 text-center px-4">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-light text-[#001F3F] mb-4 tracking-tight">
-              Capturing Life's
-              <span className="block bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">
-                Beautiful Moments
-              </span>
-            </h1>
-          </div>
-        </header>
-
-        {/* Loading section for slideshow */}
-        <section className="slideshow-container flex-1" style={{ backgroundColor: '#FFF5E1' }}>
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'black' }}>
+        {/* Loading section for slideshow - only the loading indicator without header */}
+        <section className="slideshow-container flex-1" style={{ backgroundColor: 'black' }}>
           <div className="flex flex-col items-center justify-center h-full animate-fade-in">
             <div className="w-16 h-16 border-4 border-[#FF6F61] border-t-transparent rounded-full animate-spin mb-4"></div>
-            <div className="text-[#001F3F] text-xl font-light">Discovering visual stories...</div>
+            <div className="text-white text-xl font-light">Discovering visual stories...</div>
           </div>
         </section>
       </div>
@@ -109,21 +97,9 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFF5E1' }}>
-      {/* Header section */}
-      <header className="pt-20 pb-10 text-center px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-light text-[#001F3F] mb-4 tracking-tight">
-            Capturing Life's
-            <span className="block bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">
-              Beautiful Moments
-            </span>
-          </h1>
-        </div>
-      </header>
-
-      {/* Hero Slideshow */}
-      <section className="relative w-[90%] h-[70vh] mx-auto overflow-hidden rounded-3xl shadow-lg">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'black' }}>
+      {/* Hero Slideshow - Only the slideshow without any other elements */}
+      <section className="relative w-full h-[100vh] overflow-hidden">
         {/* Slideshow slides */}
         {images.map((image, index) => (
           <div
@@ -136,17 +112,9 @@ const HomePage = () => {
             <img
               src={image.path || image.baseUrl}
               alt={image.original_name}
-              className="w-full h-full object-cover rounded-3xl"
-              onClick={() => setShowLightbox(true)}
+              className="w-full h-full object-cover"
             />
 
-            {/* Info overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
-              <div className="max-w-6xl mx-auto">
-                <h3 className="text-xl md:text-2xl font-light mb-1">{image.original_name}</h3>
-
-              </div>
-            </div>
           </div>
         ))}
 
@@ -157,14 +125,14 @@ const HomePage = () => {
             onClick={goToPrevious}
             aria-label="Previous image"
           >
-            <FiChevronLeft className="group-hover:scale-125 transition-transform" />
+            <FiChevronLeft className="group-hover:scale-125 transition-transform text-white text-3xl" />
           </button>
           <button
             className="slideshow-control-btn group"
             onClick={goToNext}
             aria-label="Next image"
           >
-            <FiChevronRight className="group-hover:scale-125 transition-transform" />
+            <FiChevronRight className="group-hover:scale-125 transition-transform text-white text-3xl" />
           </button>
         </div>
 
@@ -189,67 +157,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Lightbox for slideshow image */}
-      {showLightbox && images.length > 0 && (
-        <div
-          className="lightbox-overlay"
-          onClick={() => setShowLightbox(false)}
-        >
-          <div className="lightbox-content">
-            <img
-              src={images[currentIndex].path || images[currentIndex].baseUrl}
-              alt={images[currentIndex].original_name}
-              className="lightbox-image"
-              onClick={(e) => e.stopPropagation()}
-            />
-
-            <button
-              className="close-button"
-              onClick={() => setShowLightbox(false)}
-              aria-label="Close lightbox"
-            >
-              <FiX />
-            </button>
-
-            <div className="lightbox-nav">
-              <button
-                className="nav-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToPrevious();
-                }}
-                aria-label="Previous image"
-              >
-                <FiChevronLeft />
-              </button>
-              <button
-                className="nav-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToNext();
-                }}
-                aria-label="Next image"
-              >
-                <FiChevronRight />
-              </button>
-            </div>
-
-            <div className="absolute top-4 left-0 right-0 text-center text-sm text-white bg-black/40 py-2 px-4 rounded-full max-w-xs mx-auto">
-              {currentIndex + 1} of {images.length}
-              <button
-                className="ml-3 flex items-center"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Share functionality would go here
-                }}
-              >
-                <FiShare2 className="inline mr-1" size={14} />
-                Share
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

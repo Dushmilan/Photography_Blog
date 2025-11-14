@@ -60,8 +60,8 @@ const Login = ({ setIsAuthenticated }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#FFF5E1]">
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 w-full max-w-md border border-[#708090]/30 transform transition-all duration-500 hover:shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 w-full max-w-md border border-gray-600/30 transform transition-all duration-500 hover:shadow-2xl">
         <div className="text-center mb-8">
           <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-[#FF6F61] to-[#A8E6CF] flex items-center justify-center mb-4">
             {isLogin ? (
@@ -70,10 +70,10 @@ const Login = ({ setIsAuthenticated }) => {
               <FiUserPlus className="text-white text-2xl" />
             )}
           </div>
-          <h2 className="text-2xl font-light text-[#001F3F]">
+          <h2 className="text-2xl font-light text-white">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
-          <p className="text-[#001F3F]/70 mt-2">
+          <p className="text-white/70 mt-2">
             {isLogin ? 'Sign in to access your portfolio' : 'Join our community of photographers'}
           </p>
         </div>
@@ -83,19 +83,19 @@ const Login = ({ setIsAuthenticated }) => {
         <form onSubmit={handleSubmit} className="space-y-5">
 
           <div className="relative">
-            <label className="block text-[#001F3F] text-sm font-medium mb-2" htmlFor="username">
+            <label className="block text-white text-sm font-medium mb-2" htmlFor="username">
               Username
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiUser className="text-[#708090]" />
+                <FiUser className="text-gray-400" />
               </div>
               <input
                 id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-10 pr-3 py-3 bg-cream-50 border border-[#708090]/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] focus:border-transparent text-[#001F3F] transition-all duration-300"
+                className="w-full pl-10 pr-3 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
                 placeholder="Enter your username"
                 required
               />
@@ -103,19 +103,19 @@ const Login = ({ setIsAuthenticated }) => {
           </div>
 
           <div className="relative">
-            <label className="block text-[#001F3F] text-sm font-medium mb-2" htmlFor="password">
+            <label className="block text-white text-sm font-medium mb-2" htmlFor="password">
               Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiLock className="text-[#708090]" />
+                <FiLock className="text-gray-400" />
               </div>
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 bg-cream-50 border border-[#708090]/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] focus:border-transparent text-[#001F3F] transition-all duration-300"
+                className="w-full pl-10 pr-10 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
                 placeholder="Enter your password"
                 required
               />
@@ -125,9 +125,9 @@ const Login = ({ setIsAuthenticated }) => {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <FiEyeOff className="text-[#708090] hover:text-[#001F3F]" />
+                  <FiEyeOff className="text-gray-400 hover:text-white" />
                 ) : (
-                  <FiEye className="text-[#708090] hover:text-[#001F3F]" />
+                  <FiEye className="text-gray-400 hover:text-white" />
                 )}
               </button>
             </div>
@@ -183,8 +183,8 @@ const Login = ({ setIsAuthenticated }) => {
           </button>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-[#708090]/20 text-center">
-          <p className="text-[#001F3F]/60 text-sm">
+        <div className="mt-8 pt-6 border-t border-gray-600/20 text-center">
+          <p className="text-white/60 text-sm">
             By signing in, you agree to our <a href="#" className="text-[#A8E6CF] hover:underline">Terms</a> and <a href="#" className="text-[#A8E6CF] hover:underline">Privacy Policy</a>
           </p>
         </div>

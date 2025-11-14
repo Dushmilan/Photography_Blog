@@ -53,14 +53,14 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFF5E1' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'black' }}>
       {/* Header section */}
       <header className="pt-20 pb-10 text-center px-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-light text-[#001F3F] mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-light text-white mb-4 tracking-tight">
             Get In <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Touch</span>
           </h1>
-          <p className="text-xl text-[#001F3F] max-w-2xl mx-auto opacity-90">
+          <p className="text-xl text-white max-w-2xl mx-auto opacity-90">
             Have a project in mind? Let's create something amazing together.
           </p>
         </div>
@@ -72,18 +72,18 @@ const ContactPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
             <div>
-              <h2 className="text-2xl md:text-3xl font-light text-[#001F3F] mb-8">
+              <h2 className="text-2xl md:text-3xl font-light text-white mb-8">
                 Contact <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Information</span>
               </h2>
-              
+
               <div className="space-y-8">
                 <div className="flex items-start">
                   <div className="w-12 h-12 rounded-full bg-[#A8E6CF]/30 flex items-center justify-center mr-5 flex-shrink-0">
                     <FiMail className="text-[#FF6F61] text-xl" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-[#001F3F] text-lg mb-1">Email</h3>
-                    <p className="text-[#001F3F]/80">hello@photography.com</p>
+                    <h3 className="font-medium text-white text-lg mb-1">Email</h3>
+                    <p className="text-white/80">hello@photography.com</p>
                   </div>
                 </div>
 
@@ -92,8 +92,8 @@ const ContactPage = () => {
                     <FiPhone className="text-[#FF6F61] text-xl" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-[#001F3F] text-lg mb-1">Phone</h3>
-                    <p className="text-[#001F3F]/80">+1 (555) 123-4567</p>
+                    <h3 className="font-medium text-white text-lg mb-1">Phone</h3>
+                    <p className="text-white/80">+1 (555) 123-4567</p>
                   </div>
                 </div>
 
@@ -102,8 +102,8 @@ const ContactPage = () => {
                     <FiMapPin className="text-[#FF6F61] text-xl" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-[#001F3F] text-lg mb-1">Location</h3>
-                    <p className="text-[#001F3F]/80">New York, NY</p>
+                    <h3 className="font-medium text-white text-lg mb-1">Location</h3>
+                    <p className="text-white/80">New York, NY</p>
                   </div>
                 </div>
 
@@ -112,20 +112,20 @@ const ContactPage = () => {
                     <FiInstagram className="text-[#FF6F61] text-xl" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-[#001F3F] text-lg mb-1">Instagram</h3>
-                    <p className="text-[#001F3F]/80">@photographer</p>
+                    <h3 className="font-medium text-white text-lg mb-1">Instagram</h3>
+                    <p className="text-white/80">@photographer</p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-12">
-                <h3 className="text-xl font-medium text-[#001F3F] mb-4">Follow Me</h3>
+                <h3 className="text-xl font-medium text-white mb-4">Follow Me</h3>
                 <div className="flex space-x-4">
                   <a href="#" className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center border border-[#708090]/30 shadow-sm hover:shadow-md transition-shadow">
-                    <FiInstagram className="text-[#001F3F]" />
+                    <FiInstagram className="text-white" />
                   </a>
                   <a href="#" className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center border border-[#708090]/30 shadow-sm hover:shadow-md transition-shadow">
-                    <FiFacebook className="text-[#001F3F]" />
+                    <FiFacebook className="text-white" />
                   </a>
                 </div>
               </div>
@@ -133,56 +133,56 @@ const ContactPage = () => {
 
             {/* Contact Form */}
             <div>
-              <h2 className="text-2xl md:text-3xl font-light text-[#001F3F] mb-8">
+              <h2 className="text-2xl md:text-3xl font-light text-white mb-8">
                 Send a <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Message</span>
               </h2>
-              
+
               <form className="space-y-6" onSubmit={handleContactSubmit}>
                 <div>
-                  <label htmlFor="name" className="block text-[#001F3F] mb-2 font-medium">Name *</label>
+                  <label htmlFor="name" className="block text-white mb-2 font-medium">Name *</label>
                   <input
                     type="text"
                     id="name"
                     placeholder="Your Name *"
-                    className="w-full px-4 py-3 rounded-lg border border-[#708090]/30 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-white/80 backdrop-blur-sm"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-gray-800 text-white placeholder-gray-400"
                     value={contactForm.name}
                     onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
                     required
                   />
                 </div>
-                
+
                 <div>
-                  <label htmlFor="email" className="block text-[#001F3F] mb-2 font-medium">Email *</label>
+                  <label htmlFor="email" className="block text-white mb-2 font-medium">Email *</label>
                   <input
                     type="email"
                     id="email"
                     placeholder="Your Email *"
-                    className="w-full px-4 py-3 rounded-lg border border-[#708090]/30 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-white/80 backdrop-blur-sm"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-gray-800 text-white placeholder-gray-400"
                     value={contactForm.email}
                     onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
                     required
                   />
                 </div>
-                
+
                 <div>
-                  <label htmlFor="subject" className="block text-[#001F3F] mb-2 font-medium">Subject</label>
+                  <label htmlFor="subject" className="block text-white mb-2 font-medium">Subject</label>
                   <input
                     type="text"
                     id="subject"
                     placeholder="Subject"
-                    className="w-full px-4 py-3 rounded-lg border border-[#708090]/30 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-white/80 backdrop-blur-sm"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-gray-800 text-white placeholder-gray-400"
                     value={contactForm.subject}
                     onChange={(e) => setContactForm({...contactForm, subject: e.target.value})}
                   />
                 </div>
-                
+
                 <div>
-                  <label htmlFor="message" className="block text-[#001F3F] mb-2 font-medium">Message *</label>
+                  <label htmlFor="message" className="block text-white mb-2 font-medium">Message *</label>
                   <textarea
                     id="message"
                     rows="6"
                     placeholder="Your Message *"
-                    className="w-full px-4 py-3 rounded-lg border border-[#708090]/30 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-white/80 backdrop-blur-sm"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-gray-800 text-white placeholder-gray-400"
                     value={contactForm.message}
                     onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
                     required
