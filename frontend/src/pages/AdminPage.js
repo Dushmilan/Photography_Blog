@@ -72,7 +72,7 @@ const AdminPage = () => {
     window.location.href = '/login';
   };
 
-  // Functions to handle toggling slideshow and featured status
+  // Functions to handle toggling slideshow status
   const toggleSlideshowStatus = async (imageId, isSlideshow) => {
     try {
       const response = await api.put(`/imagekit/image/${imageId}`, { is_slideshow: isSlideshow });
@@ -85,21 +85,6 @@ const AdminPage = () => {
       );
     } catch (error) {
       console.error('Error updating slideshow status:', error);
-    }
-  };
-
-  const toggleFeaturedStatus = async (imageId, isFeatured) => {
-    try {
-      const response = await api.put(`/imagekit/image/${imageId}`, { is_featured: isFeatured });
-
-      // Update the image in the local state
-      setImages(prevImages =>
-        prevImages.map(img =>
-          img.id === imageId ? { ...img, is_featured: isFeatured } : img
-        )
-      );
-    } catch (error) {
-      console.error('Error updating featured status:', error);
     }
   };
 

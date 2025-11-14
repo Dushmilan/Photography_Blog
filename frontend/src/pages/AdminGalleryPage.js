@@ -39,7 +39,7 @@ const AdminGalleryPage = () => {
     window.location.href = '/login';
   };
 
-  // Functions to handle toggling slideshow and featured status
+  // Function to handle toggling slideshow status
   const toggleSlideshowStatus = async (imageId, isSlideshow) => {
     try {
       const response = await api.put(`/images/${imageId}/slideshow`, { isSlideshow });
@@ -52,22 +52,6 @@ const AdminGalleryPage = () => {
       );
     } catch (error) {
       console.error('Error updating slideshow status:', error);
-      // Optionally show an error message to the user
-    }
-  };
-
-  const toggleFeaturedStatus = async (imageId, isFeatured) => {
-    try {
-      const response = await api.put(`/images/${imageId}/featured`, { isFeatured });
-
-      // Update the image in the local state
-      setImages(prevImages =>
-        prevImages.map(img =>
-          img.id === imageId ? { ...img, is_featured: isFeatured } : img
-        )
-      );
-    } catch (error) {
-      console.error('Error updating featured status:', error);
       // Optionally show an error message to the user
     }
   };
@@ -175,16 +159,6 @@ const AdminGalleryPage = () => {
                               }`}
                             >
                               {image.is_public ? 'Public ✓' : 'Private'}
-                            </button>
-                            <button
-                              onClick={() => toggleFeaturedStatus(image.id, !image.is_featured)}
-                              className={`px-2 py-1 rounded text-xs ${
-                                image.is_featured
-                                  ? 'bg-yellow-500/30 text-white'
-                                  : 'bg-gray-600/20 text-white'
-                              }`}
-                            >
-                              {image.is_featured ? 'Featured ✓' : 'Featured'}
                             </button>
                             <button
                               onClick={() => toggleSlideshowStatus(image.id, !image.is_slideshow)}

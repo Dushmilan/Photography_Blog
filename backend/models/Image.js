@@ -60,22 +60,6 @@ class Image {
     return await this.db.getImageByIdAndPhotographer(id, photographerId);
   }
 
-  async updateFeaturedStatus(imageId, photographerId, isFeatured) {
-    if (!imageId || !photographerId || typeof isFeatured !== 'boolean') {
-      throw new AppError('Image ID, photographer ID, and boolean isFeatured are required for updating featured status', 400);
-    }
-
-    try {
-      return await this.db.updateImageFeaturedStatus(imageId, photographerId, isFeatured);
-    } catch (error) {
-      if (error.message && error.message.includes('not found or doesn\'t belong to this photographer')) {
-        throw new AppError('Image not found or unauthorized to update', 404);
-      } else if (error.message && error.message.includes('does not exist in the database')) {
-        throw new AppError(error.message, 404);
-      }
-      throw error;
-    }
-  }
 
   async updateSlideshowStatus(imageId, photographerId, isSlideshow) {
     if (!imageId || !photographerId || typeof isSlideshow !== 'boolean') {
@@ -109,10 +93,6 @@ class Image {
       }
       throw error;
     }
-  }
-
-  async getFeaturedImages() {
-    return await this.db.getFeaturedImages();
   }
 
   async getSlideshowImages() {
@@ -171,9 +151,6 @@ class Image {
     const updates = {};
     if (updateData.path !== undefined) {
       updates.path = updateData.path;
-    }
-    if (updateData.is_featured !== undefined) {
-      updates.is_featured = updateData.is_featured;
     }
     if (updateData.is_slideshow !== undefined) {
       updates.is_slideshow = updateData.is_slideshow;

@@ -9,12 +9,11 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create simplified images table 
+-- Create simplified images table
 CREATE TABLE IF NOT EXISTS images (
   id TEXT PRIMARY KEY, -- Using ImageKit File ID as primary key
   path TEXT NOT NULL,
   photographer_id INTEGER REFERENCES users(id),
-  is_featured BOOLEAN DEFAULT FALSE,
   is_slideshow BOOLEAN DEFAULT FALSE,
   is_public BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -22,7 +21,6 @@ CREATE TABLE IF NOT EXISTS images (
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_images_photographer_id ON images(photographer_id);
-CREATE INDEX IF NOT EXISTS idx_images_is_featured ON images(is_featured);
 CREATE INDEX IF NOT EXISTS idx_images_is_slideshow ON images(is_slideshow);
 CREATE INDEX IF NOT EXISTS idx_images_is_public ON images(is_public);
 

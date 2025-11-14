@@ -68,7 +68,6 @@ router.get('/images', authenticate, async (req, res) => {
         mimetype: imageKitImage.type,
         width: imageKitImage.width,
         height: imageKitImage.height,
-        is_featured: dbRecord?.is_featured || false,
         is_slideshow: dbRecord?.is_slideshow || false,
         is_public: dbRecord?.is_public || false,
         photographer_id: req.user.userId,
@@ -126,7 +125,7 @@ router.get('/image/:imageId/transform', authenticate, async (req, res) => {
 router.put('/image/:imageId', authenticate, async (req, res) => {
   try {
     const { imageId } = req.params;
-    const { is_featured, is_slideshow, is_public } = req.body;
+    const { is_slideshow, is_public } = req.body;
 
     // Use ImageService to handle upsert
     const ImageService = require('../models/ImageService');
@@ -159,7 +158,6 @@ router.put('/image/:imageId', authenticate, async (req, res) => {
     const updateData = {
       id: imageId,
       photographer_id: req.user.userId,
-      is_featured: is_featured !== undefined ? is_featured : false,
       is_slideshow: is_slideshow !== undefined ? is_slideshow : false,
       is_public: is_public !== undefined ? is_public : false
     };
@@ -243,7 +241,6 @@ router.get('/image/:imageId', authenticate, async (req, res) => {
       photographer_id: req.user.userId,
       created_at: imagekitImage?.createdAt || dbImage?.created_at || new Date().toISOString(),
       // DB metadata if available, default values otherwise
-      is_featured: dbImage?.is_featured || false,
       is_slideshow: dbImage?.is_slideshow || false,
       is_public: dbImage?.is_public || false,
       ...dbImage // Include any other metadata from DB

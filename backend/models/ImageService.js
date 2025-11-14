@@ -80,7 +80,6 @@ class ImageService {
         width: imageKitImage.width,
         height: imageKitImage.height,
         // Use database metadata if available, otherwise default values
-        is_featured: dbMetadata?.is_featured || false,
         is_slideshow: dbMetadata?.is_slideshow || false,
         is_public: dbMetadata?.is_public || false,
         photographer_id: dbMetadata?.photographer_id || userId, // Use DB value if available
@@ -151,9 +150,6 @@ class ImageService {
     return await this.db.getImageByIdAndPhotographer(id, photographerId);
   }
 
-  async updateFeaturedStatus(imageId, photographerId, isFeatured) {
-    return await this.db.updateImageFeaturedStatus(imageId, photographerId, isFeatured);
-  }
 
   async updateSlideshowStatus(imageId, photographerId, isSlideshow) {
     return await this.db.updateImageSlideshowStatus(imageId, photographerId, isSlideshow);
@@ -163,9 +159,6 @@ class ImageService {
     return await this.db.updateImagePublicStatus(imageId, photographerId, isPublic);
   }
 
-  async getFeaturedImages() {
-    return await this.db.getFeaturedImages();
-  }
 
   async getSlideshowImages() {
     return await this.db.getSlideshowImages();

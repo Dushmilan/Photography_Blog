@@ -41,23 +41,6 @@ router.put('/:id/public', authenticate, catchAsync(async (req, res) => {
   res.json({ image: updatedImage });
 }));
 
-// Update featured status of an image
-router.put('/:id/featured', authenticate, catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { isFeatured } = req.body;
-
-  // Validate input data
-  if (typeof isFeatured !== 'boolean') {
-    throw new AppError('isFeatured must be a boolean value', 400);
-  }
-
-  const supabase = req.app.locals.supabase;
-  const imageClass = new Image(supabase);
-
-  // Update the featured status of the image
-  const updatedImage = await imageClass.updateFeaturedStatus(id, req.user.userId, isFeatured);
-  res.json({ image: updatedImage });
-}));
 
 // Update slideshow status of an image
 router.put('/:id/slideshow', authenticate, catchAsync(async (req, res) => {
@@ -257,7 +240,6 @@ router.get('/admin-gallery-all', authenticate, catchAsync(async (req, res) => {
         mimetype: imageKitImage.type,
         width: imageKitImage.width,
         height: imageKitImage.height,
-        is_featured: dbRecord?.is_featured || false,
         is_slideshow: dbRecord?.is_slideshow || false,
         is_public: dbRecord?.is_public || false,
         photographer_id: req.user.userId,
