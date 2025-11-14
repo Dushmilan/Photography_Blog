@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import api from '../utils/api';
 import { FiUser, FiLock, FiEye, FiEyeOff, FiLogIn, FiUserPlus } from 'react-icons/fi';
+import { handleApiError, handleUnexpectedError } from '../utils/errorHandler';
 
 const Login = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [errorType, setErrorType] = useState('');
   const [isLogin, setIsLogin] = useState(true); // true for login, false for register
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -14,8 +16,22 @@ const Login = ({ setIsAuthenticated }) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setErrorType('');
 
     try {
+      // Validate inputs
+      if (!username.trim() || !password.trim()) {
+        throw new Error('Username and password are required');
+      }
+
+      if (username.length < 3) {
+        throw new Error('Username must be at least 3 characters long');
+      }
+
+      if (password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
       const requestData = isLogin
         ? { username, password }
@@ -27,13 +43,15 @@ const Login = ({ setIsAuthenticated }) => {
         // Store both access and refresh tokens
         localStorage.setItem('access_token', response.data.accessToken);
         localStorage.setItem('refresh_token', response.data.refreshToken);
-        
+
         setIsAuthenticated(true);
       } else {
-        setError('Login response did not contain required tokens');
+        throw new Error('Login response did not contain required tokens');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
+      const errorInfo = handleApiError(err, isLogin ? 'Login failed' : 'Registration failed');
+      setError(errorInfo.message);
+      setErrorType(errorInfo.type);
     } finally {
       setIsLoading(false);
     }
@@ -64,6 +82,9 @@ const Login = ({ setIsAuthenticated }) => {
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
             </svg>
             {error}
+            {errorType === 'network' && (
+              <p className="text-xs mt-1 text-red-600">Please check your internet connection</p>
+            )}
           </div>
         )}
 
@@ -154,6 +175,7 @@ const Login = ({ setIsAuthenticated }) => {
             onClick={() => {
               setIsLogin(!isLogin);
               setError('');
+              setErrorType('');
             }}
             className="text-[#A8E6CF] hover:text-[#7fc9ae] font-medium transition-colors duration-300 flex items-center justify-center"
           >

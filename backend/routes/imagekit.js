@@ -34,20 +34,56 @@ router.get('/images', authenticate, async (req, res) => {
     const pageSize = parseInt(req.query.pageSize) || 50;
     const skip = parseInt(req.query.skip) || 0;
 
-    // Get images from database that belong to the authenticated user
-    const images = await Image.getUserImages(req.user.userId, {
-      limit: pageSize,
-      offset: skip,
-      order: 'created_at DESC'
+    // Get images from ImageKit API
+    const imagekitImages = await new Promise((resolve, reject) => {
+      // Note: ImageKit's listFiles doesn't use 'skip', it uses 'offset'
+      imagekit.listFiles({
+        limit: pageSize,
+        offset: skip,
+        // Add any other filters you want, like search by path or tags
+      }, (error, files) => {
+        if (error) {
+          console.error('Error from ImageKit listFiles API:', error);
+          // Return empty array instead of rejecting to handle gracefully
+          resolve([]);
+        } else {
+          resolve(files);
+        }
+      });
+    });
+
+    // Get metadata from database for these images
+    const db = new (require('../utils/db'))(req.app.locals.supabase);
+    const dbMetadata = await db.getImagesByPhotographerId(req.user.userId);
+
+    // Merge the data so ImageKit images have their status metadata from DB
+    const mergedImages = imagekitImages.map(imageKitImage => {
+      const dbRecord = dbMetadata.find(dbImg => dbImg.id === imageKitImage.fileId);
+
+      return {
+        id: imageKitImage.fileId,
+        path: imageKitImage.url || imageKitImage.filePath,
+        filename: imageKitImage.name,
+        size: imageKitImage.size,
+        mimetype: imageKitImage.type,
+        width: imageKitImage.width,
+        height: imageKitImage.height,
+        is_featured: dbRecord?.is_featured || false,
+        is_slideshow: dbRecord?.is_slideshow || false,
+        is_public: dbRecord?.is_public || false,
+        photographer_id: req.user.userId,
+        created_at: imageKitImage.createdAt || new Date().toISOString(),
+        ...dbRecord // Include any other metadata from DB
+      };
     });
 
     res.json({
-      images: images.rows || images,
-      total: images.count || (images.rows ? images.rows.length : images.length)
+      images: mergedImages,
+      total: imagekitImages.total || mergedImages.length
     });
   } catch (error) {
-    console.error('Error fetching images:', error);
-    res.status(500).json({ message: 'Error fetching images', error: error.message });
+    console.error('Error fetching images from ImageKit:', error);
+    res.status(500).json({ message: 'Error fetching images from ImageKit', error: error.message });
   }
 });
 
@@ -92,18 +128,36 @@ router.put('/image/:imageId', authenticate, async (req, res) => {
     const { imageId } = req.params;
     const { is_featured, is_slideshow, is_public } = req.body;
 
-    // Verify user ownership
-    const image = await Image.getByIdAndUser(imageId, req.user.userId);
-    if (!image) {
-      return res.status(404).json({ message: 'Image not found or access denied' });
+    // Use ImageService to handle upsert
+    const ImageService = require('../models/ImageService');
+    const imageService = new ImageService(req.app.locals.supabase);
+
+    // First try to verify the image exists in ImageKit (optional - just for validation)
+    try {
+      await new Promise((resolve, reject) => {
+        imagekit.getFileDetails(imageId, (error, fileDetails) => {
+          if (error) {
+            console.log(`Image ${imageId} not found in ImageKit (may not be a valid ImageKit file ID), proceeding with database metadata update only`);
+            // Continue without failing
+          }
+          resolve(fileDetails); // Continue regardless
+        });
+      });
+    } catch (error) {
+      console.log(`Could not verify image ${imageId} in ImageKit, proceeding with database update. Error:`, error.message || error);
     }
 
-    const updateData = {};
-    if (is_featured !== undefined) updateData.is_featured = is_featured;
-    if (is_slideshow !== undefined) updateData.is_slideshow = is_slideshow;
-    if (is_public !== undefined) updateData.is_public = is_public;
+    // Create update data
+    const updateData = {
+      id: imageId,
+      photographer_id: req.user.userId,
+      is_featured: is_featured !== undefined ? is_featured : false,
+      is_slideshow: is_slideshow !== undefined ? is_slideshow : false,
+      is_public: is_public !== undefined ? is_public : false
+    };
 
-    const updatedImage = await Image.update(imageId, updateData);
+    // Upsert the image metadata
+    const updatedImage = await imageService.upsertImageMetadata(updateData);
 
     res.json({
       message: 'Image updated successfully',
@@ -120,26 +174,80 @@ router.get('/image/:imageId', authenticate, async (req, res) => {
   try {
     const { imageId } = req.params;
 
-    // Get from database
-    const image = await Image.getByIdAndUser(imageId, req.user.userId);
-    if (!image) {
-      return res.status(404).json({ message: 'Image not found or access denied' });
+    // First try to get from database (for metadata)
+    let dbImage = null;
+    try {
+      dbImage = await Image.getByIdAndUser(imageId, req.user.userId);
+    } catch (error) {
+      // If DB query fails, continue without DB metadata
+      console.log('No database metadata found for image, proceeding with ImageKit data only');
     }
+
+    // Get image details from ImageKit
+    let imagekitImage = null;
+    try {
+      imagekitImage = await new Promise((resolve, reject) => {
+        imagekit.getFileDetails(imageId, (error, fileDetails) => {
+          if (error) {
+            console.error('Image not found in ImageKit:', error);
+            resolve(null); // Continue with DB data only
+          } else {
+            resolve(fileDetails);
+          }
+        });
+      });
+    } catch (error) {
+      console.log(`Could not get image ${imageId} from ImageKit, proceeding with database data only`);
+    }
+
+    // If we couldn't get from ImageKit but have DB data, use that
+    if (!imagekitImage && dbImage) {
+      // Use the DB record with minimal defaults
+      imagekitImage = {
+        fileId: dbImage.id,
+        url: dbImage.path,
+        filePath: dbImage.path,
+        name: dbImage.filename || 'Unknown',
+        size: dbImage.size || 0,
+        type: dbImage.mimetype || 'unknown',
+        width: dbImage.width || 0,
+        height: dbImage.height || 0,
+        createdAt: dbImage.created_at
+      };
+    }
+
+    // Combine ImageKit data with DB metadata if available
+    const image = {
+      id: imagekitImage?.fileId || dbImage?.id,
+      path: imagekitImage?.url || imagekitImage?.filePath || dbImage?.path,
+      filename: imagekitImage?.name || dbImage?.filename || 'Unknown',
+      size: imagekitImage?.size || dbImage?.size || 0,
+      mimetype: imagekitImage?.type || dbImage?.mimetype || 'unknown',
+      width: imagekitImage?.width || dbImage?.width || 0,
+      height: imagekitImage?.height || dbImage?.height || 0,
+      photographer_id: req.user.userId,
+      created_at: imagekitImage?.createdAt || dbImage?.created_at || new Date().toISOString(),
+      // DB metadata if available, default values otherwise
+      is_featured: dbImage?.is_featured || false,
+      is_slideshow: dbImage?.is_slideshow || false,
+      is_public: dbImage?.is_public || false,
+      ...dbImage // Include any other metadata from DB
+    };
 
     // Generate various size URLs using ImageKit
     const imageUrls = {
-      original: image.path,
-      thumbnail: image.thumbnail_path || imagekit.url({
-        path: `/${image.filename}`,
-        transformation: [{ width: '300', height: '300', crop: 'pad' }]
+      original: imagekitImage.url,
+      thumbnail: imagekit.url({
+        path: imagekitImage.filePath,
+        transformation: [{ width: 300, height: 300, crop: 'pad' }]
       }),
-      small: image.small_path || imagekit.url({
-        path: `/${image.filename}`,
-        transformation: [{ width: '600' }]
+      small: imagekit.url({
+        path: imagekitImage.filePath,
+        transformation: [{ width: 600 }]
       }),
-      medium: image.medium_path || imagekit.url({
-        path: `/${image.filename}`,
-        transformation: [{ width: '1200' }]
+      medium: imagekit.url({
+        path: imagekitImage.filePath,
+        transformation: [{ width: 1200 }]
       })
     };
 

@@ -1,5 +1,6 @@
 // Image model for Supabase/PostgreSQL with ImageKit integration
 const Database = require('../utils/db');
+const { AppError } = require('../utils/errorHandler');
 
 class Image {
   constructor(supabase) {
@@ -7,6 +8,10 @@ class Image {
   }
 
   async create(imageData) {
+    if (!imageData) {
+      throw new AppError('Image data is required for creating an image', 400);
+    }
+
     return await this.db.createImage(imageData);
   }
 
@@ -15,35 +20,67 @@ class Image {
   }
 
   async findByPhotographerId(photographerId) {
+    if (!photographerId) {
+      throw new AppError('Photographer ID is required for finding images by photographer', 400);
+    }
+
     return await this.db.getImagesByPhotographerId(photographerId);
   }
 
   async findById(id) {
+    if (!id) {
+      throw new AppError('Image ID is required for finding image by ID', 400);
+    }
+
     return await this.db.getImageById(id);
   }
 
   // Get image by ID and verify user ownership
   async getByIdAndUser(imageId, userId) {
+    if (!imageId || !userId) {
+      throw new AppError('Image ID and user ID are required for finding image by ID and user', 400);
+    }
+
     return await this.db.getImageByIdAndPhotographer(imageId, userId);
   }
 
   async deleteById(id) {
+    if (!id) {
+      throw new AppError('Image ID is required for deleting image', 400);
+    }
+
     return await this.db.deleteImageById(id);
   }
 
   async findByIdAndPhotographer(id, photographerId) {
+    if (!id || !photographerId) {
+      throw new AppError('Image ID and photographer ID are required for finding image by ID and photographer', 400);
+    }
+
     return await this.db.getImageByIdAndPhotographer(id, photographerId);
   }
 
   async updateFeaturedStatus(imageId, photographerId, isFeatured) {
+    if (!imageId || !photographerId || typeof isFeatured !== 'boolean') {
+      throw new AppError('Image ID, photographer ID, and boolean isFeatured are required for updating featured status', 400);
+    }
+
     return await this.db.updateImageFeaturedStatus(imageId, photographerId, isFeatured);
   }
 
   async updateSlideshowStatus(imageId, photographerId, isSlideshow) {
+    if (!imageId || !photographerId || typeof isSlideshow !== 'boolean') {
+      throw new AppError('Image ID, photographer ID, and boolean isSlideshow are required for updating slideshow status', 400);
+    }
+
     return await this.db.updateImageSlideshowStatus(imageId, photographerId, isSlideshow);
   }
 
   async updatePublicStatus(imageId, photographerId, isPublic) {
+    if (!imageId || !photographerId || typeof isPublic !== 'boolean') {
+      throw new AppError('Image ID, photographer ID, and boolean isPublic are required for updating public status', 400);
+    }
+
     return await this.db.updateImagePublicStatus(imageId, photographerId, isPublic);
   }
 
@@ -62,15 +99,27 @@ class Image {
 
   // Get user images with pagination
   async getUserImages(userId, options = {}) {
+    if (!userId) {
+      throw new AppError('User ID is required for getting user images', 400);
+    }
+
     const { limit = 50, offset = 0, order = 'created_at DESC' } = options;
-    
+
+    // Validate pagination parameters
+    if (limit <= 0 || limit > 100) {
+      throw new AppError('Limit must be between 1 and 100', 400);
+    }
+    if (offset < 0) {
+      throw new AppError('Offset must be a non-negative number', 400);
+    }
+
     // We'll need to build a custom query to support pagination
     // For now, we'll fetch all images for the user and handle pagination here
     const allImages = await this.db.getImagesByPhotographerId(userId);
-    
+
     const paginatedImages = allImages.slice(offset, offset + limit);
     const count = allImages.length;
-    
+
     return {
       rows: paginatedImages,
       count: count
@@ -79,9 +128,17 @@ class Image {
 
   // Update image metadata
   async update(imageId, updateData) {
+    if (!imageId) {
+      throw new AppError('Image ID is required for updating image', 400);
+    }
+
+    if (!updateData) {
+      throw new AppError('Update data is required for updating image', 400);
+    }
+
     const image = await this.db.getImageById(imageId);
     if (!image) {
-      throw new Error('Image not found');
+      throw new AppError('Image not found', 404);
     }
 
     const updates = {};

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 import { FiX, FiChevronLeft, FiChevronRight, FiShare2, FiDownload, FiInfo } from 'react-icons/fi';
-import { handleApiError } from '../utils/errorHandler';
+import { handleApiError, handleUnexpectedError } from '../utils/errorHandler';
 import { getImageUrl, formatFileSize, getImageDimensions, getAspectRatio, preloadImages } from '../utils/imageUtils';
 
 const GalleryPage = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [errorType, setErrorType] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isSlideshow, setIsSlideshow] = useState(false);
@@ -28,13 +29,15 @@ const GalleryPage = () => {
     try {
       setLoading(true);
       setError('');
-      
+      setErrorType('');
+
       // Fetch public images from the database
       const response = await api.get('/images/public');
       setImages(response.data || []);
     } catch (err) {
-      const errorMessage = handleApiError(err, 'Failed to load public images');
-      setError(errorMessage);
+      const errorInfo = handleApiError(err, 'Failed to load public images');
+      setError(errorInfo.message);
+      setErrorType(errorInfo.type);
     } finally {
       setLoading(false);
     }
@@ -147,12 +150,28 @@ const GalleryPage = () => {
           <div className="text-5xl mb-4 text-[#FF6F61]">⚠️</div>
           <h2 className="text-2xl font-light text-[#001F3F] mb-2">Oops! Something went wrong</h2>
           <p className="text-[#001F3F]/80 mb-6">{error}</p>
-          <button
-            className="bg-[#FF6F61] hover:bg-[#e56259] text-white px-6 py-3 rounded-full font-medium transition-colors"
-            onClick={fetchImages}
-          >
-            Try Again
-          </button>
+
+          {errorType === 'network' && (
+            <p className="text-[#001F3F]/60 mb-6">Please check your internet connection and try again.</p>
+          )}
+
+          <div className="space-y-3">
+            <button
+              className="bg-[#FF6F61] hover:bg-[#e56259] text-white px-6 py-3 rounded-full font-medium transition-colors w-full"
+              onClick={fetchImages}
+            >
+              Try Again
+            </button>
+            <button
+              className="text-[#708090] hover:text-[#001F3F] px-6 py-2 rounded-full font-medium transition-colors w-full"
+              onClick={() => {
+                setError('');
+                setErrorType('');
+              }}
+            >
+              Dismiss Error
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -351,8 +370,8 @@ const GalleryPage = () => {
             <div className="absolute top-4 left-4 flex items-center">
               <button
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  isSlideshow 
-                    ? 'bg-[#A8E6CF] text-[#001F3F]' 
+                  isSlideshow
+                    ? 'bg-[#A8E6CF] text-[#001F3F]'
                     : 'bg-white/20 text-white hover:bg-white/30'
                 }`}
                 onClick={(e) => {

@@ -8,8 +8,14 @@ class Database {
 
   // User operations
   async createUser(userData) {
-    // For debugging, let's log the data being inserted
-    console.log('Creating user with data:', userData);
+    // Validate input data
+    if (!userData || !userData.username || !userData.password) {
+      throw new Error('Username and password are required for user creation');
+    }
+
+    if (typeof userData.username !== 'string' || typeof userData.password !== 'string') {
+      throw new Error('Username and password must be strings');
+    }
 
     const { data, error } = await this.supabase
       .from('users')
@@ -25,12 +31,14 @@ class Database {
       console.error('Error details:', error.details, error.hint);
       throw handleDbError(error);
     }
-    console.log('User created successfully:', data);
     return data;
   }
 
   async findUserById(userId) {
-    console.log('Finding user by ID:', userId);
+    if (!userId) {
+      throw new Error('User ID is required for finding user by ID');
+    }
+
     const { data, error, status } = await this.supabase
       .from('users')
       .select('*')
@@ -39,7 +47,6 @@ class Database {
 
     // If no user is found, Supabase returns an error with status 406 or 404
     if (error && (status === 406 || status === 404)) {
-      console.log('User not found by ID:', userId);
       return null; // Return null if no user found
     }
 
@@ -48,12 +55,18 @@ class Database {
       throw handleDbError(error);
     }
 
-    console.log('Found user by ID:', data);
     return data;
   }
 
   async findUserByUsername(username) {
-    console.log('Finding user by username:', username);
+    if (!username) {
+      throw new Error('Username is required for finding user by username');
+    }
+
+    if (typeof username !== 'string') {
+      throw new Error('Username must be a string');
+    }
+
     const { data, error, status } = await this.supabase
       .from('users')
       .select('*')
@@ -62,7 +75,6 @@ class Database {
 
     // If no user is found, Supabase returns an error with status 406 or 404
     if (error && (status === 406 || status === 404)) {
-      console.log('User not found:', username);
       return null; // Return null if no user found
     }
 
@@ -71,12 +83,16 @@ class Database {
       throw handleDbError(error);
     }
 
-    console.log('Found user:', data);
     return data;
   }
 
   // Image operations
   async createImage(imageData) {
+    // Validate input data
+    if (!imageData || !imageData.id || !imageData.photographer_id) {
+      throw new Error('Image ID and photographer ID are required for image creation');
+    }
+
     const { data, error } = await this.supabase
       .from('images')
       .insert([{
@@ -94,7 +110,6 @@ class Database {
       console.error('Error creating image:', error);
       // If the error is due to unique constraint (image already exists), return existing
       if (error.code === '23505') {  // Unique violation
-        console.log('Image already exists in DB:', imageData.id);
         // Try to fetch the existing image
         const { data: existingData } = await this.supabase
           .from('images')
@@ -111,7 +126,6 @@ class Database {
   }
 
   async getAllImages() {
-    console.log('Fetching all images from database');
     const { data, error } = await this.supabase
       .from('images')
       .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
@@ -121,11 +135,14 @@ class Database {
       console.error('Error fetching all images:', error);
       throw handleDbError(error);
     }
-    console.log('Successfully fetched', data.length, 'images');
     return data;
   }
 
   async getImagesByPhotographerId(photographerId) {
+    if (!photographerId) {
+      throw new Error('Photographer ID is required for fetching images by photographer');
+    }
+
     const { data, error } = await this.supabase
       .from('images')
       .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
@@ -137,18 +154,44 @@ class Database {
   }
 
   async getImageById(imageId) {
+    if (!imageId) {
+      throw new Error('Image ID is required for fetching image by ID');
+    }
+
     const { data, error } = await this.supabase
       .from('images')
       .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('id', imageId)
-      .single();
+      .single(); // Using single() since ID should be unique
 
-    if (error) throw handleDbError(error);
+    if (error) {
+      if (error.code === 'PGRST103' || error.message?.includes('multiple')) {
+        // Multiple images found, which indicates data integrity issue
+        console.warn(`Multiple images found with ID ${imageId}. This indicates a data integrity issue.`);
+        // Get all matching records and return the first one
+        const { data: allData, error: allError } = await this.supabase
+          .from('images')
+          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+          .eq('id', imageId);
+
+        if (allError) throw handleDbError(allError);
+        return allData?.[0] || null;
+      } else if (error.code === 'PGRST116' || error.code === '42P01') {
+        // Record not found
+        return null;
+      } else {
+        throw handleDbError(error);
+      }
+    }
+
     return data;
   }
 
   async deleteImageById(imageId) {
-    console.log('Deleting image with ID:', imageId);
+    if (!imageId) {
+      throw new Error('Image ID is required for deleting image');
+    }
+
     const { data, error } = await this.supabase
       .from('images')
       .delete()
@@ -159,72 +202,223 @@ class Database {
       console.error('Error deleting image from DB:', error);
       throw handleDbError(error);
     }
-    console.log('Successfully deleted image with ID:', imageId);
     return data;
   }
 
   async getImageByIdAndPhotographer(imageId, photographerId) {
+    if (!imageId || !photographerId) {
+      throw new Error('Image ID and photographer ID are required for fetching image by ID and photographer');
+    }
+
     const { data, error } = await this.supabase
       .from('images')
       .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
-      .single();
+      .single(); // Using single() since combination should be unique
 
-    if (error) throw handleDbError(error);
+    if (error) {
+      if (error.code === 'PGRST103' || error.message?.includes('multiple')) {
+        // Multiple images found, which indicates data integrity issue
+        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId}. This indicates a data integrity issue.`);
+        // Get all matching records and return the first one
+        const { data: allData, error: allError } = await this.supabase
+          .from('images')
+          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+          .eq('id', imageId)
+          .eq('photographer_id', photographerId);
+
+        if (allError) throw handleDbError(allError);
+        return allData?.[0] || null;
+      } else if (error.code === 'PGRST116' || error.code === '42P01') {
+        // Record not found
+        return null;
+      } else {
+        throw handleDbError(error);
+      }
+    }
+
     return data;
   }
 
   async updateImage(imageId, updateData, photographerId) {
-    const { data, error } = await this.supabase
+    if (!imageId || !updateData || !photographerId) {
+      throw new Error('Image ID, update data, and photographer ID are required for updating image');
+    }
+
+    const { data: updateResult, error } = await this.supabase
       .from('images')
       .update(updateData)
       .eq('id', imageId)
-      .eq('photographer_id', photographerId)
-      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
-      .single();
+      .eq('photographer_id', photographerId);
 
     if (error) throw handleDbError(error);
-    return data;
+
+    // After successful update, fetch the updated record
+    const { data: fetchResult, error: fetchError } = await this.supabase
+      .from('images')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .single(); // Using single() since combination should be unique
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST103' || fetchError.message?.includes('multiple')) {
+        // Multiple images found, which indicates data integrity issue
+        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId} after update. This indicates a data integrity issue.`);
+        // Get all matching records and return the first one
+        const { data: allData, error: allError } = await this.supabase
+          .from('images')
+          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+          .eq('id', imageId)
+          .eq('photographer_id', photographerId);
+
+        if (allError) throw handleDbError(allError);
+        return allData?.[0] || null;
+      } else if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
+        // Record not found after update
+        return null;
+      } else {
+        throw handleDbError(fetchError);
+      }
+    }
+
+    return fetchResult;
   }
 
   async updateImageFeaturedStatus(imageId, photographerId, isFeatured) {
-    const { data, error } = await this.supabase
+    if (!imageId || !photographerId || typeof isFeatured !== 'boolean') {
+      throw new Error('Image ID, photographer ID, and boolean isFeatured are required for updating featured status');
+    }
+
+    const { data: updateResult, error } = await this.supabase
       .from('images')
       .update({ is_featured: isFeatured })
       .eq('id', imageId)
-      .eq('photographer_id', photographerId)
-      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
-      .single();
+      .eq('photographer_id', photographerId);
 
     if (error) throw handleDbError(error);
-    return data;
+
+    // After successful update, fetch the updated record
+    const { data: fetchResult, error: fetchError } = await this.supabase
+      .from('images')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .single(); // Using single() since combination should be unique
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST103' || fetchError.message?.includes('multiple')) {
+        // Multiple images found, which indicates data integrity issue
+        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId} after featured status update. This indicates a data integrity issue.`);
+        // Get all matching records and return the first one
+        const { data: allData, error: allError } = await this.supabase
+          .from('images')
+          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+          .eq('id', imageId)
+          .eq('photographer_id', photographerId);
+
+        if (allError) throw handleDbError(allError);
+        return allData?.[0] || null;
+      } else if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
+        // Record not found after update
+        return null;
+      } else {
+        throw handleDbError(fetchError);
+      }
+    }
+
+    return fetchResult;
   }
 
   async updateImageSlideshowStatus(imageId, photographerId, isSlideshow) {
-    const { data, error } = await this.supabase
+    if (!imageId || !photographerId || typeof isSlideshow !== 'boolean') {
+      throw new Error('Image ID, photographer ID, and boolean isSlideshow are required for updating slideshow status');
+    }
+
+    const { data: updateResult, error } = await this.supabase
       .from('images')
       .update({ is_slideshow: isSlideshow })
       .eq('id', imageId)
-      .eq('photographer_id', photographerId)
-      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
-      .single();
+      .eq('photographer_id', photographerId);
 
     if (error) throw handleDbError(error);
-    return data;
+
+    // After successful update, fetch the updated record
+    const { data: fetchResult, error: fetchError } = await this.supabase
+      .from('images')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .single(); // Using single() since combination should be unique
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST103' || fetchError.message?.includes('multiple')) {
+        // Multiple images found, which indicates data integrity issue
+        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId} after slideshow status update. This indicates a data integrity issue.`);
+        // Get all matching records and return the first one
+        const { data: allData, error: allError } = await this.supabase
+          .from('images')
+          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+          .eq('id', imageId)
+          .eq('photographer_id', photographerId);
+
+        if (allError) throw handleDbError(allError);
+        return allData?.[0] || null;
+      } else if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
+        // Record not found after update
+        return null;
+      } else {
+        throw handleDbError(fetchError);
+      }
+    }
+
+    return fetchResult;
   }
 
   async updateImagePublicStatus(imageId, photographerId, isPublic) {
-    const { data, error } = await this.supabase
+    if (!imageId || !photographerId || typeof isPublic !== 'boolean') {
+      throw new Error('Image ID, photographer ID, and boolean isPublic are required for updating public status');
+    }
+
+    const { data: updateResult, error } = await this.supabase
       .from('images')
       .update({ is_public: isPublic })
       .eq('id', imageId)
-      .eq('photographer_id', photographerId)
-      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
-      .single();
+      .eq('photographer_id', photographerId);
 
     if (error) throw handleDbError(error);
-    return data;
+
+    // After successful update, fetch the updated record
+    const { data: fetchResult, error: fetchError } = await this.supabase
+      .from('images')
+      .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .single(); // Using single() since combination should be unique
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST103' || fetchError.message?.includes('multiple')) {
+        // Multiple images found, which indicates data integrity issue
+        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId} after public status update. This indicates a data integrity issue.`);
+        // Get all matching records and return the first one
+        const { data: allData, error: allError } = await this.supabase
+          .from('images')
+          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
+          .eq('id', imageId)
+          .eq('photographer_id', photographerId);
+
+        if (allError) throw handleDbError(allError);
+        return allData?.[0] || null;
+      } else if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
+        // Record not found after update
+        return null;
+      } else {
+        throw handleDbError(fetchError);
+      }
+    }
+
+    return fetchResult;
   }
 
   async getFeaturedImages() {

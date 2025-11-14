@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getBaseUrl } from '../config/apiConfig';
+import { logError } from './errorHandler';
 
 // Create axios instance for API calls
 const api = axios.create({
@@ -16,6 +17,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    logError(error, 'API_REQUEST_ERROR');
     return Promise.reject(error);
   }
 );
@@ -27,6 +29,13 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+
+    // Log the error
+    logError(error, 'API_RESPONSE_ERROR', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status
+    });
 
     // If the error is 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -59,6 +68,7 @@ api.interceptors.response.use(
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
+        logError(refreshError, 'TOKEN_REFRESH_ERROR');
         // If refresh fails, clear tokens and redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
@@ -67,6 +77,7 @@ api.interceptors.response.use(
       }
     }
 
+    // For other errors, reject with the original error
     return Promise.reject(error);
   }
 );
