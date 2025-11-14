@@ -16,7 +16,6 @@ const GalleryPage = () => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [layout, setLayout] = useState('grid'); // 'grid' or 'masonry'
 
   const { addError } = useError();
 
@@ -144,94 +143,66 @@ const GalleryPage = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'black' }}>
       {filteredImages.length > 0 ? (
-        <div className="gallery-header-container p-4 pt-24 pb-4">
-          {/* Layout toggle controls */}
-          <div className="flex justify-center mb-4">
-            <div className="flex items-center bg-[#001F3F]/20 rounded-lg p-1">
-              <button
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  layout === 'grid'
-                    ? 'bg-[#A8E6CF] text-[#001F3F]'
-                    : 'text-white hover:bg-white/10'
-                }`}
-                onClick={() => setLayout('grid')}
-              >
-                Grid
-              </button>
-              <button
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  layout === 'masonry'
-                    ? 'bg-[#A8E6CF] text-[#001F3F]'
-                    : 'text-white hover:bg-white/10'
-                }`}
-                onClick={() => setLayout('masonry')}
-              >
-                Masonry
-              </button>
-            </div>
-          </div>
+        <div className="gallery-container p-4 pt-16 pb-4">
+          {/* Gallery grid layout */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+            {filteredImages.map((image, index) => {
+              const imageUrl = getImageUrl(image, 'medium');
+              const { width, height } = getImageDimensions(image);
+              const fileSize = formatFileSize(image.size || image.mediaMetadata?.photo?.imageFileSize || 0);
+              // Calculate aspect ratio to determine height
+              const aspectRatio = (width && height) ? width / height : 4/3;
+              const heightClass = aspectRatio > 1.2 ? 'h-64' : aspectRatio > 0.8 ? 'h-48' : 'h-36';
 
-          {/* Gallery grid/masonry based on layout */}
-          {layout === 'masonry' ? (
-            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 p-6">
-              {filteredImages.map((image, index) => {
-                const imageUrl = getImageUrl(image, 'medium');
-                const { width, height } = getImageDimensions(image);
-                const fileSize = formatFileSize(image.size || image.mediaMetadata?.photo?.imageFileSize || 0);
-                // Calculate aspect ratio to determine height
-                const aspectRatio = (width && height) ? width / height : 4/3;
-                const heightClass = aspectRatio > 1.2 ? 'h-80' : aspectRatio > 0.8 ? 'h-64' : 'h-48';
-
-                return (
-                  <div
-                    key={image.id}
-                    className="mb-6 break-inside-avoid image-card group cursor-pointer relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#001F3F]/10"
-                    onClick={() => openLightbox(images.findIndex(img => img.id === image.id))}
-                    tabIndex={0}
-                    role="button"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        openLightbox(images.findIndex(img => img.id === image.id));
-                      }
-                    }}
-                  >
-                    <div className={`${heightClass} overflow-hidden`}>
-                      <img
-                        src={imageUrl}
-                        alt={image.original_name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI2Q0ZDRkNCIvPgo8cGF0aCBkPSJNMyA2TDkgMTJMMyAxOEw5IDI0TDE2IDE3TDE5IDIwTDE1IDI0TDMgMTBaIiBzdHJva2U9IiM4ZTg1NzQiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTIwIDZMMTQgMTJMOSA3IiBzdHJva2U9IiM4ZTg1NzQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
-                        }}
-                      />
-                    </div>
-
-                    {/* Image info overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
-                      <h3 className="font-medium truncate text-sm">{image.original_name}</h3>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-xs text-white/80">{width || image.mediaMetadata?.width}×{height || image.mediaMetadata?.height}</span>
-                        <span className="text-xs text-white/80">{fileSize}</span>
-                      </div>
-                    </div>
-
-                    {/* View button */}
-                    <button
-                      className="absolute bottom-3 right-3 p-2 rounded-full bg-white/30 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl transform translate-y-2 group-hover:translate-y-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openLightbox(images.findIndex(img => img.id === image.id));
+              return (
+                <div
+                  key={image.id}
+                  className="image-card group cursor-pointer relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#001F3F]/10 aspect-square"
+                  onClick={() => openLightbox(images.findIndex(img => img.id === image.id))}
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      openLightbox(images.findIndex(img => img.id === image.id));
+                    }
+                  }}
+                >
+                  <div className={`w-full ${heightClass} overflow-hidden`}>
+                    <img
+                      src={imageUrl}
+                      alt={image.original_name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI2Q0ZDRkNCIvPgo8cGF0aCBkPSJNMyA2TDkgMTJMMyAxOEw5IDI0TDE2IDE3TDE5IDIwTDE1IDI0TDMgMTBaIiBzdHJva2U9IiM4ZTg1NzQiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTIwIDZMMTQgMTJMOSA3IiBzdHJva2U9IiM4ZTg1NzQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
                       }}
-                      aria-label="View details"
-                    >
-                      <FiInfo size={16} />
-                    </button>
+                    />
                   </div>
-                );
-              })}
-            </div>
-          )}
+
+                  {/* Image info overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
+                    <h3 className="font-medium truncate text-sm">{image.original_name}</h3>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-white/80">{width || image.mediaMetadata?.width}×{height || image.mediaMetadata?.height}</span>
+                      <span className="text-xs text-white/80">{fileSize}</span>
+                    </div>
+                  </div>
+
+                  {/* View button */}
+                  <button
+                    className="absolute bottom-3 right-3 p-2 rounded-full bg-white/30 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl transform translate-y-2 group-hover:translate-y-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openLightbox(images.findIndex(img => img.id === image.id));
+                    }}
+                    aria-label="View details"
+                  >
+                    <FiInfo size={16} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <div className="empty-gallery flex flex-col items-center justify-center min-h-[60vh] p-8">
