@@ -56,20 +56,11 @@ const HomePage = () => {
     );
   };
 
-  const goToSlide = (index) => {
-    setCurrentIndex(index);
-    setSlideshowActive(false); // Pause slideshow when user interacts
-  };
-
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowLeft') {
-        goToPrevious();
-      } else if (e.key === 'ArrowRight') {
-        goToNext();
-      } else if (e.key === ' ') { // Spacebar to toggle slideshow
+      if (e.key === ' ') { // Spacebar to toggle slideshow
         e.preventDefault();
         setSlideshowActive(prev => !prev);
       }
@@ -118,37 +109,6 @@ const HomePage = () => {
           </div>
         ))}
 
-        {/* Slideshow controls */}
-        <div className="absolute inset-y-0 flex items-center justify-between w-full px-4">
-          <button
-            className="slideshow-control-btn group"
-            onClick={goToPrevious}
-            aria-label="Previous image"
-          >
-            <FiChevronLeft className="group-hover:scale-125 transition-transform text-white text-3xl" />
-          </button>
-          <button
-            className="slideshow-control-btn group"
-            onClick={goToNext}
-            aria-label="Next image"
-          >
-            <FiChevronRight className="group-hover:scale-125 transition-transform text-white text-3xl" />
-          </button>
-        </div>
-
-        {/* Slideshow navigation dots */}
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 z-20">
-          {images.map((_, index) => (
-            <button
-              key={index}
-              className={`w-3 h-3 rounded-full ${index === currentIndex ? 'bg-gradient-to-r from-[#A8E6CF] to-[#6B8C6B] scale-125 shadow-[0_0_8px_rgba(168,230,207,0.5)]' : 'bg-white/50'}`}
-              onClick={() => goToSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
-            >
-              <span className="sr-only">Go to slide {index + 1}</span>
-            </button>
-          ))}
-        </div>
 
         {/* Slideshow status indicator */}
         <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm z-20">
