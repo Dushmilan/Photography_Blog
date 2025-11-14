@@ -61,7 +61,7 @@ const HomePage = () => {
     if (imageRefs.current[currentIndex]) {
       imageRefs.current[currentIndex].scrollIntoView({
         behavior: 'smooth',
-        block: 'start'
+        block: 'center'
       });
     }
   }, [currentIndex]);
@@ -81,12 +81,10 @@ const HomePage = () => {
 
   return (
     <div className="relative min-h-screen" style={{ backgroundColor: 'black' }}>
-      {/* Main column of centered hero images in the remaining 90% */}
+      {/* Main hero images container - scrollable, extends to full width */}
       <div
-        className="absolute left-8 top-40 w-[93%] h-[80%] p-4 overflow-y-auto rounded-lg"
+        className="absolute left-0 top-40 w-full h-[80%] overflow-y-auto"
         style={{
-          backgroundColor: 'black',
-          right: '7%',
           scrollbarWidth: 'thin',
           scrollbarColor: '#4B5563 #1F2937'
         }}
@@ -94,9 +92,9 @@ const HomePage = () => {
           // Calculate which image is currently in view
           const container = e.target;
           const scrollPosition = container.scrollTop;
-          // Calculate based on the container's height (80vh) instead of full viewport
+          // Calculate based on the container's height
           const containerHeight = container.clientHeight;
-          const imageHeight = 0.6 * containerHeight; // 60% of the container height
+          const imageHeight = 0.6 * containerHeight; // Adjusted calculation
           const spacing = 40 * 4; // 40 * 4px = 160px (mb-40 in Tailwind)
           const elementHeight = imageHeight + spacing;
           const index = Math.floor(scrollPosition / elementHeight);
@@ -121,13 +119,14 @@ const HomePage = () => {
             background: #6B7280; /* Scrollbar thumb hover color */
           }
         `}</style>
-        <div className="max-w-4xl mx-auto pt-8">
+
+        <div className="max-w-4xl mx-auto pt-8 pr-8">
           {images.map((image, index) => (
             <div
               ref={addToRefs(index)}
               key={image.id}
               className="relative mx-auto mb-40" /* 40 * 4px = 160px spacing between images */
-              style={{ width: '100%', height: '60vh' }}
+              style={{ width: '93%', height: '60vh' }}
             >
               <img
                 src={image.path || image.baseUrl}
@@ -139,24 +138,43 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Thumbnail preview section starting from vertical center of the page */}
-      <div className="absolute top-1/2 right-8 w-[7%] h-[80%] bg-black bg-opacity-50 p-1 overflow-y-auto rounded-lg transform -translate-y-1/2">
-        <div className="flex flex-col gap-1">
-          {images.map((image, index) => (
-            <div
-              key={image.id}
-              className={`cursor-pointer rounded overflow-hidden border transition-all duration-300 ${index === currentIndex ? 'border-white scale-100 opacity-100' : 'border-gray-600 opacity-50'}`}
-              onClick={() => {
-                selectImage(index);
-              }}
-            >
-              <img
-                src={image.path || image.baseUrl}
-                alt={image.original_name}
-                className="w-full h-12 object-cover" /* Reduced height further */
-              />
-            </div>
-          ))}
+      {/* Fixed thumbnail preview section - stays in position and does not move with scroll */}
+      <div className="absolute top-1/2 right-8 w-[7%] h-[60%] bg-black bg-opacity-50 p-1 rounded-lg overflow-hidden transform -translate-y-1/5">
+        <div className="h-full flex flex-col items-center">
+          {images.map((image, index) => {
+            // Determine opacity and styling based on position relative to current index
+            let positionClass = '';
+            if (index === currentIndex) {
+              positionClass = 'border-white opacity-100 scale-110 z-10';  // Active thumbnail is highlighted
+            } else if (index < currentIndex) {
+              positionClass = 'border-gray-600 opacity-40';  // Previous images are faded
+            } else {
+              positionClass = 'border-gray-600 opacity-40';  // Next images are faded
+            }
+            return (
+              <div
+                key={image.id}
+                className={`cursor-pointer rounded overflow-hidden border transition-all duration-300 ${positionClass}`}
+                style={{ margin: '0.25rem 0' }} /* mb-1 equivalent */
+                onClick={() => {
+                  selectImage(index);
+                  // Also scroll to the corresponding image
+                  if (imageRefs.current[index]) {
+                    imageRefs.current[index].scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'center'
+                    });
+                  }
+                }}
+              >
+                <img
+                  src={image.path || image.baseUrl}
+                  alt={image.original_name}
+                  className="w-full h-12 object-cover"
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
