@@ -65,7 +65,14 @@ class Image {
       throw new AppError('Image ID, photographer ID, and boolean isFeatured are required for updating featured status', 400);
     }
 
-    return await this.db.updateImageFeaturedStatus(imageId, photographerId, isFeatured);
+    try {
+      return await this.db.updateImageFeaturedStatus(imageId, photographerId, isFeatured);
+    } catch (error) {
+      if (error.message && error.message.includes('not found or doesn\'t belong to this photographer')) {
+        throw new AppError('Image not found or unauthorized to update', 404);
+      }
+      throw error;
+    }
   }
 
   async updateSlideshowStatus(imageId, photographerId, isSlideshow) {
@@ -73,7 +80,14 @@ class Image {
       throw new AppError('Image ID, photographer ID, and boolean isSlideshow are required for updating slideshow status', 400);
     }
 
-    return await this.db.updateImageSlideshowStatus(imageId, photographerId, isSlideshow);
+    try {
+      return await this.db.updateImageSlideshowStatus(imageId, photographerId, isSlideshow);
+    } catch (error) {
+      if (error.message && error.message.includes('not found or doesn\'t belong to this photographer')) {
+        throw new AppError('Image not found or unauthorized to update', 404);
+      }
+      throw error;
+    }
   }
 
   async updatePublicStatus(imageId, photographerId, isPublic) {
@@ -81,7 +95,14 @@ class Image {
       throw new AppError('Image ID, photographer ID, and boolean isPublic are required for updating public status', 400);
     }
 
-    return await this.db.updateImagePublicStatus(imageId, photographerId, isPublic);
+    try {
+      return await this.db.updateImagePublicStatus(imageId, photographerId, isPublic);
+    } catch (error) {
+      if (error.message && error.message.includes('not found or doesn\'t belong to this photographer')) {
+        throw new AppError('Image not found or unauthorized to update', 404);
+      }
+      throw error;
+    }
   }
 
   async getFeaturedImages() {
@@ -157,7 +178,14 @@ class Image {
 
     if (Object.keys(updates).length > 0) {
       // Use the general update method
-      return await this.db.updateImage(imageId, updates, image.photographer_id);
+      try {
+        return await this.db.updateImage(imageId, updates, image.photographer_id);
+      } catch (error) {
+        if (error.message && error.message.includes('not found or doesn\'t belong to this photographer')) {
+          throw new AppError('Image not found or unauthorized to update', 404);
+        }
+        throw error;
+      }
     }
 
     // Return the unchanged image if no updates were made

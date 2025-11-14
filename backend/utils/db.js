@@ -246,41 +246,51 @@ class Database {
       throw new Error('Image ID, update data, and photographer ID are required for updating image');
     }
 
+    // First, verify that the image exists and belongs to the photographer
+    const { data: existingImage, error: fetchError } = await this.supabase
+      .from('images')
+      .select('id, photographer_id')
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
+        // Record not found - either image doesn't exist or doesn't belong to this user
+        throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+      } else {
+        console.error('Error fetching image for general update:', fetchError);
+        throw handleDbError(fetchError);
+      }
+    }
+
+    if (!existingImage) {
+      throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+    }
+
+    // Update the image
     const { data: updateResult, error } = await this.supabase
       .from('images')
       .update(updateData)
       .eq('id', imageId)
       .eq('photographer_id', photographerId);
 
-    if (error) throw handleDbError(error);
+    if (error) {
+      console.error('Error updating image:', error);
+      throw handleDbError(error);
+    }
 
     // After successful update, fetch the updated record
-    const { data: fetchResult, error: fetchError } = await this.supabase
+    const { data: fetchResult, error: fetchError2 } = await this.supabase
       .from('images')
       .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
       .single(); // Using single() since combination should be unique
 
-    if (fetchError) {
-      if (fetchError.code === 'PGRST103' || fetchError.message?.includes('multiple')) {
-        // Multiple images found, which indicates data integrity issue
-        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId} after update. This indicates a data integrity issue.`);
-        // Get all matching records and return the first one
-        const { data: allData, error: allError } = await this.supabase
-          .from('images')
-          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
-          .eq('id', imageId)
-          .eq('photographer_id', photographerId);
-
-        if (allError) throw handleDbError(allError);
-        return allData?.[0] || null;
-      } else if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
-        // Record not found after update
-        return null;
-      } else {
-        throw handleDbError(fetchError);
-      }
+    if (fetchError2) {
+      console.error('Error fetching updated image after general update:', fetchError2);
+      throw handleDbError(fetchError2);
     }
 
     return fetchResult;
@@ -291,41 +301,51 @@ class Database {
       throw new Error('Image ID, photographer ID, and boolean isFeatured are required for updating featured status');
     }
 
+    // First, verify that the image exists and belongs to the photographer
+    const { data: existingImage, error: fetchError } = await this.supabase
+      .from('images')
+      .select('id, photographer_id')
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
+        // Record not found - either image doesn't exist or doesn't belong to this user
+        throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+      } else {
+        console.error('Error fetching image for featured status update:', fetchError);
+        throw handleDbError(fetchError);
+      }
+    }
+
+    if (!existingImage) {
+      throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+    }
+
+    // Update the featured status
     const { data: updateResult, error } = await this.supabase
       .from('images')
       .update({ is_featured: isFeatured })
       .eq('id', imageId)
       .eq('photographer_id', photographerId);
 
-    if (error) throw handleDbError(error);
+    if (error) {
+      console.error('Error updating image featured status:', error);
+      throw handleDbError(error);
+    }
 
     // After successful update, fetch the updated record
-    const { data: fetchResult, error: fetchError } = await this.supabase
+    const { data: fetchResult, error: fetchError2 } = await this.supabase
       .from('images')
       .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
       .single(); // Using single() since combination should be unique
 
-    if (fetchError) {
-      if (fetchError.code === 'PGRST103' || fetchError.message?.includes('multiple')) {
-        // Multiple images found, which indicates data integrity issue
-        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId} after featured status update. This indicates a data integrity issue.`);
-        // Get all matching records and return the first one
-        const { data: allData, error: allError } = await this.supabase
-          .from('images')
-          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
-          .eq('id', imageId)
-          .eq('photographer_id', photographerId);
-
-        if (allError) throw handleDbError(allError);
-        return allData?.[0] || null;
-      } else if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
-        // Record not found after update
-        return null;
-      } else {
-        throw handleDbError(fetchError);
-      }
+    if (fetchError2) {
+      console.error('Error fetching updated image after featured status update:', fetchError2);
+      throw handleDbError(fetchError2);
     }
 
     return fetchResult;
@@ -336,41 +356,51 @@ class Database {
       throw new Error('Image ID, photographer ID, and boolean isSlideshow are required for updating slideshow status');
     }
 
+    // First, verify that the image exists and belongs to the photographer
+    const { data: existingImage, error: fetchError } = await this.supabase
+      .from('images')
+      .select('id, photographer_id')
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
+        // Record not found - either image doesn't exist or doesn't belong to this user
+        throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+      } else {
+        console.error('Error fetching image for slideshow status update:', fetchError);
+        throw handleDbError(fetchError);
+      }
+    }
+
+    if (!existingImage) {
+      throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+    }
+
+    // Update the slideshow status
     const { data: updateResult, error } = await this.supabase
       .from('images')
       .update({ is_slideshow: isSlideshow })
       .eq('id', imageId)
       .eq('photographer_id', photographerId);
 
-    if (error) throw handleDbError(error);
+    if (error) {
+      console.error('Error updating image slideshow status:', error);
+      throw handleDbError(error);
+    }
 
     // After successful update, fetch the updated record
-    const { data: fetchResult, error: fetchError } = await this.supabase
+    const { data: fetchResult, error: fetchError2 } = await this.supabase
       .from('images')
       .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
       .single(); // Using single() since combination should be unique
 
-    if (fetchError) {
-      if (fetchError.code === 'PGRST103' || fetchError.message?.includes('multiple')) {
-        // Multiple images found, which indicates data integrity issue
-        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId} after slideshow status update. This indicates a data integrity issue.`);
-        // Get all matching records and return the first one
-        const { data: allData, error: allError } = await this.supabase
-          .from('images')
-          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
-          .eq('id', imageId)
-          .eq('photographer_id', photographerId);
-
-        if (allError) throw handleDbError(allError);
-        return allData?.[0] || null;
-      } else if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
-        // Record not found after update
-        return null;
-      } else {
-        throw handleDbError(fetchError);
-      }
+    if (fetchError2) {
+      console.error('Error fetching updated image after slideshow status update:', fetchError2);
+      throw handleDbError(fetchError2);
     }
 
     return fetchResult;
@@ -381,41 +411,51 @@ class Database {
       throw new Error('Image ID, photographer ID, and boolean isPublic are required for updating public status');
     }
 
+    // First, verify that the image exists and belongs to the photographer
+    const { data: existingImage, error: fetchError } = await this.supabase
+      .from('images')
+      .select('id, photographer_id')
+      .eq('id', imageId)
+      .eq('photographer_id', photographerId)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
+        // Record not found - either image doesn't exist or doesn't belong to this user
+        throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+      } else {
+        console.error('Error fetching image for public status update:', fetchError);
+        throw handleDbError(fetchError);
+      }
+    }
+
+    if (!existingImage) {
+      throw new Error(`Image with ID ${imageId} not found or doesn't belong to this photographer`);
+    }
+
+    // Update the public status
     const { data: updateResult, error } = await this.supabase
       .from('images')
       .update({ is_public: isPublic })
       .eq('id', imageId)
       .eq('photographer_id', photographerId);
 
-    if (error) throw handleDbError(error);
+    if (error) {
+      console.error('Error updating image public status:', error);
+      throw handleDbError(error);
+    }
 
     // After successful update, fetch the updated record
-    const { data: fetchResult, error: fetchError } = await this.supabase
+    const { data: fetchResult, error: fetchError2 } = await this.supabase
       .from('images')
       .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
       .eq('id', imageId)
       .eq('photographer_id', photographerId)
       .single(); // Using single() since combination should be unique
 
-    if (fetchError) {
-      if (fetchError.code === 'PGRST103' || fetchError.message?.includes('multiple')) {
-        // Multiple images found, which indicates data integrity issue
-        console.warn(`Multiple images found with ID ${imageId} for photographer ${photographerId} after public status update. This indicates a data integrity issue.`);
-        // Get all matching records and return the first one
-        const { data: allData, error: allError } = await this.supabase
-          .from('images')
-          .select('id, path, photographer_id, is_featured, is_slideshow, is_public, created_at')
-          .eq('id', imageId)
-          .eq('photographer_id', photographerId);
-
-        if (allError) throw handleDbError(allError);
-        return allData?.[0] || null;
-      } else if (fetchError.code === 'PGRST116' || fetchError.code === '42P01') {
-        // Record not found after update
-        return null;
-      } else {
-        throw handleDbError(fetchError);
-      }
+    if (fetchError2) {
+      console.error('Error fetching updated image after public status update:', fetchError2);
+      throw handleDbError(fetchError2);
     }
 
     return fetchResult;
