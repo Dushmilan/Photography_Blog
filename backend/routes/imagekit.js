@@ -135,12 +135,20 @@ router.put('/image/:imageId', authenticate, async (req, res) => {
     // First try to verify the image exists in ImageKit (optional - just for validation)
     try {
       await new Promise((resolve, reject) => {
+        // Validate that the ID is not empty or null before calling ImageKit
+        if (!imageId) {
+          console.log(`Invalid image ID provided: ${imageId}`);
+          resolve(null);
+          return;
+        }
+
         imagekit.getFileDetails(imageId, (error, fileDetails) => {
           if (error) {
             console.log(`Image ${imageId} not found in ImageKit (may not be a valid ImageKit file ID), proceeding with database metadata update only`);
-            // Continue without failing
+            resolve(null); // Resolve with null to continue regardless
+          } else {
+            resolve(fileDetails);
           }
-          resolve(fileDetails); // Continue regardless
         });
       });
     } catch (error) {
@@ -187,6 +195,13 @@ router.get('/image/:imageId', authenticate, async (req, res) => {
     let imagekitImage = null;
     try {
       imagekitImage = await new Promise((resolve, reject) => {
+        // Validate that the ID is not empty or null before calling ImageKit
+        if (!imageId) {
+          console.log(`Invalid image ID provided: ${imageId}`);
+          resolve(null);
+          return;
+        }
+
         imagekit.getFileDetails(imageId, (error, fileDetails) => {
           if (error) {
             console.error('Image not found in ImageKit:', error);
@@ -197,7 +212,7 @@ router.get('/image/:imageId', authenticate, async (req, res) => {
         });
       });
     } catch (error) {
-      console.log(`Could not get image ${imageId} from ImageKit, proceeding with database data only`);
+      console.log(`Could not get image ${imageId} from ImageKit, proceeding with database data only. Error:`, error.message || error);
     }
 
     // If we couldn't get from ImageKit but have DB data, use that

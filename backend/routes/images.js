@@ -56,6 +56,13 @@ router.put('/:id/public', authenticate, catchAsync(async (req, res) => {
   let imagekitFile = null;
   try {
     imagekitFile = await new Promise((resolve, reject) => {
+      // Validate that the ID is not empty or null before calling ImageKit
+      if (!id) {
+        console.log(`Invalid image ID provided: ${id}`);
+        resolve(null);
+        return;
+      }
+
       imagekit.getFileDetails(id, (error, fileDetails) => {
         if (error) {
           // Log error but don't throw - continue to allow DB metadata updates
@@ -123,6 +130,13 @@ router.get('/:id', authenticate, catchAsync(async (req, res) => {
   let imagekitImage = null;
   try {
     imagekitImage = await new Promise((resolve, reject) => {
+      // Validate that the ID is not empty or null before calling ImageKit
+      if (!id) {
+        console.log(`Invalid image ID provided: ${id}`);
+        resolve(null);
+        return;
+      }
+
       imagekit.getFileDetails(id, (error, fileDetails) => {
         if (error) {
           console.error('Image not found in ImageKit:', error);
@@ -133,7 +147,7 @@ router.get('/:id', authenticate, catchAsync(async (req, res) => {
       });
     });
   } catch (error) {
-    console.log(`Could not get image ${id} from ImageKit, proceeding with database data only`);
+    console.log(`Could not get image ${id} from ImageKit, proceeding with database data only. Error:`, error.message || error);
   }
 
   if (!imagekitImage && !dbImage) {
@@ -229,6 +243,13 @@ router.post('/', authenticate, catchAsync(async (req, res) => {
   // Check if the image exists in ImageKit
   try {
     await new Promise((resolve, reject) => {
+      // Validate that the ID is not empty or null before calling ImageKit
+      if (!imageData.id) {
+        console.log(`Invalid image ID provided: ${imageData.id}`);
+        resolve(null);
+        return;
+      }
+
       imagekit.getFileDetails(imageData.id, (error, fileDetails) => {
         if (error) {
           console.error('Image not found in ImageKit:', error);
@@ -241,7 +262,7 @@ router.post('/', authenticate, catchAsync(async (req, res) => {
     });
   } catch (error) {
     // If ImageKit check fails, log but continue - image might be new or have different ID format
-    console.log(`Could not verify image ${imageData.id} in ImageKit, proceeding with database entry`);
+    console.log(`Could not verify image ${imageData.id} in ImageKit, proceeding with database entry. Error:`, error.message || error);
   }
 
   // Create the image with simplified schema data

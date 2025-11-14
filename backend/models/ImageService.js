@@ -58,12 +58,20 @@ class ImageService {
       return await this.findByPhotographerId(userId) || [];
     }
 
-    // Merge the data so ImageKit images have their status metadata from DB
-    const mergedImages = imageKitImages.map(imageKitImage => {
+    // Process ImageKit images and merge with DB metadata
+    const validMergedImages = [];
+
+    for (const imageKitImage of imageKitImages) {
+      // Verify that the ImageKit image has a valid fileId
+      if (!imageKitImage.fileId) {
+        console.warn('Skipping ImageKit image with no fileId:', imageKitImage);
+        continue;
+      }
+
       // Match database metadata by fileId
       const dbMetadata = dbImages.find(dbImg => dbImg.id === imageKitImage.fileId);
 
-      return {
+      validMergedImages.push({
         id: imageKitImage.fileId,
         path: imageKitImage.url || imageKitImage.filePath,
         filename: imageKitImage.name,
@@ -78,15 +86,15 @@ class ImageService {
         photographer_id: dbMetadata?.photographer_id || userId, // Use DB value if available
         created_at: imageKitImage.createdAt || new Date().toISOString(),
         ...dbMetadata // Spread any other metadata from DB (but avoid overwriting key fields)
-      };
-    });
+      });
+    }
 
     // Also include any DB-only images that might not be in ImageKit (for fallback)
     const dbOnlyImages = dbImages.filter(dbImg =>
       !imageKitImages.some(ikImg => ikImg.fileId === dbImg.id)
     );
 
-    return [...mergedImages, ...dbOnlyImages];
+    return [...validMergedImages, ...dbOnlyImages];
   }
 
   // Create/update metadata in database for a specific image
