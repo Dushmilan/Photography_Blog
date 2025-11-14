@@ -76,46 +76,6 @@ const AboutPage = () => {
               </div>
             </div>
           </div>
-
-          {/* Skills Section */}
-          <div className="mt-20">
-            <h2 className="text-2xl md:text-3xl font-light text-white mb-8 text-center">
-              My <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Expertise</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-[#708090]/20 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#A8E6CF]/20 flex items-center justify-center">
-                  <FiCamera className="text-white text-2xl" />
-                </div>
-                <h3 className="text-lg font-medium text-white mb-2">Portrait</h3>
-                <p className="text-white/70 text-sm">Capturing the essence of personality and emotion</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-[#708090]/20 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#A8E6CF]/20 flex items-center justify-center">
-                  <FiCamera className="text-white text-2xl" />
-                </div>
-                <h3 className="text-lg font-medium text-white mb-2">Landscape</h3>
-                <p className="text-white/70 text-sm">Showcasing the beauty of natural environments</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-[#708090]/20 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#A8E6CF]/20 flex items-center justify-center">
-                  <FiCamera className="text-white text-2xl" />
-                </div>
-                <h3 className="text-lg font-medium text-white mb-2">Event</h3>
-                <p className="text-white/70 text-sm">Documenting special moments and celebrations</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-[#708090]/20 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#A8E6CF]/20 flex items-center justify-center">
-                  <FiCamera className="text-white text-2xl" />
-                </div>
-                <h3 className="text-lg font-medium text-white mb-2">Commercial</h3>
-                <p className="text-white/70 text-sm">Professional photography for businesses</p>
-              </div>
-            </div>
-          </div>
         </div>
       </main>
     </div>
