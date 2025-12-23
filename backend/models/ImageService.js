@@ -70,10 +70,20 @@ class ImageService {
 
       // Match database metadata by fileId
       const dbMetadata = dbImages.find(dbImg => dbImg.id === imageKitImage.fileId);
+      const currentPath = imageKitImage.url || imageKitImage.filePath;
+
+      // If the path in the DB doesn't match the current ImageKit URL (e.g., endpoint changed), 
+      // automatically update the database record.
+      if (dbMetadata && dbMetadata.path !== currentPath) {
+        console.log(`🔄 Updating path for image ${imageKitImage.fileId} (Endpoint sync)`);
+        this.db.updateImage(imageKitImage.fileId, { path: currentPath }, userId).catch(err => {
+          console.error(`Failed to sync path for ${imageKitImage.fileId}:`, err.message);
+        });
+      }
 
       validMergedImages.push({
         id: imageKitImage.fileId,
-        path: imageKitImage.url || imageKitImage.filePath,
+        path: currentPath,
         filename: imageKitImage.name,
         size: imageKitImage.size,
         mimetype: imageKitImage.type,
@@ -84,7 +94,7 @@ class ImageService {
         is_public: dbMetadata?.is_public || false,
         photographer_id: dbMetadata?.photographer_id || userId, // Use DB value if available
         created_at: imageKitImage.createdAt || new Date().toISOString(),
-        ...dbMetadata // Spread any other metadata from DB (but avoid overwriting key fields)
+        ...dbMetadata // Spread any other metadata from DB
       });
     }
 
