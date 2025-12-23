@@ -12,7 +12,7 @@ const app = express();
 
 const rateLimit = require('express-rate-limit');
 
-// Rate limiting
+// Rate limiting - Disable and skip on Netlify as it can cause issues in serverless environments
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
@@ -22,11 +22,16 @@ const limiter = rateLimit({
 });
 
 // Middleware
-app.use(limiter); // Apply to all requests
+if (!process.env.NETLIFY) {
+  app.use(limiter); // Only apply rate limiting when NOT on Netlify
+}
 app.use(compression()); // Enable gzip compression
 app.use(cors());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+
+// Health check route
+app.get('/ping', (req, res) => res.json({ message: 'pong', netlify: !!process.env.NETLIFY }));
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -54,9 +59,11 @@ apiRouter.use('/images', require('./routes/images'));
 apiRouter.use('/imagekit', require('./routes/imagekit'));
 apiRouter.use('/contact', require('./routes/contact'));
 
-// Mount the router under both prefixes to handle local development and Netlify Functions
+// Mount the router under multiple prefixes to handle local development, 
+// Netlify Functions redirects, and case-stripped paths.
 app.use('/api', apiRouter);
 app.use('/.netlify/functions/api', apiRouter);
+app.use('/', apiRouter); // Fallback for stripped paths in serverless environments
 
 // Global error handling middleware (should be last)
 app.use(globalErrorHandler);
