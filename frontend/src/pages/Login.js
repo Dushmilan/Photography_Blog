@@ -13,7 +13,7 @@ const Login = ({ setIsAuthenticated }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { addError } = useError();
+  const { addError, addSuccess } = useError();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,20 +36,24 @@ const Login = ({ setIsAuthenticated }) => {
       }
 
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
-      const requestData = isLogin
-        ? { username, password }
-        : { username, password }; // No email needed for registration
+      const requestData = { username, password };
 
       const response = await api.post(endpoint, requestData);
 
-      if (response.data.accessToken && response.data.refreshToken) {
-        // Store both access and refresh tokens
-        localStorage.setItem('access_token', response.data.accessToken);
-        localStorage.setItem('refresh_token', response.data.refreshToken);
-
-        setIsAuthenticated(true);
+      if (isLogin) {
+        if (response.data.accessToken && response.data.refreshToken) {
+          // Store both access and refresh tokens
+          localStorage.setItem('access_token', response.data.accessToken);
+          localStorage.setItem('refresh_token', response.data.refreshToken);
+          setIsAuthenticated(true);
+        } else {
+          throw new Error('Login response did not contain required tokens');
+        }
       } else {
-        throw new Error('Login response did not contain required tokens');
+        // Handle successful registration
+        addSuccess('Account created successfully! Please sign in.');
+        setIsLogin(true);
+        setPassword(''); // Clear password for security
       }
     } catch (err) {
       // Show error notification and get error info for potential fallback display
