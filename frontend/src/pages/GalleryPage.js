@@ -143,7 +143,7 @@ const GalleryPage = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'black' }}>
       {filteredImages.length > 0 ? (
-        <div className="gallery-container p-4 pt-48 pb-4">
+        <div className="gallery-container p-4 pt-24 md:pt-48 pb-4">
           {/* Gallery grid layout - centered in container with 85% width */}
           <div className="mx-auto w-full max-w-[85%]">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">

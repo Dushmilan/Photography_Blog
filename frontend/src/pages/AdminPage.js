@@ -224,7 +224,7 @@ const AdminPage = () => {
       <div className="px-4 md:px-8" style={{ backgroundColor: 'black' }}>
         <div className="max-w-7xl mx-auto py-8">
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-600/30 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF6F61] to-[#FF9933] flex items-center justify-center">

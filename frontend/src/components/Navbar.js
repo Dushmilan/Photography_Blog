@@ -42,27 +42,31 @@ const Navbar = ({ isAuthenticated }) => {
     <nav className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-2 shadow-md' : 'py-5'} bg-black border-b-0`}>
       <div className="container mx-auto px-4 flex items-center justify-between">
 
-        {/* Left section with Home */}
-        <div className="flex items-center">
-          <ul className="nav-items hidden md:flex">
+        {/* Left section with Logo/Brand */}
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF6F61] to-[#A8E6CF] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <FiImage className="text-white text-lg" />
+          </div>
+          <span className="text-xl font-light tracking-tight text-white">
+            Cooked<span className="font-bold">ByLens</span>
+          </span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex items-center">
+          <ul className="nav-items flex items-center">
             <li>
               <Link
                 to="/"
-                className={`nav-link ${isActive('/') ? 'active text-white' : 'text-white'} font-medium`}
+                className={`nav-link ${isActive('/') && location.pathname === '/' ? 'active' : ''}`}
               >
                 Home
               </Link>
             </li>
-          </ul>
-        </div>
-
-        {/* Right section with other navigation items */}
-        <div className="flex items-center">
-          <ul className="nav-items hidden md:flex">
             <li>
               <Link
                 to="/gallery"
-                className={`nav-link ${isActive('/gallery') ? 'active text-white' : 'text-white'} font-medium`}
+                className={`nav-link ${isActive('/gallery') ? 'active' : ''}`}
               >
                 Gallery
               </Link>
@@ -70,7 +74,7 @@ const Navbar = ({ isAuthenticated }) => {
             <li>
               <Link
                 to="/about"
-                className={`nav-link ${isActive('/about') ? 'active text-white' : 'text-white'} font-medium`}
+                className={`nav-link ${isActive('/about') ? 'active' : ''}`}
               >
                 About
               </Link>
@@ -78,7 +82,7 @@ const Navbar = ({ isAuthenticated }) => {
             <li>
               <Link
                 to="/contact"
-                className={`nav-link ${isActive('/contact') ? 'active text-white' : 'text-white'} font-medium`}
+                className={`nav-link ${isActive('/contact') ? 'active' : ''}`}
               >
                 Contact
               </Link>
@@ -88,9 +92,9 @@ const Navbar = ({ isAuthenticated }) => {
                 href="https://www.instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="nav-link text-white font-medium"
+                className="nav-link text-white hover:text-[#A8E6CF]"
               >
-                <FiInstagram size={20} className="inline mr-1 relative top-[4px]" />
+                <FiInstagram size={20} />
               </a>
             </li>
 
@@ -99,9 +103,9 @@ const Navbar = ({ isAuthenticated }) => {
               <li>
                 <Link
                   to="/admin/gallery"
-                  className={`nav-link ${isActive('/admin/gallery') ? 'active text-white' : 'text-white'} font-medium`}
+                  className={`nav-link ${isActive('/admin/gallery') ? 'active' : ''}`}
                 >
-                  Admin Gallery
+                  Admin
                 </Link>
               </li>
             )}
@@ -111,7 +115,7 @@ const Navbar = ({ isAuthenticated }) => {
               <li>
                 <Link
                   to="/login"
-                  className={`nav-link ${isActive('/login') ? 'active text-white' : 'text-white'} font-medium`}
+                  className={`nav-link ${isActive('/login') ? 'active' : ''}`}
                 >
                   Login
                 </Link>
@@ -120,95 +124,101 @@ const Navbar = ({ isAuthenticated }) => {
           </ul>
         </div>
 
-        {/* Mobile menu button - now with white color */}
-        <div className="md:hidden self-start mt-2">
+        {/* Mobile menu button */}
+        <div className="lg:hidden flex items-center">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-white p-2 rounded-lg hover:bg-white/20 transition-colors"
+            className="text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
-            {isMenuOpen ? <FiX size={24} color="white" /> : <FiMenu size={24} color="white" />}
+            {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Navigation - now with black background */}
+      {/* Mobile Navigation Dropdown */}
       {isMenuOpen && (
-        <div className="md:hidden bg-black py-4 px-4 border-t border-gray-700 animate-slideDown">
-          <ul className="flex flex-col gap-3 items-center">
+        <div className="lg:hidden bg-[#0a0a0a] border border-white/10 absolute top-[75px] right-4 w-[85%] sm:w-[50%] md:w-[35%] lg:w-[30%] min-w-[280px] rounded-2xl shadow-2xl animate-slideDown overflow-hidden z-[51]">
+          <ul className="flex flex-col p-2 bg-black/95 backdrop-blur-xl">
             <li>
               <Link
                 to="/"
-                className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
+                className={`flex items-center gap-3 py-4 px-4 rounded-xl ${isActive('/') && location.pathname === '/' ? 'bg-white/10 text-[#FF6F61]' : 'text-white/70'}`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Home
+                <FiHome className="text-lg" />
+                <span className="font-medium">Home</span>
               </Link>
             </li>
             <li>
               <Link
                 to="/gallery"
-                className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/gallery') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
+                className={`flex items-center gap-3 py-4 px-4 rounded-xl ${isActive('/gallery') ? 'bg-white/10 text-[#FF6F61]' : 'text-white/70'}`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Gallery
+                <FiGrid className="text-lg" />
+                <span className="font-medium">Gallery</span>
               </Link>
             </li>
             <li>
               <Link
                 to="/about"
-                className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/about') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
+                className={`flex items-center gap-3 py-4 px-4 rounded-xl ${isActive('/about') ? 'bg-white/10 text-[#FF6F61]' : 'text-white/70'}`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                About
+                <FiUser className="text-lg" />
+                <span className="font-medium">About</span>
               </Link>
             </li>
             <li>
               <Link
                 to="/contact"
-                className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/contact') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
+                className={`flex items-center gap-3 py-4 px-4 rounded-xl ${isActive('/contact') ? 'bg-white/10 text-[#FF6F61]' : 'text-white/70'}`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Contact
+                <FiMail className="text-lg" />
+                <span className="font-medium">Contact</span>
               </Link>
             </li>
+
+            <div className="h-[1px] bg-white/5 my-2 mx-4" />
+
+            {isAuthenticated ? (
+              <li>
+                <Link
+                  to="/admin/gallery"
+                  className={`flex items-center gap-3 py-4 px-4 rounded-xl ${isActive('/admin/gallery') ? 'bg-white/10 text-[#FF6F61]' : 'text-white/70'}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <FiUpload className="text-lg" />
+                  <span className="font-medium">Admin Dashboard</span>
+                </Link>
+              </li>
+            ) : (
+              <li>
+                <Link
+                  to="/login"
+                  className={`flex items-center gap-3 py-4 px-4 rounded-xl ${isActive('/login') ? 'bg-white/10 text-[#FF6F61]' : 'text-white/70'}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <FiLogIn className="text-lg" />
+                  <span className="font-medium">Admin Login</span>
+                </Link>
+              </li>
+            )}
+
             <li>
               <a
                 href="https://www.instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="nav-link py-2 px-4 rounded-lg hover:bg-gray-800 text-white font-medium"
+                className="flex items-center gap-3 py-4 px-4 text-white/70"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <FiInstagram size={20} className="inline mr-1 relative top-[2px]" /> Instagram
+                <FiInstagram className="text-lg" />
+                <span className="font-medium">Instagram</span>
               </a>
             </li>
-
-            {/* Show Admin Gallery only when authenticated */}
-            {isAuthenticated && (
-              <li>
-                <Link
-                  to="/admin/gallery"
-                  className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/admin/gallery') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Admin Gallery
-                </Link>
-              </li>
-            )}
-
-            {/* Only show login when not authenticated */}
-            {!isAuthenticated && (
-              <li>
-                <Link
-                  to="/login"
-                  className={`nav-link py-2 px-4 rounded-lg hover:bg-gray-800 ${isActive('/login') ? 'active bg-gray-800 text-white' : 'text-white'} font-medium`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Login
-                </Link>
-              </li>
-            )}
           </ul>
         </div>
       )}
