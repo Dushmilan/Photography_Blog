@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { FiCamera, FiAward, FiHeart, FiAperture } from 'react-icons/fi';
-import img from '../Images/photographer4.jpg';
+import img from '../Images/Photographer6.jpg';
 
 const AboutPage = () => {
   useEffect(() => {
@@ -36,12 +36,12 @@ const AboutPage = () => {
           {/* RIGHT COLUMN: ONLY TEXT & DETAILS */}
           <div className="lg:col-span-7 space-y-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <header>
-              <p className="text-[#A8E6CF] text-xs font-medium tracking-[0.3em] uppercase mb-3">Lead Photographer</p>
-              <h1 className="text-5xl lg:text-7xl font-thin tracking-tight mb-4">
-                Jane <span className="font-normal text-transparent bg-clip-text bg-gradient-to-r from-[#FF6F61] via-[#FF9933] to-[#A8E6CF]">Smith</span>
+              <p className="text-[#A8E6CF] text-xs font-medium tracking-[0.3em] uppercase mb-3">Photographer</p>
+              <h1 className="text-5xl lg:text-7xl font-thin tracking-tight mb-4 text-white">
+                Mithurshan <span className="font-normal text-transparent bg-clip-text bg-gradient-to-r from-[#FF6F61] via-[#FF9933] to-[#A8E6CF]">Sen</span>
               </h1>
               <p className="text-xl text-white/60 font-light max-w-xl leading-relaxed">
-                Visual storyteller freezing time through the lens of light, shadow, and raw emotion. Exploring the unscripted beauty of the world.
+                From intimate portraits to vast landscapes, I document the diversity of the human spirit and the raw, unscripted beauty of our most meaningful connections.<br /> My lens speaks one message: <b>we are all the same!-yet beautifully different.</b>
               </p>
             </header>
 
