@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiMenu, FiX, FiHome, FiImage, FiGrid, FiUpload, FiUser, FiLogIn, FiMail, FiInstagram } from 'react-icons/fi';
+import img from '../Images/Logo.jpg';
 
 const Navbar = ({ isAuthenticated }) => {
   const location = useLocation();
@@ -44,22 +45,18 @@ const Navbar = ({ isAuthenticated }) => {
 
         {/* Left section with Logo/Brand */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-16 h-8 rounded-lg bg-gradient-to-br from-[#FF6F61] to-[#A8E6CF] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-            <img src="/Logo.jpg" alt="Logo" />
+          <div className="w-48 h-12 rounded-lg bg-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+            <img
+              src={img}
+              alt="Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center">
           <ul className="nav-items flex items-center">
-            <li>
-              <Link
-                to="/"
-                className={`nav-link ${isActive('/') && location.pathname === '/' ? 'active' : ''}`}
-              >
-                Home
-              </Link>
-            </li>
             <li>
               <Link
                 to="/gallery"
