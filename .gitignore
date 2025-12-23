@@ -29,6 +29,7 @@ output/
 
 # Generated files
 public/
+!frontend/public/
 www/
 
 #==========================================================
