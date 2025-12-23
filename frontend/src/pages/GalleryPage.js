@@ -144,21 +144,16 @@ const GalleryPage = () => {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'black' }}>
       {filteredImages.length > 0 ? (
         <div className="gallery-container p-4 pt-24 md:pt-48 pb-4">
-          {/* Gallery grid layout - centered in container with 85% width */}
-          <div className="mx-auto w-full max-w-[85%]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+          {/* Masonry Layout Container */}
+          <div className="mx-auto w-full max-w-[85%] px-6 py-6">
+            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
               {filteredImages.map((image, index) => {
                 const imageUrl = getImageUrl(image, 'medium');
-                const { width, height } = getImageDimensions(image);
-                const fileSize = formatFileSize(image.size || image.mediaMetadata?.photo?.imageFileSize || 0);
-                // Calculate aspect ratio to determine height
-                const aspectRatio = (width && height) ? width / height : 4 / 3;
-                const heightClass = aspectRatio > 1.2 ? 'h-64' : aspectRatio > 0.8 ? 'h-48' : 'h-36';
 
                 return (
                   <div
                     key={image.id}
-                    className="image-card group cursor-pointer relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#001F3F]/10 aspect-square"
+                    className="break-inside-avoid mb-6 image-card group cursor-pointer relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#001F3F]/10"
                     onClick={() => openLightbox(images.findIndex(img => img.id === image.id))}
                     tabIndex={0}
                     role="button"
@@ -168,38 +163,16 @@ const GalleryPage = () => {
                       }
                     }}
                   >
-                    <div className={`w-full ${heightClass} overflow-hidden`}>
-                      <img
-                        src={imageUrl}
-                        alt={image.original_name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI2Q0ZDRkNCIvPgo8cGF0aCBkPSJNMyA2TDkgMTJMMyAxOEw5IDI0TDE2IDE3TDE5IDIwTDE1IDI0TDMgMTBaIiBzdHJva2U9IiM4ZTg1NzQiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTIwIDZMMTQgMTJMOSA3IiBzdHJva2U9IiM4ZTg1NzQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
-                        }}
-                      />
-                    </div>
-
-                    {/* Image info overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
-                      <h3 className="font-medium truncate text-sm">{image.original_name}</h3>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-xs text-white/80">{width || image.mediaMetadata?.width}×{height || image.mediaMetadata?.height}</span>
-                        <span className="text-xs text-white/80">{fileSize}</span>
-                      </div>
-                    </div>
-
-                    {/* View button */}
-                    <button
-                      className="absolute bottom-3 right-3 p-2 rounded-full bg-white/30 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl transform translate-y-2 group-hover:translate-y-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openLightbox(images.findIndex(img => img.id === image.id));
+                    {/* Note: Removed fixed height classes to allow natural aspect ratio */}
+                    <img
+                      src={imageUrl}
+                      alt={image.original_name}
+                      className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = 'data:image/svg+xml;base64,...';
                       }}
-                      aria-label="View details"
-                    >
-                      <FiInfo size={16} />
-                    </button>
+                    />
                   </div>
                 );
               })}
@@ -273,61 +246,6 @@ const GalleryPage = () => {
                 aria-label="Next image"
               >
                 <FiChevronRight size={24} />
-              </button>
-            </div>
-
-            {/* Image info panel */}
-            <div className="absolute bottom-4 left-0 right-0 text-center bg-black/40 text-white py-3 px-4 rounded-lg max-w-md mx-auto backdrop-blur-sm transition-all duration-300">
-              <div className="text-sm font-medium truncate mb-1">{images[currentSlide].original_name}</div>
-              <div className="flex justify-between items-center text-xs mb-2">
-                <span>{images[currentSlide].width || images[currentSlide].mediaMetadata?.width}×{images[currentSlide].height || images[currentSlide].mediaMetadata?.height}</span>
-                <span>{formatFileSize(images[currentSlide].size || images[currentSlide].mediaMetadata?.photo?.imageFileSize || 0)}</span>
-              </div>
-              <div className="flex justify-center gap-3 mt-1">
-                <span className="text-xs">({currentSlide + 1} of {images.length})</span>
-                <button
-                  className="text-xs flex items-center text-white hover:text-[#A8E6CF] transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Share functionality would go here
-                    alert('Share functionality would be implemented here');
-                  }}
-                >
-                  <FiShare2 className="mr-1" size={12} />
-                  Share
-                </button>
-                <button
-                  className="text-xs flex items-center text-white hover:text-[#A8E6CF] transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Download the image directly
-                    const link = document.createElement('a');
-                    link.href = getImageUrl(images[currentSlide], 'original');
-                    link.download = images[currentSlide].original_name;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
-                >
-                  <FiDownload className="mr-1" size={12} />
-                  Download
-                </button>
-              </div>
-            </div>
-
-            {/* Slideshow toggle */}
-            <div className="absolute top-4 left-4 flex items-center">
-              <button
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${isSlideshow
-                  ? 'bg-[#A8E6CF] text-[#001F3F]'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsSlideshow(!isSlideshow);
-                }}
-              >
-                {isSlideshow ? 'Stop Slideshow' : 'Start Slideshow'}
               </button>
             </div>
           </div>

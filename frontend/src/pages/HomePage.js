@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FiChevronLeft, FiChevronRight, FiX, FiShare2 } from 'react-icons/fi';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../utils/api';
 
 const HomePage = () => {
@@ -7,12 +6,16 @@ const HomePage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Refs for DOM manipulation
+  const containerRef = useRef(null);
+  const thumbnailContainerRef = useRef(null);
   const imageRefs = useRef([]);
+  const isAutoScrolling = useRef(false);
+  const rafId = useRef(null);
 
+  // Helper to collect refs
   const addToRefs = (index) => (el) => {
-    if (el && imageRefs.current) {
-      imageRefs.current[index] = el;
-    }
+    if (el) imageRefs.current[index] = el;
   };
 
   useEffect(() => {
@@ -22,173 +25,256 @@ const HomePage = () => {
 
   const fetchImages = async () => {
     try {
-      // Fetch slideshow images
+      // 1. Try Slideshow endpoint
       const slideshowResponse = await api.get('/images/slideshow');
+      let data = slideshowResponse.data;
 
-      // Use slideshow images for the slideshow - Ensure it's an array
-      let slideshowData = slideshowResponse.data;
-      if (!Array.isArray(slideshowData)) {
-        console.warn('Expected array for slideshow images, got:', typeof slideshowData);
-        // Handle case where images might be nested in an object
-        slideshowData = slideshowData?.images || [];
-      }
-      setImages(slideshowData);
+      // Handle array vs object response
+      if (!Array.isArray(data)) data = data?.images || [];
 
-      // If no slideshow images, fetch all images as fallback
-      if (slideshowData.length === 0) {
-        const allImagesResponse = await api.get('/images/public');
-        let allData = allImagesResponse.data;
-        if (!Array.isArray(allData)) {
-          allData = allData?.images || [];
-        }
-        setImages(allData);
+      // 2. Fallback to public images if slideshow is empty
+      if (data.length === 0) {
+        const publicResponse = await api.get('/images/public');
+        let publicData = publicResponse.data;
+        if (!Array.isArray(publicData)) publicData = publicData?.images || [];
+        data = publicData;
       }
 
-      setLoading(false);
+      setImages(data);
     } catch (err) {
       console.error('Failed to load images:', err);
-      setImages([]); // Ensure images is an array on error
+      setImages([]);
+    } finally {
       setLoading(false);
     }
   };
 
-  const goToPrevious = () => {
-    setCurrentIndex(prevIndex =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
+  // --- NAVIGATION LOGIC ---
 
-  const goToNext = () => {
-    setCurrentIndex(prevIndex =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
-  };
+  const scrollToImage = useCallback((index) => {
+    if (!imageRefs.current[index] || !containerRef.current) return;
 
-  const selectImage = (index) => {
     setCurrentIndex(index);
-  };
+    isAutoScrolling.current = true;
 
-  // Scroll to the current image when currentIndex changes
+    // Scroll the MAIN container to the specific image
+    imageRefs.current[index].scrollIntoView({
+      behavior: 'smooth',
+      block: 'center', // This ensures the main image is vertically centered
+    });
+
+    // Release the "auto scroll" lock after animation completes
+    setTimeout(() => {
+      isAutoScrolling.current = false;
+    }, 800);
+  }, []);
+
+  // --- SYNCHRONIZATION LOGIC (The Core Magic) ---
+
   useEffect(() => {
-    if (imageRefs.current[currentIndex]) {
-      imageRefs.current[currentIndex].scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-    }
-  }, [currentIndex]);
+    const mainContainer = containerRef.current;
+    const thumbContainer = thumbnailContainerRef.current;
 
-  if (loading || images.length === 0) {
+    if (!mainContainer || !thumbContainer || images.length === 0) return;
+
+    const handleScroll = () => {
+      // Cancel previous frame to prevent stacking
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+
+      rafId.current = requestAnimationFrame(() => {
+        // 1. Calculate Main Scroll Progress (0.0 to 1.0)
+        const mainScrollTop = mainContainer.scrollTop;
+        const mainScrollHeight = mainContainer.scrollHeight - mainContainer.clientHeight;
+
+        // Prevent division by zero
+        if (mainScrollHeight <= 0) return;
+
+        const scrollRatio = mainScrollTop / mainScrollHeight;
+
+        // 2. Apply Ratio to Thumbnail Container
+        const thumbScrollHeight = thumbContainer.scrollHeight - thumbContainer.clientHeight;
+        const targetThumbScroll = scrollRatio * thumbScrollHeight;
+
+        // 3. Move Thumbnail Container
+        thumbContainer.scrollTop = targetThumbScroll;
+      });
+    };
+
+    // Listen to the MAIN container's scroll event
+    mainContainer.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      mainContainer.removeEventListener('scroll', handleScroll);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
+  }, [loading, images.length]);
+
+  // --- INTERSECTION OBSERVER (Updates Active State on Manual Scroll) ---
+
+  useEffect(() => {
+    if (loading || images.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Only update state if we aren't currently auto-scrolling (clicked/keyboard)
+        if (isAutoScrolling.current) return;
+
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = parseInt(entry.target.getAttribute('data-index'));
+            if (!isNaN(index)) {
+              setCurrentIndex(index);
+            }
+          }
+        });
+      },
+      {
+        root: containerRef.current,
+        threshold: 0.55, // Trigger when >55% of image is visible
+      }
+    );
+
+    imageRefs.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [loading, images.length]);
+
+  // --- KEYBOARD CONTROLS ---
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (images.length === 0) return;
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const nextIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
+        scrollToImage(nextIndex);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextIndex = currentIndex === images.length - 1 ? 0 : currentIndex + 1;
+        scrollToImage(nextIndex);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, images.length, scrollToImage]);
+
+
+  // --- RENDER ---
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'black' }}>
-        <section className="slideshow-container flex-1" style={{ backgroundColor: 'black' }}>
-          <div className="flex flex-col items-center justify-center h-full animate-fade-in">
-            <div className="w-16 h-16 border-4 border-[#FF6F61] border-t-transparent rounded-full animate-spin mb-4"></div>
-            <div className="text-white text-xl font-light">Discovering visual stories...</div>
-          </div>
-        </section>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[#FF6F61] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div className="text-white font-light text-sm tracking-widest animate-pulse">LOADING GALLERY</div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: 'black' }}>
-      {/* Main hero images container - scrollable, extends to full width */}
+    <div className="relative min-h-screen bg-black overflow-hidden select-none">
+
+      {/* MAIN SCROLL CONTAINER 
+        - Occupies full screen
+        - Scroll Snap for nice feel
+        - Hide scrollbars
+      */}
       <div
-        className="absolute left-0 top-40 w-full h-[80%] overflow-y-auto"
+        ref={containerRef}
+        className="absolute inset-0 w-full h-full overflow-y-auto outline-none"
         style={{
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#4B5563 #1F2937'
-        }}
-        onScroll={(e) => {
-          // Calculate which image is currently in view
-          const container = e.target;
-          const scrollPosition = container.scrollTop;
-          // Calculate based on the container's height
-          const containerHeight = container.clientHeight;
-          const imageHeight = 0.6 * containerHeight; // Adjusted calculation
-          const spacing = 40 * 4; // 40 * 4px = 160px (mb-40 in Tailwind)
-          const elementHeight = imageHeight + spacing;
-          const index = Math.floor(scrollPosition / elementHeight);
-          if (index >= 0 && index < images.length && index !== currentIndex) {
-            setCurrentIndex(index);
-          }
+          scrollSnapType: 'y mandatory',
+          scrollbarWidth: 'none', // Firefox
+          msOverflowStyle: 'none', // IE/Edge
         }}
       >
         <style>{`
-          .overflow-y-auto::-webkit-scrollbar {
-            width: 6px; /* Reduced width of scrollbar */
-          }
-          .overflow-y-auto::-webkit-scrollbar-track {
-            background: #1F2937; /* Dark background for scrollbar track */
-            border-radius: 4px;
-          }
-          .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: #4B5563; /* Scrollbar thumb color */
-            border-radius: 4px;
-          }
-          .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #6B7280; /* Scrollbar thumb hover color */
-          }
+          /* Hide scrollbar for Chrome/Safari */
+          div::-webkit-scrollbar { display: none; }
         `}</style>
 
-        <div className="max-w-4xl mx-auto pt-8 pr-8">
-          {Array.isArray(images) && images.map((image, index) => (
+        {/* Main Container Padding Logic:
+          To center a 60vh image in a 100vh viewport, we need 20vh top and 20vh bottom space.
+        */}
+        <div className="max-w-6xl mx-auto px-4 py-[20vh]">
+          {images.map((image, index) => (
             <div
-              ref={addToRefs(index)}
               key={image.id}
-              className="relative mx-auto mb-40" /* 40 * 4px = 160px spacing between images */
-              style={{ width: '93%', height: '60vh' }}
+              ref={addToRefs(index)}
+              data-index={index}
+              className="w-full h-[60vh] mb-[20vh] last:mb-0 flex items-center justify-center snap-center"
             >
               <img
                 src={image.path || image.baseUrl}
                 alt={image.original_name}
-                className="w-full h-full object-contain rounded-lg shadow-lg"
+                className="max-h-full w-auto object-contain rounded-sm shadow-2xl transition-transform duration-700 ease-out"
+                style={{
+                  // Subtle scale effect when active
+                  transform: index === currentIndex ? 'scale(1)' : 'scale(0.95)',
+                  opacity: index === currentIndex ? 1 : 0.5,
+                  transition: 'opacity 0.5s ease, transform 0.5s ease'
+                }}
               />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Fixed thumbnail preview section - stays in position and does not move with scroll */}
-      <div className="absolute top-1/2 right-8 w-[7%] h-[60%] bg-black bg-opacity-50 p-1 rounded-lg overflow-hidden transform -translate-y-1/5">
-        <div className="h-full flex flex-col items-center">
-          {Array.isArray(images) && images.map((image, index) => {
-            // Determine opacity and styling based on position relative to current index
-            let positionClass = '';
-            if (index === currentIndex) {
-              positionClass = 'border-white opacity-100 scale-110 z-10';  // Active thumbnail is highlighted
-            } else if (index < currentIndex) {
-              positionClass = 'border-gray-600 opacity-40';  // Previous images are faded
-            } else {
-              positionClass = 'border-gray-600 opacity-40';  // Next images are faded
-            }
-            return (
+      {/* THUMBNAIL SIDEBAR 
+        - Fixed position on right
+        - Vertically centered
+        - No pointer events on container (so click-through works), 
+          but yes pointer events on images.
+      */}
+      <div
+        className="absolute top-1/2 right-4 md:right-8 w-20 md:w-28 h-[60vh] -translate-y-1/2 pointer-events-none z-50 overflow-hidden"
+      >
+        {/* Inner Scroll Container */}
+        <div
+          ref={thumbnailContainerRef}
+          className="w-full h-full overflow-y-auto pr-2"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {/* THUMBNAIL PADDING LOGIC (Crucial for Center Line Sync):
+             Container Height = 60vh.
+             Thumbnail Height = 6rem (h-24).
+             To center the first thumbnail at scroll 0: 
+             Padding Top = (ContainerHeight / 2) - (ThumbHeight / 2).
+             Padding = calc(30vh - 3rem).
+          */}
+          <div className="py-[calc(30vh-3rem)]">
+            {images.map((image, index) => (
               <div
                 key={image.id}
-                className={`cursor-pointer rounded overflow-hidden border transition-all duration-300 ${positionClass}`}
-                style={{ margin: '0.25rem 0' }} /* mb-1 equivalent */
-                onClick={() => {
-                  selectImage(index);
-                  // Also scroll to the corresponding image
-                  if (imageRefs.current[index]) {
-                    imageRefs.current[index].scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'center'
-                    });
-                  }
-                }}
+                onClick={() => scrollToImage(index)}
+                className={`
+                  relative w-full h-24 mb-4 rounded cursor-pointer 
+                  transition-all duration-300 ease-out pointer-events-auto
+                  overflow-hidden border-2
+                  ${index === currentIndex
+                    ? 'border-white opacity-100 scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)]'
+                    : 'border-transparent opacity-30 hover:opacity-60 grayscale scale-95'}
+                `}
               >
                 <img
                   src={image.path || image.baseUrl}
-                  alt={image.original_name}
-                  className="w-full h-12 object-cover"
+                  alt={`Thumbnail ${index}`}
+                  className="w-full h-full object-cover"
                 />
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* Optional: Mobile Scroll Indicator */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/30 text-xs animate-bounce md:hidden pointer-events-none">
+        SCROLL
+      </div>
+
     </div>
   );
 };

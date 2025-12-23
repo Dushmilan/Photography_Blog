@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { FiCamera, FiAward, FiHeart, FiAperture } from 'react-icons/fi';
-
+import img from '../Images/photographer2.JPG';
 const AboutPage = () => {
   useEffect(() => {
     document.title = 'About | Cooked By Lens';
@@ -23,9 +23,8 @@ const AboutPage = () => {
 
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="w-32 h-32 mb-4 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] rounded-full animate-spin-slow opacity-50 blur-sm"></div>
                 <div className="absolute inset-1 bg-[#0a0a0a] rounded-full flex items-center justify-center border border-white/10">
-                  <FiCamera className="text-4xl text-white/40" />
+                  <img src={img} alt="Photographer" className="w-full h-full object-cover" />
                 </div>
               </div>
 

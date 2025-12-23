@@ -44,12 +44,9 @@ const Navbar = ({ isAuthenticated }) => {
 
         {/* Left section with Logo/Brand */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF6F61] to-[#A8E6CF] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-            <FiImage className="text-white text-lg" />
+          <div className="w-16 h-8 rounded-lg bg-gradient-to-br from-[#FF6F61] to-[#A8E6CF] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <img src="/Logo.jpg" alt="Logo" />
           </div>
-          <span className="text-xl font-light tracking-tight text-white">
-            Cooked<span className="font-bold">ByLens</span>
-          </span>
         </Link>
 
         {/* Desktop Navigation */}
