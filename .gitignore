@@ -310,10 +310,6 @@ backend/.env.*
 frontend/build/
 frontend/dist/
 frontend/out/
-frontend/public/
-frontend/.next/
-frontend/node_modules/
-
 # Frontend environment files
 frontend/.env
 frontend/.env.*

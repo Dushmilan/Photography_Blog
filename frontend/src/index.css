@@ -11,8 +11,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: black; /* Changed to black background */
-  color: #ffffff; /* Changed to white text for contrast */
+  background-color: black; 
+  color: #ffffff; 
   transition: background 0.3s ease;
 }
 
