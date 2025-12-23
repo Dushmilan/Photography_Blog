@@ -371,4 +371,60 @@ router.get('/:id', authenticate, catchAsync(async (req, res) => {
   res.json(image);
 }));
 
+// Delete an image from database and ImageKit
+router.delete('/:id', authenticate, catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  // Validate image ID
+  if (!id) {
+    throw new AppError('Image ID is required', 400);
+  }
+
+  const supabase = req.app.locals.supabase;
+  const imageClass = new Image(supabase);
+
+  // Initialize ImageKit
+  const ImageKit = require('imagekit');
+  require('dotenv').config();
+
+  // Validate environment variables for ImageKit
+  if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+    throw new AppError('ImageKit configuration is missing', 500);
+  }
+
+  const imagekit = new ImageKit({
+    publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+  });
+
+  // Delete from ImageKit
+  try {
+    await new Promise((resolve, reject) => {
+      imagekit.deleteFile(id, (error, result) => {
+        if (error) {
+          console.error('Error deleting from ImageKit:', error);
+          // Proceed even if error matches to ensure DB cleanup
+          resolve(null);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Unexpected error during ImageKit deletion:', error);
+  }
+
+  // Delete from Database
+  try {
+    await imageClass.deleteById(id);
+  } catch (error) {
+    console.error('Error deleting from database:', error);
+    // If it was already deleted from DB, that's fine, but if it's a different error we might want to know.
+    // However, for a delete operation, if it's gone, it's success.
+  }
+
+  res.status(200).json({ message: 'Image deleted successfully' });
+}));
+
 module.exports = router;

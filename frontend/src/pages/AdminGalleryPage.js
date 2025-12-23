@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiImage, FiX, FiCheck, FiUser, FiLogOut, FiActivity, FiEye, FiEyeOff, FiPlay, FiBriefcase } from 'react-icons/fi';
+import { FiImage, FiX, FiCheck, FiUser, FiLogOut, FiActivity, FiEye, FiEyeOff, FiPlay, FiBriefcase, FiTrash2 } from 'react-icons/fi';
 import api from '../utils/api';
 import { ENDPOINTS } from '../config/apiConfig';
 
@@ -70,6 +70,23 @@ const AdminGalleryPage = () => {
     } catch (error) {
       console.error('Error updating public status:', error);
       // Optionally show an error message to the user
+    }
+  };
+
+  // Handle deleting an image
+  const handleDelete = async (imageId) => {
+    if (!window.confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/images/${imageId}`);
+
+      // Remove the image from local state
+      setImages(prevImages => prevImages.filter(img => img.id !== imageId));
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert('Failed to delete image. Please try again.');
     }
   };
 
@@ -217,6 +234,14 @@ const AdminGalleryPage = () => {
                       >
                         {image.is_slideshow ? <FiCheck /> : <FiPlay />}
                         Slideshow
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(image.id)}
+                        className="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white mt-1"
+                      >
+                        <FiTrash2 />
+                        Delete Asset
                       </button>
                     </div>
                   </div>
