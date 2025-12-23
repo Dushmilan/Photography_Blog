@@ -174,6 +174,17 @@ class Image {
     // Return the unchanged image if no updates were made
     return image;
   }
+
+  async updateOrder(updates, type) {
+    if (!updates || !Array.isArray(updates)) {
+      throw new AppError('Updates must be an array', 400);
+    }
+    if (type !== 'gallery' && type !== 'slideshow') {
+      throw new AppError('Type must be "gallery" or "slideshow"', 400);
+    }
+
+    return await this.db.updateImageOrder(updates, type);
+  }
 }
 
 module.exports = Image;

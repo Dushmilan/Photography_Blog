@@ -60,6 +60,24 @@ router.put('/:id/slideshow', authenticate, catchAsync(async (req, res) => {
   res.json({ image: updatedImage });
 }));
 
+// Reorder images
+router.put('/reorder', authenticate, catchAsync(async (req, res) => {
+  const { updates, type } = req.body;
+
+  if (!updates || !Array.isArray(updates)) {
+    throw new AppError('Updates array is required', 400);
+  }
+  if (!type) {
+    throw new AppError('Type (gallery/slideshow) is required', 400);
+  }
+
+  const supabase = req.app.locals.supabase;
+  const imageClass = new Image(supabase);
+
+  await imageClass.updateOrder(updates, type);
+  res.status(200).json({ message: 'Order updated successfully' });
+}));
+
 
 // Create a new image in the database
 router.post('/', authenticate, catchAsync(async (req, res) => {
