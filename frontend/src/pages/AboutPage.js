@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { FiCamera, FiAward, FiHeart, FiAperture } from 'react-icons/fi';
-import img from '../Images/photographer2.JPG';
+import img from '../Images/photographer4.jpg';
+
 const AboutPage = () => {
   useEffect(() => {
     document.title = 'About | Cooked By Lens';
   }, []);
+
   return (
     <div className="h-screen bg-black text-white selection:bg-[#FF6F61] selection:text-white overflow-hidden relative pt-16">
       {/* Background Decor */}
@@ -14,93 +16,64 @@ const AboutPage = () => {
 
       {/* Main Container */}
       <div className="h-full max-w-7xl mx-auto px-6 flex items-center justify-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
-          {/* Left Column: Profile Card (Compact) */}
-          <div className="lg:col-span-4 animate-slide-up bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md shadow-2xl relative overflow-hidden group">
-            {/* Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#FF6F61]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-32 h-32 mb-4 relative">
-                <div className="absolute inset-1 bg-[#0a0a0a] rounded-full flex items-center justify-center border border-white/10">
-                  <img src={img} alt="Photographer" className="w-full h-full object-cover" />
-                </div>
+          {/* LEFT COLUMN: ONLY PHOTO */}
+          <div className="lg:col-span-5 animate-slide-up flex justify-center">
+            <div className="relative group">
+              {/* Decorative Frame */}
+              <div className="absolute -inset-4 border border-white/10 rounded-2xl group-hover:border-[#FF6F61]/30 transition-colors duration-500" />
+              <div className="relative overflow-hidden rounded-xl aspect-[4/5] w-full max-w-sm shadow-2xl">
+                <img
+                  src={img}
+                  alt="Photographer Profile"
+                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 scale-105 hover:scale-100"
+                />
               </div>
-
-              <h2 className="text-2xl font-light text-white mb-1">Jane Smith</h2>
-              <p className="text-[#A8E6CF] text-xs font-medium tracking-[0.2em] uppercase mb-6">Lead Photographer</p>
-
-              {/* Vertical Divider */}
-              <div className="w-10 h-[1px] bg-white/10 mb-6"></div>
-
-              <div className="grid grid-cols-3 gap-2 w-full mb-6 text-center">
-                <div>
-                  <div className="text-xl font-bold text-white">10+</div>
-                  <div className="text-[10px] text-white/40 uppercase">Years</div>
-                </div>
-                <div className="border-l border-white/10">
-                  <div className="text-xl font-bold text-white">500+</div>
-                  <div className="text-[10px] text-white/40 uppercase">Shoots</div>
-                </div>
-                <div className="border-l border-white/10">
-                  <div className="text-xl font-bold text-white">15</div>
-                  <div className="text-[10px] text-white/40 uppercase">Awards</div>
-                </div>
-              </div>
-
             </div>
           </div>
 
-          {/* Right Column: Content (Concise) */}
-          <div className="lg:col-span-8 space-y-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <div>
-              <h1 className="text-4xl lg:text-6xl font-thin tracking-tight mb-4">
-                Visual <span className="font-normal text-transparent bg-clip-text bg-gradient-to-r from-[#FF6F61] via-[#FF9933] to-[#A8E6CF]">Storyteller</span>
+          {/* RIGHT COLUMN: ONLY TEXT & DETAILS */}
+          <div className="lg:col-span-7 space-y-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <header>
+              <p className="text-[#A8E6CF] text-xs font-medium tracking-[0.3em] uppercase mb-3">Lead Photographer</p>
+              <h1 className="text-5xl lg:text-7xl font-thin tracking-tight mb-4">
+                Jane <span className="font-normal text-transparent bg-clip-text bg-gradient-to-r from-[#FF6F61] via-[#FF9933] to-[#A8E6CF]">Smith</span>
               </h1>
-              <p className="text-lg text-white/60 font-light max-w-2xl leading-relaxed">
-                Freezing time through the lens of light, shadow, and raw emotion. My work is an exploration of the unscripted beauty that surrounds us.
+              <p className="text-xl text-white/60 font-light max-w-xl leading-relaxed">
+                Visual storyteller freezing time through the lens of light, shadow, and raw emotion. Exploring the unscripted beauty of the world.
               </p>
-            </div>
+            </header>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-colors">
-                <p className="text-[#FF6F61] mb-2 font-medium flex items-center gap-2">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <p className="text-[#FF6F61] font-medium flex items-center gap-2">
                   <FiCamera /> Philosophy
                 </p>
                 <p className="text-sm text-white/50 leading-relaxed">
-                  Rooted in authenticity. I strive to capture the genuine, fleeting moments that tell a story for eternity.
+                  Rooted in authenticity. Capturing the genuine, fleeting moments that tell a story for eternity.
                 </p>
               </div>
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-colors">
-                <p className="text-[#A8E6CF] mb-2 font-medium flex items-center gap-2">
+              <div className="space-y-2">
+                <p className="text-[#A8E6CF] font-medium flex items-center gap-2">
                   <FiAperture /> Approach
                 </p>
                 <p className="text-sm text-white/50 leading-relaxed">
-                  Blending natural light with architectural composition to create images that feel breathing and alive.
+                  Blending natural light with architectural composition to create images that feel alive.
                 </p>
               </div>
             </div>
 
-            {/* Specialties Row */}
-            <div>
-              <p className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4 pl-1">Specialties</p>
-              <div className="flex flex-wrap gap-4">
-                {[
-                  { icon: FiCamera, label: "Portraiture" },
-                  { icon: FiAperture, label: "Landscape" },
-                  { icon: FiHeart, label: "Lifestyle" },
-                  { icon: FiAward, label: "Editorial" }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3 px-5 py-3 rounded-full bg-white/5 border border-white/10 hover:border-[#A8E6CF]/50 hover:bg-white/10 transition-all cursor-default">
-                    <item.icon className="text-[#A8E6CF]" />
-                    <span className="text-sm text-white/80">{item.label}</span>
-                  </div>
-                ))}
-              </div>
+            {/* Specialties */}
+            <div className="flex flex-wrap gap-3">
+              {["Portraiture", "Landscape", "Lifestyle", "Editorial"].map((label, idx) => (
+                <span key={idx} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-white/70 uppercase tracking-wider">
+                  {label}
+                </span>
+              ))}
             </div>
-
           </div>
+
         </div>
       </div>
     </div>
