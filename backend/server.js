@@ -30,9 +30,6 @@ app.use(cors());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Health check route
-app.get('/ping', (req, res) => res.json({ message: 'pong', netlify: !!process.env.NETLIFY }));
-
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
@@ -53,6 +50,14 @@ app.locals.supabase = supabase;
 
 // Routes
 const apiRouter = express.Router();
+
+// Health check inside router
+apiRouter.get('/ping', (req, res) => res.json({
+  message: 'pong',
+  netlify: !!process.env.NETLIFY,
+  env: process.env.NODE_ENV
+}));
+
 apiRouter.use('/auth', require('./routes/auth'));
 apiRouter.use('/tokens', require('./routes/tokens'));
 apiRouter.use('/images', require('./routes/images'));
