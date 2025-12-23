@@ -4,7 +4,7 @@ const SuccessNotification = ({ message, isVisible, onClose, duration = 3000 }) =
   if (!isVisible) return null;
 
   return (
-    <div className="fixed top-6 right-6 z-[9999] pointer-events-none">
+    <div className="fixed top-24 right-6 z-[9999] pointer-events-none">
       <div className="max-w-md w-full bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl transform transition-all duration-500 ease-out animate-slideIn pointer-events-auto overflow-hidden">
         {/* Success progress bar */}
         <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-[#A8E6CF] to-[#FF6F61] animate-progress" style={{ animationDuration: `${duration}ms` }}></div>

@@ -65,11 +65,10 @@ const ErrorNotification = ({ message, type = 'error', isVisible, onClose, durati
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
-      <div 
-        className={`max-w-sm w-full rounded-lg shadow-lg border ${getBgColor()} transform transition-all duration-300 ease-in-out ${
-          show ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-        }`}
+    <div className="fixed top-24 right-4 z-[9999]">
+      <div
+        className={`max-w-sm w-full rounded-lg shadow-lg border ${getBgColor()} transform transition-all duration-300 ease-in-out ${show ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+          }`}
       >
         <div className="p-4">
           <div className="flex items-start">
