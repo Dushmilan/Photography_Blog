@@ -133,6 +133,7 @@ const AdminGalleryPage = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Reordering & Filtering State
   const [filter, setFilter] = useState('all'); // 'all', 'public', 'slideshow'
@@ -306,7 +307,9 @@ const AdminGalleryPage = () => {
 
       setPendingOrders({});
       setIsReordering(false);
-      alert('Order updated successfully!');
+
+      setSuccessMessage('Order saved successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error saving order:', error);
       alert('Failed to save order.');
@@ -349,6 +352,17 @@ const AdminGalleryPage = () => {
 
       {/* Header Bar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
+
+        {/* Success Toast */}
+        {successMessage && (
+          <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-50 animate-slide-down">
+            <div className="bg-[#A8E6CF] text-black px-6 py-3 rounded-full shadow-lg shadow-[#A8E6CF]/20 flex items-center gap-2 font-medium">
+              <FiCheck className="text-lg" />
+              {successMessage}
+            </div>
+          </div>
+        )}
+
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-gradient-to-br from-[#FF6F61] to-[#A8E6CF] rounded-xl flex items-center justify-center shadow-lg shadow-[#FF6F61]/20">
