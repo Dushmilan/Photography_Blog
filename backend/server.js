@@ -47,11 +47,16 @@ if (supabaseUrl && supabaseKey) {
 app.locals.supabase = supabase;
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/tokens', require('./routes/tokens'));
-app.use('/api/images', require('./routes/images'));
-app.use('/api/imagekit', require('./routes/imagekit'));
-app.use('/api/contact', require('./routes/contact'));
+const apiRouter = express.Router();
+apiRouter.use('/auth', require('./routes/auth'));
+apiRouter.use('/tokens', require('./routes/tokens'));
+apiRouter.use('/images', require('./routes/images'));
+apiRouter.use('/imagekit', require('./routes/imagekit'));
+apiRouter.use('/contact', require('./routes/contact'));
+
+// Mount the router under both prefixes to handle local development and Netlify Functions
+app.use('/api', apiRouter);
+app.use('/.netlify/functions/api', apiRouter);
 
 // Global error handling middleware (should be last)
 app.use(globalErrorHandler);
