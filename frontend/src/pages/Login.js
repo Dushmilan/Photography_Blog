@@ -138,14 +138,13 @@ const Login = ({ setIsAuthenticated }) => {
           </div>
 
           <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full flex items-center justify-center py-3 px-4 rounded-xl font-medium text-white transition-all duration-300 ${
-                isLoading
-                  ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#FF6F61] via-[#FF9933] to-[#A8E6CF] hover:from-[#e56259] hover:via-[#ff8a14] hover:to-[#7fc9ae] transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl'
+            type="submit"
+            disabled={isLoading}
+            className={`w-full flex items-center justify-center py-3 px-4 rounded-xl font-medium text-white transition-all duration-300 ${isLoading
+                ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-[#FF6F61] via-[#FF9933] to-[#A8E6CF] hover:from-[#e56259] hover:via-[#ff8a14] hover:to-[#7fc9ae] transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl'
               }`}
-            >
+          >
             {isLoading ? (
               <>
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

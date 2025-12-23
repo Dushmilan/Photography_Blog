@@ -325,11 +325,10 @@ const AdminPage = () => {
                               alert('Failed to update public status. Please try again.');
                             });
                         }}
-                        className={`p-2 rounded-full shadow-lg transition-colors ${
-                          image.is_public
-                            ? 'bg-[#FF6F61] text-white'
-                            : 'bg-white text-black'
-                        }`}
+                        className={`p-2 rounded-full shadow-lg transition-colors ${image.is_public
+                          ? 'bg-[#FF6F61] text-white'
+                          : 'bg-white text-black'
+                          }`}
                         aria-label={image.is_public ? "Remove from public gallery" : "Add to public gallery"}
                       >
                         {image.is_public ? <FiX size={18} /> : <FiCheck size={18} />}

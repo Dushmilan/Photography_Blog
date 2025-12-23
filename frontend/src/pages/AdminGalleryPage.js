@@ -200,8 +200,8 @@ const AdminGalleryPage = () => {
                       <button
                         onClick={() => togglePublicStatus(image.id, !image.is_public)}
                         className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${image.is_public
-                            ? 'bg-white text-black hover:bg-[#A8E6CF]'
-                            : 'bg-white/10 text-white hover:bg-white/20'
+                          ? 'bg-white text-black hover:bg-[#A8E6CF]'
+                          : 'bg-white/10 text-white hover:bg-white/20'
                           }`}
                       >
                         {image.is_public ? <FiEyeOff /> : <FiEye />}
@@ -211,8 +211,8 @@ const AdminGalleryPage = () => {
                       <button
                         onClick={() => toggleSlideshowStatus(image.id, !image.is_slideshow)}
                         className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${image.is_slideshow
-                            ? 'bg-[#FF6F61] text-white hover:bg-[#ff857a]'
-                            : 'bg-white/10 text-white hover:bg-white/20'
+                          ? 'bg-[#FF6F61] text-white hover:bg-[#ff857a]'
+                          : 'bg-white/10 text-white hover:bg-white/20'
                           }`}
                       >
                         {image.is_slideshow ? <FiCheck /> : <FiPlay />}

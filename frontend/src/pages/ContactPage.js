@@ -90,7 +90,7 @@ const ContactPage = () => {
                       placeholder="Your Name *"
                       className="w-full px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-transparent text-white placeholder-gray-400 text-sm"
                       value={contactForm.name}
-                      onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                       required
                     />
                   </div>
@@ -103,7 +103,7 @@ const ContactPage = () => {
                       placeholder="Your Email *"
                       className="w-full px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-transparent text-white placeholder-gray-400 text-sm"
                       value={contactForm.email}
-                      onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                       required
                     />
                   </div>
@@ -117,7 +117,7 @@ const ContactPage = () => {
                     placeholder="Your Message *"
                     className="w-full px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-transparent text-white placeholder-gray-400 text-sm"
                     value={contactForm.message}
-                    onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                     required
                   ></textarea>
                 </div>
@@ -126,11 +126,10 @@ const ContactPage = () => {
                   <button
                     type="submit"
                     disabled={contactStatus === 'loading'}
-                    className={`py-2 px-4 rounded-lg font-medium transition-all border ${
-                      contactStatus === 'loading'
-                        ? 'bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-[#FF6F61] to-[#FF9933] text-white hover:from-[#FF5F51] hover:to-[#E58929]'
-                    } text-sm`}
+                    className={`py-2 px-4 rounded-lg font-medium transition-all border ${contactStatus === 'loading'
+                      ? 'bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-[#FF6F61] to-[#FF9933] text-white hover:from-[#FF5F51] hover:to-[#E58929]'
+                      } text-sm`}
                   >
                     {contactStatus === 'loading' ? (
                       <>

@@ -125,7 +125,6 @@ const GalleryPage = () => {
     return matchesSearch;
   });
 
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -152,7 +151,7 @@ const GalleryPage = () => {
                 const { width, height } = getImageDimensions(image);
                 const fileSize = formatFileSize(image.size || image.mediaMetadata?.photo?.imageFileSize || 0);
                 // Calculate aspect ratio to determine height
-                const aspectRatio = (width && height) ? width / height : 4/3;
+                const aspectRatio = (width && height) ? width / height : 4 / 3;
                 const heightClass = aspectRatio > 1.2 ? 'h-64' : aspectRatio > 0.8 ? 'h-48' : 'h-36';
 
                 return (
@@ -318,11 +317,10 @@ const GalleryPage = () => {
             {/* Slideshow toggle */}
             <div className="absolute top-4 left-4 flex items-center">
               <button
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  isSlideshow
-                    ? 'bg-[#A8E6CF] text-[#001F3F]'
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${isSlideshow
+                  ? 'bg-[#A8E6CF] text-[#001F3F]'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsSlideshow(!isSlideshow);
