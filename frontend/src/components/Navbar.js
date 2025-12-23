@@ -86,7 +86,7 @@ const Navbar = ({ isAuthenticated }) => {
             </li>
             <li>
               <a
-                href="https://www.instagram.com"
+                href="https://www.instagram.com/cooked_by_lens"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="nav-link text-white hover:text-[#A8E6CF]"

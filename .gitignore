@@ -3,18 +3,18 @@
 #==========================================================
 # Image uploads and assets (for photography blog)
 uploads/
-images/
+# images/
 photos/
 media/
 assets/images/
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.webp
-*.bmp
-*.tiff
-*.raw
+# *.jpg
+# *.jpeg
+# *.png
+# *.gif
+# *.webp
+# *.bmp
+# *.tiff
+# *.raw
 
 #==========================================================
 # BUILD OUTPUT / DISTRIBUTION
