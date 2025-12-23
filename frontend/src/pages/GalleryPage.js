@@ -46,6 +46,7 @@ const GalleryPage = () => {
   }, [addError]);
 
   useEffect(() => {
+    document.title = 'Gallery | Cooked By Lens';
     fetchImages();
   }, [fetchImages]);
 

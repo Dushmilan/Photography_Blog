@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FiCamera, FiAward, FiHeart, FiAperture } from 'react-icons/fi';
 
 const AboutPage = () => {
+  useEffect(() => {
+    document.title = 'About | Cooked By Lens';
+  }, []);
   return (
     <div className="h-screen bg-black text-white selection:bg-[#FF6F61] selection:text-white overflow-hidden relative pt-16">
       {/* Background Decor */}

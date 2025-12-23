@@ -16,6 +16,7 @@ const HomePage = () => {
   };
 
   useEffect(() => {
+    document.title = 'Home | Cooked By Lens';
     fetchImages();
   }, []);
 

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiMail, FiInstagram, FiFacebook, FiSend, FiPhone, FiMapPin } from 'react-icons/fi';
 import api from '../utils/api';
 
 const ContactPage = () => {
+  useEffect(() => {
+    document.title = 'Contact | Cooked By Lens';
+  }, []);
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',

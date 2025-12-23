@@ -18,6 +18,7 @@ const AdminPage = () => {
 
 
   useEffect(() => {
+    document.title = 'Admin Dashboard | Cooked By Lens';
     // Get user info and images
     const fetchData = async () => {
       try {
