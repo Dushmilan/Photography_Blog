@@ -24,18 +24,29 @@ const HomePage = () => {
       // Fetch slideshow images
       const slideshowResponse = await api.get('/images/slideshow');
 
-      // Use slideshow images for the slideshow
-      setImages(slideshowResponse.data);
+      // Use slideshow images for the slideshow - Ensure it's an array
+      let slideshowData = slideshowResponse.data;
+      if (!Array.isArray(slideshowData)) {
+        console.warn('Expected array for slideshow images, got:', typeof slideshowData);
+        // Handle case where images might be nested in an object
+        slideshowData = slideshowData?.images || [];
+      }
+      setImages(slideshowData);
 
       // If no slideshow images, fetch all images as fallback
-      if (slideshowResponse.data.length === 0) {
+      if (slideshowData.length === 0) {
         const allImagesResponse = await api.get('/images/public');
-        setImages(allImagesResponse.data);
+        let allData = allImagesResponse.data;
+        if (!Array.isArray(allData)) {
+          allData = allData?.images || [];
+        }
+        setImages(allData);
       }
 
       setLoading(false);
     } catch (err) {
       console.error('Failed to load images:', err);
+      setImages([]); // Ensure images is an array on error
       setLoading(false);
     }
   };
@@ -121,7 +132,7 @@ const HomePage = () => {
         `}</style>
 
         <div className="max-w-4xl mx-auto pt-8 pr-8">
-          {images.map((image, index) => (
+          {Array.isArray(images) && images.map((image, index) => (
             <div
               ref={addToRefs(index)}
               key={image.id}
@@ -141,7 +152,7 @@ const HomePage = () => {
       {/* Fixed thumbnail preview section - stays in position and does not move with scroll */}
       <div className="absolute top-1/2 right-8 w-[7%] h-[60%] bg-black bg-opacity-50 p-1 rounded-lg overflow-hidden transform -translate-y-1/5">
         <div className="h-full flex flex-col items-center">
-          {images.map((image, index) => {
+          {Array.isArray(images) && images.map((image, index) => {
             // Determine opacity and styling based on position relative to current index
             let positionClass = '';
             if (index === currentIndex) {
