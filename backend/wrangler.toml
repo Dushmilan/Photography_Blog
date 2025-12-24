@@ -1,6 +1,6 @@
 name = "photography-blog-backend"
 main = "functions/worker.js"
-compatibility_date = "2023-12-01"
+compatibility_date = "2024-12-24"
 compatibility_flags = [ "nodejs_compat" ]
 
 [env.production]
