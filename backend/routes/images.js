@@ -445,4 +445,4 @@ router.delete('/:id', authenticate, catchAsync(async (req, res) => {
   res.status(200).json({ message: 'Image deleted successfully' });
 }));
 
-module.exports = router;
+export default router;

@@ -111,8 +111,7 @@ async function example() {
 // Uncomment the line below to run the example
 // example();
 */
-
-module.exports = {
+export default {
   imagekit,
   uploadToImageKit,
   getTransformedImageUrl,

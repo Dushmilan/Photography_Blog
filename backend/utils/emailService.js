@@ -157,4 +157,4 @@ This email was sent through the contact form on your photography portfolio websi
   }
 }
 
-module.exports = EmailService;
+export default EmailService;

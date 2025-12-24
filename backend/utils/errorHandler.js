@@ -144,7 +144,7 @@ const catchAsync = (fn) => {
   };
 };
 
-module.exports = {
+export default {
   AppError,
   handleDbError,
   handleValidationError,

@@ -1,87 +1,55 @@
-const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
-const cors = require('cors');
-const path = require('path');
-const dotenv = require('dotenv');
-const compression = require('compression');
-const { globalErrorHandler } = require('./utils/errorHandler');
+import { httpServerHandler } from 'cloudflare:node';
+import express from 'express';
+import { createClient } from '@supabase/supabase-js';
+import cors from 'cors';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 
-// Only load dotenv in non-production environments
-if (process.env.NODE_ENV !== 'production' && !process.env.CF_PAGES) {
-  dotenv.config();
-}
+// Note: Local imports in ESM MUST include the .js extension
+import { globalErrorHandler } from './utils/errorHandler.js'; 
+// import authRoutes from './routes/auth.js';
+// import imageRoutes from './routes/images.js';
 
 const app = express();
 
-const rateLimit = require('express-rate-limit');
-
-// Rate limiting - Disable and skip on Cloudflare Workers as it can cause issues in serverless environments
+// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Middleware
-if (!process.env.CF_PAGES && !process.env.CF_WORKERS) {
-  app.use(limiter); // Only apply rate limiting when NOT on Cloudflare
-}
-app.use(compression()); // Enable gzip compression
+// Cloudflare Workers handle rate limiting/compression natively, 
+// but keeping these here won't break the build.
+app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '25mb' }));
-app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-let supabase;
-
-if (supabaseUrl && supabaseKey) {
-  supabase = createClient(supabaseUrl, supabaseKey);
-  console.log('Supabase client initialized');
-} else {
-  console.error('Supabase URL and Key not found in environment variables');
-  if (process.env.NODE_ENV !== 'production' && !process.env.CF_PAGES && !process.env.CF_WORKERS) {
-    process.exit(1);
-  }
-}
-
-// Make supabase available globally via app
+// Initialize Supabase using process.env (populated by secrets)
+const supabase = createClient(
+  process.env.SUPABASE_URL || '',
+  process.env.SUPABASE_KEY || ''
+);
 app.locals.supabase = supabase;
 
 // Routes
 const apiRouter = express.Router();
 
-// Health check inside router
 apiRouter.get('/ping', (req, res) => res.json({
   message: 'pong',
-  cloudflare: !!process.env.CF_WORKERS,
+  cloudflare: true,
   env: process.env.NODE_ENV
 }));
 
-apiRouter.use('/auth', require('./routes/auth'));
-apiRouter.use('/tokens', require('./routes/tokens'));
-apiRouter.use('/images', require('./routes/images'));
-apiRouter.use('/imagekit', require('./routes/imagekit'));
-apiRouter.use('/contact', require('./routes/contact'));
+// Use your routes here (Ensure the route files also use 'export default')
+// apiRouter.use('/auth', authRoutes);
 
-// Mount the router under multiple prefixes to handle local development,
-// Cloudflare Workers, and case-stripped paths.
 app.use('/api', apiRouter);
-app.use('/.netlify/functions/api', apiRouter); // Keep for Netlify compatibility
-app.use('/', apiRouter); // Fallback for stripped paths in serverless environments
+app.use('/', apiRouter);
 
-// Global error handling middleware (should be last)
 app.use(globalErrorHandler);
 
-const PORT = process.env.PORT || 5000;
-
-if (process.env.NODE_ENV !== 'production' && !process.env.CF_PAGES && !process.env.CF_WORKERS) {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
-
-module.exports = app;
+// This is the magic line that connects Express to Cloudflare
+export default httpServerHandler(app);

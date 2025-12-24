@@ -187,4 +187,4 @@ class Image {
   }
 }
 
-module.exports = Image;
+export default Image;

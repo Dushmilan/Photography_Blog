@@ -54,7 +54,7 @@ const cleanupBlacklist = () => {
   // For now, it's a placeholder for future implementation
 };
 
-module.exports = {
+export default {
   storeRefreshToken,
   isValidRefreshToken,
   removeRefreshToken,

@@ -273,4 +273,4 @@ router.get('/image/:imageId', authenticate, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

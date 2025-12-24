@@ -25,4 +25,4 @@ const processImage = async (filePath, options = {}) => {
   }
 };
 
-module.exports = { processImage };
+export default { processImage };

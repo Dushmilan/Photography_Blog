@@ -124,4 +124,4 @@ router.get('/me', authenticate, catchAsync(async (req, res) => {
   res.json(userWithoutPassword);
 }));
 
-module.exports = router;
+export default router;

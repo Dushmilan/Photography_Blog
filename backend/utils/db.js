@@ -746,4 +746,4 @@ function extractFilenameFromPath(path) {
   return parts[parts.length - 1] || '';
 }
 
-module.exports = Database;
+export default Database;

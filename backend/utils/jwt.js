@@ -91,7 +91,7 @@ const verifyRefreshToken = (token) => {
   });
 };
 
-module.exports = {
+export default {
   generateAccessToken,
   generateRefreshToken,
   verifyAccessToken,

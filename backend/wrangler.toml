@@ -1,11 +1,10 @@
 name = "photography-blog-backend"
 main = "functions/worker.js"
-compatibility_date = "2024-12-24"
-compatibility_flags = [ "nodejs_compat" ]
+compatibility_date = "2025-12-24"
+compatibility_flags = [ "nodejs_compat", "enable_nodejs_http_server_modules" ]
 
-[env.production]
-account_id = "dccc66c0370169ebcc732b5f40c2af1c"
 
-# Environment variables will be set in the Cloudflare dashboard
+minify = true
+
 [vars]
-NODE_ENV = "production" 
+NODE_ENV = "production"
