@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { FiMail, FiInstagram, FiFacebook, FiSend, FiPhone, FiMapPin } from 'react-icons/fi';
+import { FiMail, FiSend } from 'react-icons/fi';
 import api from '../utils/api';
 
 const ContactPage = () => {
   useEffect(() => {
     document.title = 'Contact | Cooked By Lens';
+    window.scrollTo(0, 0);
   }, []);
+
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
     message: ''
   });
+
   const [contactStatus, setContactStatus] = useState(null); // null, 'loading', 'success', 'error'
 
-  // Contact form handler
   const handleContactSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
     if (!contactForm.name || !contactForm.email || !contactForm.message) {
       setContactStatus('error');
       alert('Please fill in all required fields (name, email, and message).');
@@ -31,17 +32,8 @@ const ContactPage = () => {
 
       if (response.data.success) {
         setContactStatus('success');
-        // Reset form
-        setContactForm({
-          name: '',
-          email: '',
-          message: ''
-        });
-
-        // Show success message for a few seconds then reset
-        setTimeout(() => {
-          setContactStatus(null);
-        }, 3000);
+        setContactForm({ name: '', email: '', message: '' });
+        setTimeout(() => setContactStatus(null), 5000);
       } else {
         setContactStatus('error');
         alert('Failed to send message: ' + (response.data.message || 'Unknown error'));
@@ -54,118 +46,137 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pt-24" style={{ backgroundColor: 'black' }}>
-      {/* Main Content */}
-      <main className="flex-grow py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Header and Contact Form in single column */}
-          <div className="space-y-8">
-            {/* Header section */}
-            <div className="text-left">
-              <h1 className="text-4xl md:text-5xl font-light text-white mb-4 tracking-tight">
-                Let's <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Connect</span>
+    <div className="min-h-screen pt-48 pb-24 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-[#FF6F61] rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob"></div>
+      <div className="absolute bottom-20 right-10 w-72 h-72 bg-[#A8E6CF] rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Main Flex Container: items-center ensures perfect vertical alignment between text and form */}
+        <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-center justify-between">
+
+          {/* Left Column: Text & Info */}
+          <div className="space-y-12 animate-fadeInLeft lg:w-1/2">
+            <div>
+              {/* Heading: Tight leading-[0.8] for high-end scale; added <br /> for better structure */}
+              <h1 className="text-7xl md:text-9xl font-extralight text-white tracking-tighter leading-[0.8] mb-10">
+                Let's <br />
+                <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent font-normal">
+                  Connect
+                </span>
               </h1>
-              <div className="space-y-4 mt-4">
-                <p className="text-sm text-white max-w-2xl opacity-90">
-                  I am currently available for photography and videography projects.
-                  Whether you're looking for captivating visuals for your brand, event, or personal project, or
-                  interested in discussing potential collaborations, feel free to reach out.
-                </p>
-                <p className="text-sm text-white max-w-2xl opacity-90">
-                  Use the form below to inquire about rates, availability, or just to say hello. Let's create something amazing together!
-                </p>
+
+              {/* Paragraph: Longer, more descriptive content to provide the visual "weight" needed to anchor the design */}
+              <p className="text-gray-400 text-lg md:text-xl mt-8 leading-relaxed max-w-2xl font-light tracking-wide">
+                I'm always open to discussing photography projects, creative ideas, or unique opportunities
+                to bring your visual narratives to life. Whether you're looking to capture a specific moment
+                or build a long-term creative partnership, I’m here to help translate your vision into
+                compelling imagery that resonates. Let’s collaborate to create something truly exceptional
+                that captures the raw essence of your story.
+              </p>
+            </div>
+
+            {/* Email Contact Block */}
+            <div className="pt-4">
+              <div className="flex items-center space-x-6 group">
+                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#FF6F61]/20 transition-all duration-500 border border-white/10 group-hover:border-[#FF6F61]/30">
+                  <FiMail className="w-6 h-6 text-[#A8E6CF] group-hover:text-[#FF6F61] transition-colors duration-300" />
+                </div>
+                <div>
+                  <h3 className="text-white/30 uppercase tracking-[0.2em] text-xs font-bold mb-1">Get in touch</h3>
+                  <p className="text-white text-xl font-light group-hover:text-[#A8E6CF] transition-colors duration-300">
+                    hello@cookedbylens.com
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Contact Form */}
-            <div className="bg-black p-5 px-0 md:px-0 rounded-xl">
-              <h2 className="text-xl md:text-2xl font-light text-white mb-6 text-left">
-                Send a <span className="bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] bg-clip-text text-transparent">Message</span>
-              </h2>
+          {/* Right Column: Form Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 md:p-12 rounded-[2.5rem] shadow-2xl animate-fadeInRight w-full lg:max-w-lg">
+            <h2 className="text-3xl font-light text-white mb-10">
+              Send a <span className="text-[#A8E6CF]">Message</span>
+            </h2>
 
-              <form className="space-y-4 max-w-sm w-full text-left" onSubmit={handleContactSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="name" className="block text-white mb-1 font-medium text-sm"></label>
-                    <input
-                      type="text"
-                      id="name"
-                      placeholder="Your Name *"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-transparent text-white placeholder-gray-400 text-sm"
-                      value={contactForm.name}
-                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" className="block text-white mb-1 font-medium text-sm"></label>
-                    <input
-                      type="email"
-                      id="email"
-                      placeholder="Your Email *"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-transparent text-white placeholder-gray-400 text-sm"
-                      value={contactForm.email}
-                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                      required
-                    />
-                  </div>
+            <form onSubmit={handleContactSubmit} className="space-y-6">
+              <div className="space-y-5">
+                {/* Name */}
+                <div className="group">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-500 mb-2 pl-1 transition-colors group-hover:text-[#FF6F61]">Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                    className="w-full px-6 py-4 bg-black/40 border border-gray-800 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:ring-1 focus:ring-[#FF6F61] focus:border-[#FF6F61] transition-all duration-300"
+                    placeholder="Enter your name"
+                    required
+                  />
                 </div>
 
-                <div>
-                  <label htmlFor="message" className="block text-white mb-1 font-medium text-sm"></label>
+                {/* Email */}
+                <div className="group">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-500 mb-2 pl-1 transition-colors group-hover:text-[#A8E6CF]">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    className="w-full px-6 py-4 bg-black/40 border border-gray-800 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:ring-1 focus:ring-[#A8E6CF] focus:border-[#A8E6CF] transition-all duration-300"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+
+                {/* Message */}
+                <div className="group">
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-500 mb-2 pl-1 transition-colors group-hover:text-[#FF6F61]">Message</label>
                   <textarea
                     id="message"
-                    rows="5"
-                    placeholder="Your Message *"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF] bg-transparent text-white placeholder-gray-400 text-sm"
+                    rows="4"
                     value={contactForm.message}
                     onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                    className="w-full px-6 py-4 bg-black/40 border border-gray-800 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:ring-1 focus:ring-[#FF6F61] focus:border-[#FF6F61] transition-all duration-300 resize-none"
+                    placeholder="Tell me about your project..."
                     required
-                  ></textarea>
+                  />
                 </div>
+              </div>
 
-                <div className="flex justify-start">
-                  <button
-                    type="submit"
-                    disabled={contactStatus === 'loading'}
-                    className={`py-2 px-4 rounded-lg font-medium transition-all border ${contactStatus === 'loading'
-                      ? 'bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-[#FF6F61] to-[#FF9933] text-white hover:from-[#FF5F51] hover:to-[#E58929]'
-                      } text-sm`}
-                  >
-                    {contactStatus === 'loading' ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <FiSend className="mr-1 inline" /> Send
-                      </>
-                    )}
-                  </button>
+              {/* Submit Button: Gradient matched to the header text */}
+              <button
+                type="submit"
+                disabled={contactStatus === 'loading'}
+                className={`w-full py-5 mt-4 rounded-2xl font-semibold text-lg tracking-wide transition-all duration-500 transform hover:-translate-y-1 ${contactStatus === 'loading'
+                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] text-black hover:shadow-[0_0_30px_rgba(168,230,207,0.3)]'
+                  }`}
+              >
+                {contactStatus === 'loading' ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5 text-gray-500" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    Send Message <FiSend className="w-5 h-5" />
+                  </span>
+                )}
+              </button>
+
+              {/* Status Messages */}
+              {contactStatus === 'success' && (
+                <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl text-sm text-center animate-fadeIn">
+                  Message sent successfully! I'll be in touch soon.
                 </div>
-
-                {contactStatus === 'success' && (
-                  <div className="p-4 bg-green-100 text-green-700 rounded-lg border border-green-200 mt-4">
-                    Message sent successfully! Thank you for contacting me. I'll get back to you as soon as possible.
-                  </div>
-                )}
-
-                {contactStatus === 'error' && (
-                  <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-200 mt-4">
-                    Error sending message. Please try again or contact me directly at hello@photography.com
-                  </div>
-                )}
-              </form>
-            </div>
+              )}
+            </form>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
