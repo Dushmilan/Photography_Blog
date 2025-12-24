@@ -7,8 +7,6 @@ const Navbar = ({ isAuthenticated }) => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [navbarVisible, setNavbarVisible] = useState(true);
 
   const isActive = (path) => {
     if (path === '/') {
@@ -17,12 +15,9 @@ const Navbar = ({ isAuthenticated }) => {
     return location.pathname.startsWith(path);
   };
 
-  // Handle scroll effect for navbar appearance (navbar stays at top but changes on scroll)
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
-      // Change navbar style when scrolling
       if (currentScrollY > 10) {
         setScrolled(true);
       } else {
@@ -34,7 +29,6 @@ const Navbar = ({ isAuthenticated }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
@@ -92,7 +86,7 @@ const Navbar = ({ isAuthenticated }) => {
               </a>
             </li>
 
-            {/* Show Admin Gallery only when authenticated */}
+            {/* Show Admin link only when already logged in */}
             {isAuthenticated && (
               <li>
                 <Link
@@ -104,17 +98,7 @@ const Navbar = ({ isAuthenticated }) => {
               </li>
             )}
 
-            {/* Show login only when not authenticated */}
-            {!isAuthenticated && (
-              <li>
-                <Link
-                  to="/login"
-                  className={`nav-link ${isActive('/login') ? 'active' : ''}`}
-                >
-                  Login
-                </Link>
-              </li>
-            )}
+            {/* LOGIN BUTTON REMOVED FROM HERE */}
           </ul>
         </div>
 
@@ -177,7 +161,8 @@ const Navbar = ({ isAuthenticated }) => {
 
             <div className="h-[1px] bg-white/5 my-2 mx-4" />
 
-            {isAuthenticated ? (
+            {/* Show Admin Dashboard only when authenticated */}
+            {isAuthenticated && (
               <li>
                 <Link
                   to="/admin/gallery"
@@ -188,22 +173,13 @@ const Navbar = ({ isAuthenticated }) => {
                   <span className="font-medium">Admin Dashboard</span>
                 </Link>
               </li>
-            ) : (
-              <li>
-                <Link
-                  to="/login"
-                  className={`flex items-center gap-3 py-4 px-4 rounded-xl ${isActive('/login') ? 'bg-white/10 text-[#FF6F61]' : 'text-white/70'}`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <FiLogIn className="text-lg" />
-                  <span className="font-medium">Admin Login</span>
-                </Link>
-              </li>
             )}
+
+            {/* LOGIN BUTTON REMOVED FROM HERE */}
 
             <li>
               <a
-                href="https://www.instagram.com"
+                href="https://www.instagram.com/cooked_by_lens"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 py-4 px-4 text-white/70"
