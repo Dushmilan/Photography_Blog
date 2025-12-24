@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "setup-db": "node setup-database.js",
     "test:imagekit": "node test-imagekit.js",
-    "test:imagekit:comprehensive": "node test-imagekit-comprehensive.js"
+    "test:imagekit:comprehensive": "node test-imagekit-comprehensive.js",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.4",

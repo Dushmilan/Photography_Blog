@@ -3,9 +3,11 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "build": "npm install && cd frontend && npm install && CI=false npm run build",
+        "build": "npm install && cd frontend && npm install && npm run build",
         "install-backend": "cd backend && npm install",
-        "build-all": "npm run install-backend && npm run build"
+        "build-all": "npm run install-backend && npm run build",
+        "deploy-backend": "cd backend && npx wrangler deploy",
+        "cf-pages-dev": "cd frontend && npm start"
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.38.4",

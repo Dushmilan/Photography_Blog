@@ -6,13 +6,16 @@ const dotenv = require('dotenv');
 const compression = require('compression');
 const { globalErrorHandler } = require('./utils/errorHandler');
 
-dotenv.config();
+// Only load dotenv in non-production environments
+if (process.env.NODE_ENV !== 'production' && !process.env.CF_PAGES) {
+  dotenv.config();
+}
 
 const app = express();
 
 const rateLimit = require('express-rate-limit');
 
-// Rate limiting - Disable and skip on Netlify as it can cause issues in serverless environments
+// Rate limiting - Disable and skip on Cloudflare Workers as it can cause issues in serverless environments
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
@@ -22,8 +25,8 @@ const limiter = rateLimit({
 });
 
 // Middleware
-if (!process.env.NETLIFY) {
-  app.use(limiter); // Only apply rate limiting when NOT on Netlify
+if (!process.env.CF_PAGES && !process.env.CF_WORKERS) {
+  app.use(limiter); // Only apply rate limiting when NOT on Cloudflare
 }
 app.use(compression()); // Enable gzip compression
 app.use(cors());
@@ -40,7 +43,7 @@ if (supabaseUrl && supabaseKey) {
   console.log('Supabase client initialized');
 } else {
   console.error('Supabase URL and Key not found in environment variables');
-  if (process.env.NODE_ENV !== 'production' && !process.env.NETLIFY) {
+  if (process.env.NODE_ENV !== 'production' && !process.env.CF_PAGES && !process.env.CF_WORKERS) {
     process.exit(1);
   }
 }
@@ -54,7 +57,7 @@ const apiRouter = express.Router();
 // Health check inside router
 apiRouter.get('/ping', (req, res) => res.json({
   message: 'pong',
-  netlify: !!process.env.NETLIFY,
+  cloudflare: !!process.env.CF_WORKERS,
   env: process.env.NODE_ENV
 }));
 
@@ -64,10 +67,10 @@ apiRouter.use('/images', require('./routes/images'));
 apiRouter.use('/imagekit', require('./routes/imagekit'));
 apiRouter.use('/contact', require('./routes/contact'));
 
-// Mount the router under multiple prefixes to handle local development, 
-// Netlify Functions redirects, and case-stripped paths.
+// Mount the router under multiple prefixes to handle local development,
+// Cloudflare Workers, and case-stripped paths.
 app.use('/api', apiRouter);
-app.use('/.netlify/functions/api', apiRouter);
+app.use('/.netlify/functions/api', apiRouter); // Keep for Netlify compatibility
 app.use('/', apiRouter); // Fallback for stripped paths in serverless environments
 
 // Global error handling middleware (should be last)
@@ -75,7 +78,7 @@ app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-if (process.env.NODE_ENV !== 'production' && !process.env.NETLIFY) {
+if (process.env.NODE_ENV !== 'production' && !process.env.CF_PAGES && !process.env.CF_WORKERS) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });

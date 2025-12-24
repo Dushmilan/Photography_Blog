@@ -1,0 +1,11 @@
+name = "photography-blog-backend"
+main = "functions/worker.js"
+compatibility_date = "2023-12-01"
+node_compat = true
+
+[env.production]
+account_id = "your-account-id"  # Replace with your Cloudflare account ID
+
+# Environment variables will be set in the Cloudflare dashboard
+[vars]
+NODE_ENV = "production"

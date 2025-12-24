@@ -184,6 +184,8 @@ Compared to the previous version:
 
 ## Deployment
 
+### Traditional Deployment
+
 1. Build the frontend for production:
 ```bash
 cd frontend && npm run build
@@ -192,3 +194,15 @@ cd frontend && npm run build
 2. Serve the build folder or deploy to a hosting platform
 3. Ensure environment variables are set in production
 4. Start the backend server
+
+### Cloudflare Deployment (Recommended)
+
+To deploy this application to Cloudflare Pages (frontend) and Cloudflare Workers (backend):
+
+1. Follow the detailed instructions in [cloudflare-setup.md](./cloudflare-setup.md)
+2. You'll need to:
+   - Deploy the backend as a Cloudflare Worker
+   - Deploy the frontend to Cloudflare Pages
+   - Configure environment variables in both dashboards
+
+The application is designed to work seamlessly with Cloudflare's infrastructure, taking advantage of global edge deployment for optimal performance.

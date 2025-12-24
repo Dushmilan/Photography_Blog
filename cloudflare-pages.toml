@@ -1,0 +1,13 @@
+# This is the main configuration file for Cloudflare Pages
+# For Cloudflare Pages, most configuration is done through the Cloudflare dashboard
+# This file is included for documentation purposes
+
+# The build output directory for the frontend
+# This is configured in the Cloudflare dashboard as:
+# Build output directory: frontend/build
+
+# Build command (also configured in Cloudflare dashboard):
+# npm run build
+
+# Environment variables can be set in the Cloudflare Pages dashboard:
+# - REACT_APP_API_URL: Set this to your backend worker URL
