@@ -1,6 +1,6 @@
-const express = require('express');
-const EmailService = require('../utils/emailService');
-const { catchAsync, AppError } = require('../utils/errorHandler');
+import express from 'express';
+import EmailService from '../utils/emailService.js';
+import { catchAsync, AppError } from '../utils/errorHandler.js';
 
 const router = express.Router();
 const emailService = new EmailService();

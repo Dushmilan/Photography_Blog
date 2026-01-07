@@ -1,10 +1,10 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const authenticate = require('../middleware/auth');
-const { generateAccessToken, generateRefreshToken } = require('../utils/jwt');
-const { storeRefreshToken } = require('../utils/tokenStore');
-const { catchAsync, AppError } = require('../utils/errorHandler');
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import User from '../models/User.js';
+import authenticate from '../middleware/auth.js';
+import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
+import { storeRefreshToken } from '../utils/tokenStore.js';
+import { catchAsync, AppError } from '../utils/errorHandler.js';
 
 const router = express.Router();
 

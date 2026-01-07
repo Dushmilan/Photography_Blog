@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 class EmailService {
   constructor() {
@@ -45,7 +45,7 @@ class EmailService {
 
       // Send the email
       const result = await this.transporter.sendMail(mailOptions);
-      
+
       console.log('Email sent successfully:', result.messageId);
       return {
         success: true,
@@ -71,7 +71,7 @@ class EmailService {
    */
   formatContactEmail(message, fromName, fromEmail) {
     const timestamp = new Date().toLocaleString();
-    
+
     const textContent = `
 Contact Message from Photography Portfolio
 

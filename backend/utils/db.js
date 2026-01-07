@@ -1,5 +1,9 @@
 // Database utility functions for Supabase
-const { handleDbError } = require('./errorHandler');
+import { handleDbError } from './errorHandler.js';
+import ImageKit from 'imagekit';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 class Database {
   constructor(supabase) {
@@ -338,10 +342,6 @@ class Database {
         // Try to get the actual image details from ImageKit to get proper URL
         let imagePath = `/image/${imageId}`; // fallback path
         try {
-          // Initialize ImageKit to get actual image details
-          const ImageKit = require('imagekit');
-          require('dotenv').config();
-
           const imagekit = new ImageKit({
             publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
             privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
@@ -369,7 +369,7 @@ class Database {
         }
 
         // Create the image with minimal data and the update data
-        const newImage = await this.createImage({
+        await this.createImage({
           id: imageId,
           path: imagePath,
           photographer_id: photographerId,
@@ -384,7 +384,7 @@ class Database {
     }
 
     // Update the image
-    const { data: updateResult, error } = await this.supabase
+    const { error } = await this.supabase
       .from('images')
       .update(updateData)
       .eq('id', imageId)
@@ -459,10 +459,6 @@ class Database {
         // Try to get the actual image details from ImageKit to get proper URL
         let imagePath = `/image/${imageId}`; // fallback path
         try {
-          // Initialize ImageKit to get actual image details
-          const ImageKit = require('imagekit');
-          require('dotenv').config();
-
           const imagekit = new ImageKit({
             publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
             privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
@@ -490,7 +486,7 @@ class Database {
         }
 
         // Create the image with minimal data
-        const newImage = await this.createImage({
+        await this.createImage({
           id: imageId,
           path: imagePath,
           photographer_id: photographerId,
@@ -505,7 +501,7 @@ class Database {
     }
 
     // Update the slideshow status
-    const { data: updateResult, error } = await this.supabase
+    const { error } = await this.supabase
       .from('images')
       .update({ is_slideshow: isSlideshow })
       .eq('id', imageId)
@@ -579,10 +575,6 @@ class Database {
         // Try to get the actual image details from ImageKit to get proper URL
         let imagePath = `/image/${imageId}`; // fallback path
         try {
-          // Initialize ImageKit to get actual image details
-          const ImageKit = require('imagekit');
-          require('dotenv').config();
-
           const imagekit = new ImageKit({
             publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
             privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
@@ -610,7 +602,7 @@ class Database {
         }
 
         // Create the image with minimal data
-        const newImage = await this.createImage({
+        await this.createImage({
           id: imageId,
           path: imagePath,
           photographer_id: photographerId,
@@ -625,7 +617,7 @@ class Database {
     }
 
     // Update the public status
-    const { data: updateResult, error } = await this.supabase
+    const { error } = await this.supabase
       .from('images')
       .update({ is_public: isPublic })
       .eq('id', imageId)
@@ -673,8 +665,6 @@ class Database {
     const results = [];
 
     // We'll process these one by one since Supabase JS client doesn't have a bulk update with different values easily
-    // Note: A more efficient way would be to write a SQL function or use a CASE statement in a raw query, 
-    // but for < 100 images, this is acceptable.
     for (const item of updates) {
       const { id, order } = item;
 

@@ -1,7 +1,12 @@
-const express = require('express');
-const authenticate = require('../middleware/auth');
-const Image = require('../models/Image');
-const { catchAsync, AppError } = require('../utils/errorHandler');
+import express from 'express';
+import authenticate from '../middleware/auth.js';
+import Image from '../models/Image.js';
+import { catchAsync, AppError } from '../utils/errorHandler.js';
+import ImageKit from 'imagekit';
+import dotenv from 'dotenv';
+import ImageService from '../models/ImageService.js';
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -113,10 +118,6 @@ router.post('/', authenticate, catchAsync(async (req, res) => {
     return res.status(200).json({ message: 'Image already exists', image: existingImage });
   }
 
-  // Verify the image exists in ImageKit first
-  const ImageKit = require('imagekit');
-  require('dotenv').config();
-
   // Validate environment variables for ImageKit
   if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
     throw new AppError('ImageKit configuration is missing', 500);
@@ -168,7 +169,6 @@ router.post('/', authenticate, catchAsync(async (req, res) => {
 // Get images for Slideshow component
 router.get('/slideshow', catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
-  const ImageService = require('../models/ImageService');
   const imageService = new ImageService(supabase);
 
   const slideshowImages = await imageService.getSlideshowImages();
@@ -178,7 +178,6 @@ router.get('/slideshow', catchAsync(async (req, res) => {
 // Get all images for Admin_Gallery - from ImageKit with DB metadata
 router.get('/admin-gallery', authenticate, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
-  const ImageService = require('../models/ImageService');
   const imageService = new ImageService(supabase);
 
   // Get images from ImageKit with metadata from database
@@ -189,14 +188,9 @@ router.get('/admin-gallery', authenticate, catchAsync(async (req, res) => {
 // Get all images for Admin_Gallery - fetch ALL from ImageKit
 router.get('/admin-gallery-all', authenticate, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
-  const ImageService = require('../models/ImageService');
   const imageService = new ImageService(supabase);
 
   try {
-    // Initialize ImageKit with credentials
-    const ImageKit = require('imagekit');
-    require('dotenv').config();
-
     // Validate environment variables for ImageKit
     if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
       throw new AppError('ImageKit configuration is missing', 500);
@@ -279,7 +273,6 @@ router.get('/admin-gallery-all', authenticate, catchAsync(async (req, res) => {
 // Get images for Gallery component
 router.get('/gallery', catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
-  const ImageService = require('../models/ImageService');
   const imageService = new ImageService(supabase);
 
   // Fetch public images for gallery
@@ -298,7 +291,6 @@ router.get('/:id', authenticate, catchAsync(async (req, res) => {
   }
 
   const supabase = req.app.locals.supabase;
-  const ImageService = require('../models/ImageService');
   const imageService = new ImageService(supabase);
 
   // First try to get from database (for metadata)
@@ -309,10 +301,6 @@ router.get('/:id', authenticate, catchAsync(async (req, res) => {
     // If DB query fails, continue without DB metadata
     console.log('No database metadata found for image, proceeding with ImageKit data only');
   }
-
-  // Verify the image exists in ImageKit
-  const ImageKit = require('imagekit');
-  require('dotenv').config();
 
   // Validate environment variables for ImageKit
   if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
@@ -400,10 +388,6 @@ router.delete('/:id', authenticate, catchAsync(async (req, res) => {
 
   const supabase = req.app.locals.supabase;
   const imageClass = new Image(supabase);
-
-  // Initialize ImageKit
-  const ImageKit = require('imagekit');
-  require('dotenv').config();
 
   // Validate environment variables for ImageKit
   if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {

@@ -1,16 +1,20 @@
-const express = require('express');
-const authenticate = require('../middleware/auth');
-const Image = require('../models/Image');
-const ImageKit = require('imagekit');
-require('dotenv').config();
+import express from 'express';
+import authenticate from '../middleware/auth.js';
+import Image from '../models/Image.js';
+import ImageKit from 'imagekit';
+import dotenv from 'dotenv';
+import Database from '../utils/db.js';
+import ImageService from '../models/ImageService.js';
+
+dotenv.config();
 
 const router = express.Router();
 
-// Initialize ImageKit
+// Initialize ImageKit - provide defaults to prevent crash on startup if ENV is missing
 const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY || 'placeholder',
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY || 'placeholder',
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || 'https://ik.imagekit.io/placeholder'
 });
 
 // Get ImageKit authentication parameters for client-side uploads
@@ -53,7 +57,7 @@ router.get('/images', authenticate, async (req, res) => {
     });
 
     // Get metadata from database for these images
-    const db = new (require('../utils/db'))(req.app.locals.supabase);
+    const db = new Database(req.app.locals.supabase);
     const dbMetadata = await db.getImagesByPhotographerId(req.user.userId);
 
     // Merge the data so ImageKit images have their status metadata from DB
@@ -92,8 +96,9 @@ router.get('/image/:imageId/transform', authenticate, async (req, res) => {
     const { imageId } = req.params;
     const { width, height, quality = 80, crop = 'maintain_ratio' } = req.query;
 
+    const imageModel = new Image(req.app.locals.supabase);
     // First, verify the user has access to this image
-    const image = await Image.getByIdAndUser(imageId, req.user.userId);
+    const image = await imageModel.getByIdAndUser(imageId, req.user.userId);
     if (!image) {
       return res.status(404).json({ message: 'Image not found or access denied' });
     }
@@ -127,8 +132,6 @@ router.put('/image/:imageId', authenticate, async (req, res) => {
     const { imageId } = req.params;
     const { is_slideshow, is_public } = req.body;
 
-    // Use ImageService to handle upsert
-    const ImageService = require('../models/ImageService');
     const imageService = new ImageService(req.app.locals.supabase);
 
     // First try to verify the image exists in ImageKit (optional - just for validation)
@@ -180,10 +183,12 @@ router.get('/image/:imageId', authenticate, async (req, res) => {
   try {
     const { imageId } = req.params;
 
+    const imageModel = new Image(req.app.locals.supabase);
+
     // First try to get from database (for metadata)
     let dbImage = null;
     try {
-      dbImage = await Image.getByIdAndUser(imageId, req.user.userId);
+      dbImage = await imageModel.getByIdAndUser(imageId, req.user.userId);
     } catch (error) {
       // If DB query fails, continue without DB metadata
       console.log('No database metadata found for image, proceeding with ImageKit data only');
@@ -248,17 +253,17 @@ router.get('/image/:imageId', authenticate, async (req, res) => {
 
     // Generate various size URLs using ImageKit
     const imageUrls = {
-      original: imagekitImage.url,
+      original: imagekitImage?.url,
       thumbnail: imagekit.url({
-        path: imagekitImage.filePath,
+        path: imagekitImage?.filePath || '',
         transformation: [{ width: 300, height: 300, crop: 'pad' }]
       }),
       small: imagekit.url({
-        path: imagekitImage.filePath,
+        path: imagekitImage?.filePath || '',
         transformation: [{ width: 600 }]
       }),
       medium: imagekit.url({
-        path: imagekitImage.filePath,
+        path: imagekitImage?.filePath || '',
         transformation: [{ width: 1200 }]
       })
     };

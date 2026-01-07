@@ -1,5 +1,9 @@
 // Image service that combines ImageKit API and database metadata
-const Database = require('../utils/db');
+import Database from '../utils/db.js';
+import ImageKit from 'imagekit';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 class ImageService {
   constructor(supabase) {
@@ -10,9 +14,11 @@ class ImageService {
   // Get all images from ImageKit (this will be used for admin gallery)
   async getImagesFromImageKit(photographerId, pageSize = 50, skip = 0) {
     try {
-      // Initialize ImageKit with the same credentials as in imagekit.js
-      const ImageKit = require('imagekit');
-      require('dotenv').config();
+      // Validate environment variables for ImageKit
+      if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+        console.error('ImageKit configuration is missing');
+        return [];
+      }
 
       const imagekit = new ImageKit({
         publicKey: process.env.IMAGEKIT_PUBLIC_KEY,

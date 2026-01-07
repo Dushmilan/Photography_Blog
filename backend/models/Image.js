@@ -1,6 +1,6 @@
 // Image model for Supabase/PostgreSQL with ImageKit integration
-const Database = require('../utils/db');
-const { AppError } = require('../utils/errorHandler');
+import Database from '../utils/db.js';
+import { AppError } from '../utils/errorHandler.js';
 
 class Image {
   constructor(supabase) {

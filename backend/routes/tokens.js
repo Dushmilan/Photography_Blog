@@ -1,8 +1,8 @@
-const express = require('express');
-const { generateAccessToken, verifyRefreshToken } = require('../utils/jwt');
-const { isValidRefreshToken, storeRefreshToken, removeRefreshToken, blacklistToken } = require('../utils/tokenStore');
-const authenticate = require('../middleware/auth');
-const { catchAsync, AppError } = require('../utils/errorHandler');
+import express from 'express';
+import { generateAccessToken, verifyRefreshToken } from '../utils/jwt.js';
+import { isValidRefreshToken, storeRefreshToken, removeRefreshToken, blacklistToken } from '../utils/tokenStore.js';
+import authenticate from '../middleware/auth.js';
+import { catchAsync, AppError } from '../utils/errorHandler.js';
 
 const router = express.Router();
 

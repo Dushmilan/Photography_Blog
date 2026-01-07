@@ -2,10 +2,10 @@
   "name": "photography-portfolio-backend",
   "type": "module",
   "version": "1.0.0",
-  "main": "functions/worker.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node functions/worker.js",
-    "deploy": "wrangler deploy"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.4",
@@ -16,10 +16,9 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^6.10.0",
-    "hono": "^4.11.1",
     "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^7.0.6",
-    "pg": "^8.11.3"
+    "nodemailer": "^7.0.12",
+    "pg": "^8.16.3"
   }
 }

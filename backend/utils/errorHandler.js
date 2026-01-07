@@ -1,6 +1,6 @@
 // Error handling utility functions for backend
 
-class AppError extends Error {
+export class AppError extends Error {
   constructor(message, statusCode, isOperational = true) {
     super(message);
     this.statusCode = statusCode;
@@ -12,7 +12,7 @@ class AppError extends Error {
 }
 
 // Function to handle database errors
-const handleDbError = (error) => {
+export const handleDbError = (error) => {
   let message = 'Database error occurred';
   let statusCode = 500;
 
@@ -71,14 +71,14 @@ const handleDbError = (error) => {
 };
 
 // Function to handle validation errors
-const handleValidationError = (error) => {
+export const handleValidationError = (error) => {
   const errors = Object.values(error.errors).map(err => err.message);
   const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
 };
 
 // Global error handler middleware
-const globalErrorHandler = (err, req, res, next) => {
+export const globalErrorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
@@ -138,7 +138,7 @@ const globalErrorHandler = (err, req, res, next) => {
 };
 
 // Catch async errors
-const catchAsync = (fn) => {
+export const catchAsync = (fn) => {
   return (req, res, next) => {
     fn(req, res, next).catch(next);
   };

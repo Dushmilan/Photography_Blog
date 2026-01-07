@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const { verifyAccessToken } = require('../utils/jwt');
+import jwt from 'jsonwebtoken';
+import { verifyAccessToken } from '../utils/jwt.js';
 
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -12,17 +12,17 @@ const authenticateToken = async (req, res, next) => {
   try {
     // Verify the access token
     const decoded = await verifyAccessToken(token);
-    
+
     // Additional security checks
     if (decoded.type && decoded.type === 'refresh') {
       return res.status(403).json({ message: 'Invalid token type for this operation' });
     }
-    
+
     // Ensure the token was issued for the correct audience
     if (decoded.aud !== 'photography-blog-users') {
       return res.status(403).json({ message: 'Invalid token audience' });
     }
-    
+
     // Ensure the token was issued by our application
     if (decoded.iss !== 'photography-blog-api') {
       return res.status(403).json({ message: 'Invalid token issuer' });

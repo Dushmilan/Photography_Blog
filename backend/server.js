@@ -1,16 +1,20 @@
-import { httpServerHandler } from 'cloudflare:node';
+import 'dotenv/config';
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import cors from 'cors';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 
-// Note: Local imports in ESM MUST include the .js extension
-import { globalErrorHandler } from './utils/errorHandler.js'; 
-// import authRoutes from './routes/auth.js';
-// import imageRoutes from './routes/images.js';
+// Local imports
+import { globalErrorHandler } from './utils/errorHandler.js';
+import authRoutes from './routes/auth.js';
+import tokenRoutes from './routes/tokens.js';
+import imageRoutes from './routes/images.js';
+import imagekitRoutes from './routes/imagekit.js';
+import contactRoutes from './routes/contact.js';
 
 const app = express();
+const PORT = process.env.PORT || 10000;
 
 // Rate limiting
 const limiter = rateLimit({
@@ -21,13 +25,12 @@ const limiter = rateLimit({
 });
 
 // Middleware
-// Cloudflare Workers handle rate limiting/compression natively, 
-// but keeping these here won't break the build.
 app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '25mb' }));
+app.use(limiter);
 
-// Initialize Supabase using process.env (populated by secrets)
+// Initialize Supabase
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
   process.env.SUPABASE_KEY || ''
@@ -39,17 +42,24 @@ const apiRouter = express.Router();
 
 apiRouter.get('/ping', (req, res) => res.json({
   message: 'pong',
-  cloudflare: true,
+  status: 'live',
   env: process.env.NODE_ENV
 }));
 
-// Use your routes here (Ensure the route files also use 'export default')
-// apiRouter.use('/auth', authRoutes);
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/tokens', tokenRoutes);
+apiRouter.use('/images', imageRoutes);
+apiRouter.use('/imagekit', imagekitRoutes);
+apiRouter.use('/contact', contactRoutes);
 
 app.use('/api', apiRouter);
 app.use('/', apiRouter);
 
+// Error Handler
 app.use(globalErrorHandler);
 
-// This is the magic line that connects Express to Cloudflare
-export default httpServerHandler(app);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+export default app;

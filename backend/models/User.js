@@ -1,6 +1,6 @@
 // User model for Supabase/PostgreSQL
-const Database = require('../utils/db');
-const { AppError } = require('../utils/errorHandler');
+import Database from '../utils/db.js';
+import { AppError } from '../utils/errorHandler.js';
 
 class User {
   constructor(supabase) {
