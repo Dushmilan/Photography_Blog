@@ -190,7 +190,7 @@ const AdminGalleryPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [api]);
 
   const handleLogout = () => {
     // Clear both access and refresh tokens

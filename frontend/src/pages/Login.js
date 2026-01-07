@@ -191,7 +191,7 @@ const Login = ({ setIsAuthenticated }) => {
 
         <div className="mt-8 pt-6 border-t border-gray-600/20 text-center">
           <p className="text-white/60 text-sm">
-            By signing in, you agree to our <a href="#" className="text-[#A8E6CF] hover:underline">Terms</a> and <a href="#" className="text-[#A8E6CF] hover:underline">Privacy Policy</a>
+            By signing in, you agree to our <a href="#!" className="text-[#A8E6CF] hover:underline">Terms</a> and <a href="#!" className="text-[#A8E6CF] hover:underline">Privacy Policy</a>
           </p>
         </div>
       </div>
