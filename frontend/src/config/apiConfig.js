@@ -1,8 +1,8 @@
 // API Configuration
 const API_CONFIG = {
   // Base URLs for different environments
-  development: 'https://brandon-fifteen-fails-excess.trycloudflare.com',
-  production: process.env.REACT_APP_API_URL || 'https://brandon-fifteen-fails-excess.trycloudflare.com',
+  development: 'https://brandon-fifteen-fails-excess.trycloudflare.com/api',
+  production: process.env.REACT_APP_API_URL || 'https://brandon-fifteen-fails-excess.trycloudflare.com/api',
   test: 'http://localhost:5000/api',
 };
 
