@@ -8,14 +8,14 @@ const AboutPage = () => {
   }, []);
 
   return (
-    <div className="h-screen bg-black text-white selection:bg-[#FF6F61] selection:text-white overflow-hidden relative pt-16">
+    <div className="min-h-screen lg:h-screen bg-black text-white selection:bg-[#FF6F61] selection:text-white overflow-x-hidden lg:overflow-hidden relative pt-24 pb-12 lg:pt-16 lg:pb-0">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-[#001F3F]/10 -skew-x-12 pointer-events-none" />
       <div className="absolute top-20 right-20 w-96 h-96 bg-[#FF6F61]/5 rounded-full blur-[100px] pointer-events-none animate-pulse-slow" />
       <div className="absolute bottom-10 left-10 w-64 h-64 bg-[#A8E6CF]/5 rounded-full blur-[80px] pointer-events-none" />
 
       {/* Main Container */}
-      <div className="h-full max-w-7xl mx-auto px-6 flex items-center justify-center">
+      <div className="w-full h-full max-w-7xl mx-auto px-6 flex items-start lg:items-center justify-center">
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
           {/* LEFT COLUMN: ONLY PHOTO */}

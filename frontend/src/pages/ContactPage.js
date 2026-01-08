@@ -85,7 +85,7 @@ const ContactPage = () => {
                 <div>
                   <h3 className="text-white/30 uppercase tracking-[0.2em] text-xs font-bold mb-1">Get in touch</h3>
                   <p className="text-white text-xl font-light group-hover:text-[#A8E6CF] transition-colors duration-300">
-                    hello@cookedbylens.com
+                    cookedbylens@gmail.com
                   </p>
                 </div>
               </div>
@@ -148,8 +148,8 @@ const ContactPage = () => {
                 type="submit"
                 disabled={contactStatus === 'loading'}
                 className={`w-full py-5 mt-4 rounded-2xl font-semibold text-lg tracking-wide transition-all duration-500 transform hover:-translate-y-1 ${contactStatus === 'loading'
-                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] text-black hover:shadow-[0_0_30px_rgba(168,230,207,0.3)]'
+                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-[#FF6F61] to-[#A8E6CF] text-black hover:shadow-[0_0_30px_rgba(168,230,207,0.3)]'
                   }`}
               >
                 {contactStatus === 'loading' ? (
