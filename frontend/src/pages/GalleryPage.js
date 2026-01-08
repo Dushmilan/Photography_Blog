@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
-import { FiX, FiChevronLeft, FiChevronRight, FiShare2, FiDownload, FiInfo } from 'react-icons/fi';
-import { handleApiError, handleUnexpectedError, showError } from '../utils/errorHandler';
+import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import {  showError } from '../utils/errorHandler';
 import { useError } from '../contexts/ErrorContext';
-import { getImageUrl, formatFileSize, getImageDimensions, getAspectRatio, preloadImages } from '../utils/imageUtils';
+import { getImageUrl, preloadImages } from '../utils/imageUtils';
 
 const GalleryPage = () => {
   const [images, setImages] = useState([]);
@@ -13,7 +13,6 @@ const GalleryPage = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isSlideshow, setIsSlideshow] = useState(false);
-  const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
@@ -167,6 +166,8 @@ const GalleryPage = () => {
                     <img
                       src={imageUrl}
                       alt={image.original_name}
+                      onContextMenu={(e) => e.preventDefault()}
+                      draggable="false"
                       className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                       onError={(e) => {
@@ -211,6 +212,8 @@ const GalleryPage = () => {
             <img
               src={getImageUrl(images[currentSlide], 'large')}
               alt={images[currentSlide].original_name}
+              onContextMenu={(e) => e.preventDefault()}
+              draggable="false"
               className="lightbox-image max-h-[80vh] w-auto mx-auto rounded-lg"
               onClick={(e) => e.stopPropagation()}
               onError={(e) => {

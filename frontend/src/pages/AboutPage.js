@@ -27,6 +27,8 @@ const AboutPage = () => {
                 <img
                   src={img}
                   alt="Photographer Profile"
+                  onContextMenu={(e) => e.preventDefault()}
+                  draggable="false"
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 scale-105 hover:scale-100"
                 />
               </div>

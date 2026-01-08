@@ -210,6 +210,8 @@ const HomePage = () => {
               <img
                 src={image.path || image.baseUrl}
                 alt={image.original_name}
+                onContextMenu={(e) => e.preventDefault()}
+                draggable="false"
                 className="max-h-full w-auto object-contain rounded-sm shadow-2xl transition-transform duration-700 ease-out"
                 style={{
                   // Subtle scale effect when active
@@ -262,6 +264,8 @@ const HomePage = () => {
                 <img
                   src={image.path || image.baseUrl}
                   alt={`Thumbnail ${index}`}
+                  onContextMenu={(e) => e.preventDefault()}
+                  draggable="false"
                   className="w-full h-full object-cover"
                 />
               </div>
