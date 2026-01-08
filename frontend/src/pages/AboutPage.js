@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { FiCamera, FiAward, FiHeart, FiAperture } from 'react-icons/fi';
+import  { useEffect } from 'react';
+import { FiCamera, FiAperture } from 'react-icons/fi';
 import img from '../Images/Photographer6.jpg';
 
 const AboutPage = () => {
