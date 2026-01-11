@@ -230,7 +230,7 @@ const HomePage = () => {
   return (
     <div className="relative min-h-screen bg-black overflow-hidden select-none">
       {/* Mobile Horizontal Carousel */}
-      <div className="lg:hidden w-full h-screen relative bg-black">
+      <div className="lg:hidden w-full h-[100dvh] relative bg-black">
         {/* Infinite Loop Carousel */}
         <div
           ref={mobileCarouselRef}
