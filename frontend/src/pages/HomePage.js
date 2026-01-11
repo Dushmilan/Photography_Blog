@@ -167,7 +167,7 @@ const HomePage = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex, images.length, scrollToImage]);
 
-  // --- MOBILE CAROUSEL LOGIC ---
+  // --- MOBILE AND TAB CAROUSEL LOGIC ---
 
   // Touch handlers for mobile swipe
   const handleTouchStart = (e) => {
@@ -207,11 +207,11 @@ const HomePage = () => {
 
   // Auto-advance for mobile carousel
   useEffect(() => {
-    if (window.innerWidth >= 768 || images.length <= 1) return; // Only on mobile
+    if (window.innerWidth >= 1024 || images.length <= 1) return; // Only on mobile and tablets
 
     const interval = setInterval(() => {
       goToNextImage();
-    }, 5000); // Change image every 5 seconds
+    }, 3000); // Change image every 3 seconds
 
     return () => clearInterval(interval);
   }, [images.length]);
@@ -230,7 +230,7 @@ const HomePage = () => {
   return (
     <div className="relative min-h-screen bg-black overflow-hidden select-none">
       {/* Mobile Horizontal Carousel */}
-      <div className="md:hidden w-full h-screen relative bg-black">
+      <div className="lg:hidden w-full h-screen relative bg-black">
         {/* Infinite Loop Carousel */}
         <div
           ref={mobileCarouselRef}
@@ -290,7 +290,7 @@ const HomePage = () => {
       </div>
 
       {/* Desktop Version - Hidden on Mobile */}
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         {/* MAIN SCROLL CONTAINER
           - Occupies full screen
           - Scroll Snap for nice feel
