@@ -265,7 +265,7 @@ const HomePage = () => {
                   alt={image.original_name}
                   onContextMenu={(e) => e.preventDefault()}
                   draggable="false"
-                  className="max-h-[90vh] max-w-[95vw] object-contain p-4"
+                  className="max-h-[50vh] max-w-[95vw] object-contain p-4"
                 />
               </div>
             );
@@ -278,9 +278,11 @@ const HomePage = () => {
             <button
               key={`dot-${index}`}
               onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentIndex ? 'bg-white' : 'bg-gray-500'
+              className={`w-1 h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? 'bg-white h-0.5 translate-y-1' : 'bg-gray-500'
               }`}
+              style={{ width: index === currentIndex ? '1rem' : '0.5rem' ,
+            height: index === currentIndex ? '0.1rem' : '0.5rem' }}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
