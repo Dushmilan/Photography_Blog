@@ -34,12 +34,12 @@ const Navbar = ({ isAuthenticated }) => {
   }, [location.pathname]);
 
   return (
-    <nav className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-2 shadow-md' : 'py-5'} bg-black border-b-0`}>
+    <nav className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-2 shadow-none sm:shadow-md' : 'py-5'} bg-black border-b-0 sm:border-b`}>
       <div className="container mx-auto px-4 flex items-center justify-between">
 
         {/* Left section with Logo/Brand */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-48 h-12 rounded-lg bg-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+          <div className="w-32 h-10 rounded-lg bg-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 overflow-hidden md:w-48 md:h-12">
             <img
               src={img}
               alt="Logo"
@@ -119,14 +119,6 @@ const Navbar = ({ isAuthenticated }) => {
         <div className="lg:hidden bg-[#0a0a0a] border border-white/10 absolute top-[75px] right-4 w-[85%] sm:w-[50%] md:w-[35%] lg:w-[30%] min-w-[280px] rounded-2xl shadow-2xl animate-slideDown overflow-hidden z-[51]">
           <ul className="flex flex-col p-2 bg-black/95 backdrop-blur-xl">
             <li>
-              <Link
-                to="/"
-                className={`flex items-center gap-3 py-4 px-4 rounded-xl ${isActive('/') && location.pathname === '/' ? 'bg-white/10 text-[#FF6F61]' : 'text-white/70'}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <FiHome className="text-lg" />
-                <span className="font-medium">Home</span>
-              </Link>
             </li>
             <li>
               <Link
