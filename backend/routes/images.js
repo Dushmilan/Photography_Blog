@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import authenticate from '../middleware/auth.js';
 import Image from '../models/Image.js';
 import { catchAsync, AppError } from '../utils/errorHandler.js';
@@ -10,8 +11,45 @@ dotenv.config();
 
 const router = express.Router();
 
+// Rate limiting middleware for image endpoints
+const publicImageLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 30, // 30 requests per window
+  message: 'Too many image requests, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req, res) => {
+    // Rate limit by IP address for public endpoints
+    return req.ip || req.connection.remoteAddress;
+  }
+});
+
+const authImageLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 50, // 50 requests per window for authenticated users
+  message: 'Too many requests, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req, res) => {
+    // Rate limit by user ID for authenticated endpoints
+    return req.user?.userId || req.ip || req.connection.remoteAddress;
+  }
+});
+
+const imageMutationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 requests per window
+  message: 'Too many image uploads/updates, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req, res) => {
+    // Rate limit by user ID for write operations
+    return req.user?.userId || req.ip || req.connection.remoteAddress;
+  }
+});
+
 // Get all images for authenticated user (admin view) - this gets images from DB
-router.get('/my-images', authenticate, catchAsync(async (req, res) => {
+router.get('/my-images', authenticate, authImageLimiter, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
   const imageClass = new Image(supabase);
 
@@ -20,7 +58,7 @@ router.get('/my-images', authenticate, catchAsync(async (req, res) => {
 }));
 
 // Get public images for public gallery
-router.get('/public', catchAsync(async (req, res) => {
+router.get('/public', publicImageLimiter, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
   const imageClass = new Image(supabase);
 
@@ -29,7 +67,7 @@ router.get('/public', catchAsync(async (req, res) => {
 }));
 
 // Update public status of an image
-router.put('/:id/public', authenticate, catchAsync(async (req, res) => {
+router.put('/:id/public', authenticate, imageMutationLimiter, catchAsync(async (req, res) => {
   const { id } = req.params;
   const { isPublic } = req.body;
 
@@ -48,7 +86,7 @@ router.put('/:id/public', authenticate, catchAsync(async (req, res) => {
 
 
 // Update slideshow status of an image
-router.put('/:id/slideshow', authenticate, catchAsync(async (req, res) => {
+router.put('/:id/slideshow', authenticate, imageMutationLimiter, catchAsync(async (req, res) => {
   const { id } = req.params;
   const { isSlideshow } = req.body;
 
@@ -66,7 +104,7 @@ router.put('/:id/slideshow', authenticate, catchAsync(async (req, res) => {
 }));
 
 // Reorder images
-router.put('/reorder', authenticate, catchAsync(async (req, res) => {
+router.put('/reorder', authenticate, imageMutationLimiter, catchAsync(async (req, res) => {
   const { updates, type } = req.body;
 
   if (!updates || !Array.isArray(updates)) {
@@ -85,7 +123,7 @@ router.put('/reorder', authenticate, catchAsync(async (req, res) => {
 
 
 // Create a new image in the database
-router.post('/', authenticate, catchAsync(async (req, res) => {
+router.post('/', authenticate, imageMutationLimiter, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
   const imageClass = new Image(supabase);
   const imageData = req.body;
@@ -167,7 +205,7 @@ router.post('/', authenticate, catchAsync(async (req, res) => {
 }));
 
 // Get images for Slideshow component
-router.get('/slideshow', catchAsync(async (req, res) => {
+router.get('/slideshow', publicImageLimiter, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
   const imageService = new ImageService(supabase);
 
@@ -176,7 +214,7 @@ router.get('/slideshow', catchAsync(async (req, res) => {
 }));
 
 // Get all images for Admin_Gallery - from ImageKit with DB metadata
-router.get('/admin-gallery', authenticate, catchAsync(async (req, res) => {
+router.get('/admin-gallery', authenticate, authImageLimiter, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
   const imageService = new ImageService(supabase);
 
@@ -186,7 +224,7 @@ router.get('/admin-gallery', authenticate, catchAsync(async (req, res) => {
 }));
 
 // Get all images for Admin_Gallery - fetch ALL from ImageKit
-router.get('/admin-gallery-all', authenticate, catchAsync(async (req, res) => {
+router.get('/admin-gallery-all', authenticate, authImageLimiter, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
   const imageService = new ImageService(supabase);
 
@@ -271,7 +309,7 @@ router.get('/admin-gallery-all', authenticate, catchAsync(async (req, res) => {
 }));
 
 // Get images for Gallery component
-router.get('/gallery', catchAsync(async (req, res) => {
+router.get('/gallery', publicImageLimiter, catchAsync(async (req, res) => {
   const supabase = req.app.locals.supabase;
   const imageService = new ImageService(supabase);
 
@@ -282,7 +320,7 @@ router.get('/gallery', catchAsync(async (req, res) => {
 
 
 // Get a specific image by ID
-router.get('/:id', authenticate, catchAsync(async (req, res) => {
+router.get('/:id', authenticate, authImageLimiter, catchAsync(async (req, res) => {
   const { id } = req.params;
 
   // Validate image ID
@@ -378,7 +416,7 @@ router.get('/:id', authenticate, catchAsync(async (req, res) => {
 }));
 
 // Delete an image from database and ImageKit
-router.delete('/:id', authenticate, catchAsync(async (req, res) => {
+router.delete('/:id', authenticate, imageMutationLimiter, catchAsync(async (req, res) => {
   const { id } = req.params;
 
   // Validate image ID
