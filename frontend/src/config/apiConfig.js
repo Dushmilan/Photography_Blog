@@ -1,12 +1,10 @@
 // API Configuration
 const API_CONFIG = {
-  // Base URLs for different environments
-  development: 'https://brandon-fifteen-fails-excess.trycloudflare.com/api',
-  production: process.env.REACT_APP_API_URL || 'https://brandon-fifteen-fails-excess.trycloudflare.com/api',
-  test: 'http://localhost:5000/api',
+  development: 'http://localhost:8787/api',
+  production: process.env.REACT_APP_API_URL || 'https://photography-blog-api.your-subdomain.workers.dev/api',
+  test: 'http://localhost:8787/api',
 };
 
-// Get the current environment
 const getEnvironment = () => {
   if (process.env.NODE_ENV === 'production') {
     return 'production';
@@ -16,12 +14,10 @@ const getEnvironment = () => {
   return 'development';
 };
 
-// Get the base URL based on environment
 const getBaseUrl = () => {
   return API_CONFIG[getEnvironment()] || API_CONFIG.development;
 };
 
-// API endpoints configuration
 const ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
@@ -33,20 +29,19 @@ const ENDPOINTS = {
     PUBLIC: '/images/public',
     MY_IMAGES: '/images/my-images',
     CREATE: '/images',
+    REORDER: '/images/reorder',
     UPDATE_PUBLIC: (id) => `/images/${id}/public`,
-    UPDATE_FEATURED: (id) => `/images/${id}/featured`,
     UPDATE_SLIDESHOW: (id) => `/images/${id}/slideshow`,
     GALLERY: '/images/gallery',
-    FEATURES: '/images/features',
     SLIDESHOW: '/images/slideshow',
     ADMIN_GALLERY: '/images/admin-gallery',
+    GET: (id) => `/images/${id}`,
+    DELETE: (id) => `/images/${id}`,
   },
   IMAGEKIT: {
     IMAGES: '/imagekit/images',
-    UPLOAD: '/imagekit/upload',
     AUTH_PARAMETERS: '/imagekit/auth-parameters',
     TRANSFORM: (imageId) => `/imagekit/image/${imageId}/transform`,
-    DELETE: (imageId) => `/imagekit/image/${imageId}`,
     UPDATE: (imageId) => `/imagekit/image/${imageId}`,
     GET_IMAGE: (imageId) => `/imagekit/image/${imageId}`,
   },

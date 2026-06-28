@@ -1,0 +1,22 @@
+{
+  "name": "worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.3.1",
+    "hono": "^4.3.1",
+    "jose": "^5.0.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260628.1",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.0.0"
+  }
+}

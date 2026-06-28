@@ -1,0 +1,15 @@
+name = "photography-blog-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "photography-blog-db"
+database_id = ""
+
+[vars]
+JWT_SECRET = ""
+JWT_REFRESH_SECRET = ""
+IMAGEKIT_PUBLIC_KEY = ""
+IMAGEKIT_PRIVATE_KEY = ""
+IMAGEKIT_URL_ENDPOINT = ""

@@ -23,5 +23,8 @@
         "nodemailer": "^7.0.6",
         "pg": "^8.11.3",
         "serverless-http": "^4.0.0"
+    },
+    "devDependencies": {
+        "wrangler": "^4.105.0"
     }
 }
