@@ -2,8 +2,6 @@ import { Hono } from 'hono';
 import { Database } from '../db/queries';
 import { catchAsync, AppError } from '../utils/errorHandler';
 
-const router = new Hono<{ Bindings: { DB: D1Database; IMAGEKIT_PUBLIC_KEY: string; IMAGEKIT_PRIVATE_KEY: string; IMAGEKIT_URL_ENDPOINT: string } }>();
-
 const getIkAuth = (c: any) => ({
   publicKey: c.env.IMAGEKIT_PUBLIC_KEY,
   privateKey: c.env.IMAGEKIT_PRIVATE_KEY,
@@ -19,37 +17,39 @@ async function ikRequest(path: string, c: any): Promise<any> {
   return res.json();
 }
 
-// GET /images/public
-router.get('/public', catchAsync(async (c) => {
+const publicImageRoutes = new Hono<{ Bindings: { DB: D1Database; IMAGEKIT_PUBLIC_KEY: string; IMAGEKIT_PRIVATE_KEY: string; IMAGEKIT_URL_ENDPOINT: string } }>();
+const protectedImageRoutes = new Hono<{ Bindings: { DB: D1Database; IMAGEKIT_PUBLIC_KEY: string; IMAGEKIT_PRIVATE_KEY: string; IMAGEKIT_URL_ENDPOINT: string } }>();
+
+// === PUBLIC ROUTES ===
+
+publicImageRoutes.get('/public', catchAsync(async (c) => {
   const db = new Database(c.env.DB);
   const images = await db.getPublicImages();
   return c.json(images);
 }));
 
-// GET /images/gallery (alias for public)
-router.get('/gallery', catchAsync(async (c) => {
+publicImageRoutes.get('/gallery', catchAsync(async (c) => {
   const db = new Database(c.env.DB);
   const images = await db.getPublicImages();
   return c.json(images);
 }));
 
-// GET /images/slideshow
-router.get('/slideshow', catchAsync(async (c) => {
+publicImageRoutes.get('/slideshow', catchAsync(async (c) => {
   const db = new Database(c.env.DB);
   const images = await db.getSlideshowImages();
   return c.json(images);
 }));
 
-// GET /images/my-images (authenticated user's images from DB)
-router.get('/my-images', catchAsync(async (c) => {
+// === PROTECTED ROUTES ===
+
+protectedImageRoutes.get('/my-images', catchAsync(async (c) => {
   const userId = (c.get('user') as any).userId;
   const db = new Database(c.env.DB);
   const images = await db.getImagesByPhotographerId(userId);
   return c.json(images);
 }));
 
-// GET /images/admin-gallery (ImageKit + DB merge)
-router.get('/admin-gallery', catchAsync(async (c) => {
+protectedImageRoutes.get('/admin-gallery', catchAsync(async (c) => {
   const userId = (c.get('user') as any).userId;
   const db = new Database(c.env.DB);
   const ikFiles: any[] = (await ikRequest('/files?limit=1000', c)) || [];
@@ -61,8 +61,7 @@ router.get('/admin-gallery', catchAsync(async (c) => {
   return c.json({ images: merged, total: merged.length });
 }));
 
-// POST /images (create image record in DB)
-router.post('/', catchAsync(async (c) => {
+protectedImageRoutes.post('/', catchAsync(async (c) => {
   const userId = (c.get('user') as any).userId;
   const body: any = await c.req.json();
   if (!body.id) throw new AppError('Image ID is required', 400);
@@ -74,8 +73,7 @@ router.post('/', catchAsync(async (c) => {
   return c.json({ image }, 201);
 }));
 
-// PUT /images/reorder
-router.put('/reorder', catchAsync(async (c) => {
+protectedImageRoutes.put('/reorder', catchAsync(async (c) => {
   const { updates, type } = await c.req.json() as any;
   if (!updates || !type) throw new AppError('Updates and type required', 400);
   const db = new Database(c.env.DB);
@@ -83,8 +81,7 @@ router.put('/reorder', catchAsync(async (c) => {
   return c.json({ message: 'Order updated successfully' });
 }));
 
-// PUT /images/:id/public
-router.put('/:id/public', catchAsync(async (c) => {
+protectedImageRoutes.put('/:id/public', catchAsync(async (c) => {
   const id = c.req.param('id');
   const userId = (c.get('user') as any).userId;
   const { isPublic } = await c.req.json() as any;
@@ -94,8 +91,7 @@ router.put('/:id/public', catchAsync(async (c) => {
   return c.json({ image });
 }));
 
-// PUT /images/:id/slideshow
-router.put('/:id/slideshow', catchAsync(async (c) => {
+protectedImageRoutes.put('/:id/slideshow', catchAsync(async (c) => {
   const id = c.req.param('id');
   const userId = (c.get('user') as any).userId;
   const { isSlideshow } = await c.req.json() as any;
@@ -105,8 +101,7 @@ router.put('/:id/slideshow', catchAsync(async (c) => {
   return c.json({ image });
 }));
 
-// GET /images/:id (single image with ImageKit metadata)
-router.get('/:id', catchAsync(async (c) => {
+protectedImageRoutes.get('/:id', catchAsync(async (c) => {
   const id = c.req.param('id');
   const db = new Database(c.env.DB);
   const dbImage: any = await db.getImageById(id);
@@ -125,8 +120,7 @@ router.get('/:id', catchAsync(async (c) => {
   });
 }));
 
-// DELETE /images/:id
-router.delete('/:id', catchAsync(async (c) => {
+protectedImageRoutes.delete('/:id', catchAsync(async (c) => {
   const id = c.req.param('id');
   const { privateKey } = getIkAuth(c);
   await fetch(`https://api.imagekit.io/v5/files/${id}`, {
@@ -138,4 +132,4 @@ router.delete('/:id', catchAsync(async (c) => {
   return c.json({ message: 'Image deleted successfully' });
 }));
 
-export default router;
+export { publicImageRoutes, protectedImageRoutes };

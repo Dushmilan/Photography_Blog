@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { authMiddleware } from './middleware/auth';
 import authRoutes from './routes/auth';
 import tokenRoutes from './routes/tokens';
-import imageRoutes from './routes/images';
+import { publicImageRoutes, protectedImageRoutes } from './routes/images';
 import imagekitRoutes from './routes/imagekit';
 
 export type Bindings = {
@@ -16,25 +17,30 @@ export type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-// Public routes (no auth)
+app.use('/*', cors({
+  origin: ['https://cookedbylens.pages.dev', 'https://cookedbylens.com.lk', 'http://localhost:3000'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+}));
+
 const api = new Hono<{ Bindings: Bindings }>();
 
 api.get('/ping', (c) => c.json({ message: 'pong', status: 'live', env: 'production', timestamp: new Date().toISOString() }));
 api.get('/', (c) => c.json({ message: 'Photography Blog API', version: '1.0.0', endpoints: ['/ping', '/auth', '/tokens', '/images', '/imagekit'] }));
 
-// Auth & tokens (no auth middleware - they handle auth internally)
 api.route('/auth', authRoutes);
 api.route('/tokens', tokenRoutes);
 
-// Protected routes
+api.route('/images', publicImageRoutes);
+
 api.use('/images/*', authMiddleware);
 api.use('/imagekit/*', authMiddleware);
-api.route('/images', imageRoutes);
+api.route('/images', protectedImageRoutes);
 api.route('/imagekit', imagekitRoutes);
 
 app.route('/api', api);
 
-// Root redirect
 app.get('/', (c) => c.redirect('/api'));
 
 export default { fetch: app.fetch };
