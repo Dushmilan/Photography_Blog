@@ -5,11 +5,11 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "photography-blog-db"
-database_id = ""
+database_id = "0f3a22b6-3fd2-4f61-9c12-bf7d47a886df"
 
 [vars]
-JWT_SECRET = ""
-JWT_REFRESH_SECRET = ""
-IMAGEKIT_PUBLIC_KEY = ""
-IMAGEKIT_PRIVATE_KEY = ""
-IMAGEKIT_URL_ENDPOINT = ""
+JWT_SECRET = "f9b0f4fdeeee1a328b1071bfbf738c8f7faa3a31f250d9db3c576cabb1b1096b"
+JWT_REFRESH_SECRET = "198010087d92195a4384c25bb1f0f34d56cec92b40cde709e0f65120705b1ffb"
+IMAGEKIT_PUBLIC_KEY = "public_XzcXYyMljndqOVadyRp2DYqYNs="
+IMAGEKIT_PRIVATE_KEY = "private_HeMdhmFL1HKeQbEEGnNXQ6TCZIY="
+IMAGEKIT_URL_ENDPOINT = "https://ik.imagekit.io/rqndq3xs9"

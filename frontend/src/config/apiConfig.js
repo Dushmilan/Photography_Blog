@@ -1,7 +1,7 @@
 // API Configuration
 const API_CONFIG = {
   development: 'http://localhost:8787/api',
-  production: process.env.REACT_APP_API_URL || 'https://photography-blog-api.your-subdomain.workers.dev/api',
+  production: process.env.REACT_APP_API_URL || 'https://photography-blog-api.dushmilan05.workers.dev/api',
   test: 'http://localhost:8787/api',
 };
 
