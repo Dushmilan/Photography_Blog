@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { Database } from '../db/queries';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import { storeRefreshToken } from '../utils/tokenStore';
+import { authMiddleware } from '../middleware/auth';
 import { catchAsync, AppError } from '../utils/errorHandler';
 
 const router = new Hono<{ Bindings: { DB: D1Database; JWT_SECRET: string; JWT_REFRESH_SECRET: string } }>();
@@ -34,7 +35,7 @@ router.post('/login', catchAsync(async (c) => {
   return c.json({ accessToken, refreshToken, user: { id, username } });
 }));
 
-router.get('/me', catchAsync(async (c) => {
+router.get('/me', authMiddleware, catchAsync(async (c) => {
   const userId = (c.get('user') as any).userId;
   const db = new Database(c.env.DB);
   const user: any = await db.findUserById(userId);

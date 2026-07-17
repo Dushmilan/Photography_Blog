@@ -121,7 +121,8 @@ const GalleryPage = () => {
 
   // Filter images based on search term
   const filteredImages = images.filter(image => {
-    const matchesSearch = image.original_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+    const name = (image.original_name || image.filename || image.name || '').toLowerCase();
+    const matchesSearch = name.includes(debouncedSearchTerm.toLowerCase());
     return matchesSearch;
   });
 

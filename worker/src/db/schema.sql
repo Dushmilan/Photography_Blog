@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS images (
   id TEXT PRIMARY KEY,
   path TEXT NOT NULL,
+  original_name TEXT,
   photographer_id INTEGER REFERENCES users(id),
   is_slideshow INTEGER DEFAULT 0,
   is_public INTEGER DEFAULT 0,

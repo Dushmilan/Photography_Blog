@@ -10,7 +10,7 @@ const getIkAuth = (c: any) => ({
 
 async function ikRequest(path: string, c: any): Promise<any> {
   const { privateKey } = getIkAuth(c);
-  const res = await fetch(`https://api.imagekit.io/v5${path}`, {
+  const res = await fetch(`https://api.imagekit.io/v1${path}`, {
     headers: { Authorization: `Basic ${btoa(privateKey + ':')}` }
   });
   if (!res.ok) return null;
@@ -81,13 +81,21 @@ protectedImageRoutes.put('/reorder', catchAsync(async (c) => {
   return c.json({ message: 'Order updated successfully' });
 }));
 
+async function ensureImageData(id: string, path: string | undefined, c: any): Promise<{ path: string; name: string }> {
+  if (path && path !== `/image/${id}`) return { path, name: '' };
+  const ikData = await ikRequest(`/files/${id}/details`, c);
+  return { path: ikData?.url || `/image/${id}`, name: ikData?.name || '' };
+}
+
 protectedImageRoutes.put('/:id/public', catchAsync(async (c) => {
   const id = c.req.param('id');
   const userId = (c.get('user') as any).userId;
   const { isPublic } = await c.req.json() as any;
   if (typeof isPublic !== 'boolean') throw new AppError('isPublic must be boolean', 400);
   const db = new Database(c.env.DB);
-  const image = await db.updateImagePublicStatus(id, userId, isPublic);
+  const existing: any = await db.getImageById(id);
+  const imgData = await ensureImageData(id, existing?.path, c);
+  const image = await db.updateImagePublicStatus(id, userId, isPublic, imgData.path, imgData.name);
   return c.json({ image });
 }));
 
@@ -97,7 +105,9 @@ protectedImageRoutes.put('/:id/slideshow', catchAsync(async (c) => {
   const { isSlideshow } = await c.req.json() as any;
   if (typeof isSlideshow !== 'boolean') throw new AppError('isSlideshow must be boolean', 400);
   const db = new Database(c.env.DB);
-  const image = await db.updateImageSlideshowStatus(id, userId, isSlideshow);
+  const existing: any = await db.getImageById(id);
+  const imgData = await ensureImageData(id, existing?.path, c);
+  const image = await db.updateImageSlideshowStatus(id, userId, isSlideshow, imgData.path, imgData.name);
   return c.json({ image });
 }));
 

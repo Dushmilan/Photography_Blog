@@ -38,9 +38,9 @@ export class Database {
       throw new AppError('Image ID and photographer ID are required', 400);
     }
     const result = await this.db
-      .prepare(`INSERT OR IGNORE INTO images (id, path, photographer_id, is_slideshow, is_public, gallery_order, slideshow_order)
-        VALUES (?, ?, ?, ?, ?, ?, ?)`)
-      .bind(imageData.id, imageData.path || '', imageData.photographer_id,
+      .prepare(`INSERT OR IGNORE INTO images (id, path, original_name, photographer_id, is_slideshow, is_public, gallery_order, slideshow_order)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(imageData.id, imageData.path || '', imageData.original_name || '', imageData.photographer_id,
         imageData.is_slideshow ? 1 : 0, imageData.is_public ? 1 : 0,
         imageData.gallery_order || 0, imageData.slideshow_order || 0)
       .run() as any;
@@ -105,21 +105,21 @@ export class Database {
     return updatedImage;
   }
 
-  async updateImageSlideshowStatus(imageId: string, photographerId: number | string, isSlideshow: boolean) {
+  async updateImageSlideshowStatus(imageId: string, photographerId: number | string, isSlideshow: boolean, imagePath?: string, originalName?: string) {
     const existing = await this.getImageByIdAndPhotographer(imageId, photographerId);
     if (existing) return await this.updateImage(imageId, { is_slideshow: isSlideshow ? 1 : 0 }, photographerId);
     const other = await this.getImageById(imageId);
     if (other && other.photographer_id !== photographerId) throw new AppError('Image belongs to a different photographer', 403);
-    await this.createImage({ id: imageId, path: `/image/${imageId}`, photographer_id: photographerId, is_slideshow: isSlideshow ? 1 : 0, is_public: 0 });
+    await this.createImage({ id: imageId, path: imagePath || `/image/${imageId}`, original_name: originalName || '', photographer_id: photographerId, is_slideshow: isSlideshow ? 1 : 0, is_public: 0 });
     return await this.updateImage(imageId, { is_slideshow: isSlideshow ? 1 : 0 }, photographerId);
   }
 
-  async updateImagePublicStatus(imageId: string, photographerId: number | string, isPublic: boolean) {
+  async updateImagePublicStatus(imageId: string, photographerId: number | string, isPublic: boolean, imagePath?: string, originalName?: string) {
     const existing = await this.getImageByIdAndPhotographer(imageId, photographerId);
     if (existing) return await this.updateImage(imageId, { is_public: isPublic ? 1 : 0 }, photographerId);
     const other = await this.getImageById(imageId);
     if (other && other.photographer_id !== photographerId) throw new AppError('Image belongs to a different photographer', 403);
-    await this.createImage({ id: imageId, path: `/image/${imageId}`, photographer_id: photographerId, is_slideshow: 0, is_public: isPublic ? 1 : 0 });
+    await this.createImage({ id: imageId, path: imagePath || `/image/${imageId}`, original_name: originalName || '', photographer_id: photographerId, is_slideshow: 0, is_public: isPublic ? 1 : 0 });
     return await this.updateImage(imageId, { is_public: isPublic ? 1 : 0 }, photographerId);
   }
 

@@ -295,7 +295,7 @@ const AdminPage = () => {
                     <div className="aspect-square bg-gray-900 rounded-lg overflow-hidden">
                       <img
                         src={image.path || image.baseUrl}
-                        alt={image.original_name}
+                        alt={image.original_name || image.filename || image.name || ''}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI2Q0ZDRkNCIvPgo8cGF0aCBkPSJNMyA2TDkgMTJMMyAxOEw5IDI0TDE2IDE3TDE5IDIwTDE1IDI0TDMgMTBaIiBzdHJva2U9IiM4ZTg1NzQiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTIwIDZMMTQgMTJMOSA3IiBzdHJva2U9IiM4ZTg1NzQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
@@ -337,7 +337,7 @@ const AdminPage = () => {
                     </div>
 
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-xs">
-                      <p className="truncate">{image.original_name}</p>
+                      <p className="truncate">{image.original_name || image.filename || image.name || 'Untitled'}</p>
                       {image.is_public && (
                         <p className="text-[#A8E6CF] text-xs">Public</p>
                       )}

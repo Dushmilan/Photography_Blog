@@ -16,6 +16,15 @@ async function ikRequest(path: string, c: any): Promise<any> {
   return res.json();
 }
 
+async function ikRequestV1(path: string, c: any): Promise<any> {
+  const { privateKey } = ikAuth(c);
+  const res = await fetch(`https://api.imagekit.io/v1${path}`, {
+    headers: { Authorization: `Basic ${btoa(privateKey + ':')}` }
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 // GET /imagekit/auth-parameters
 router.get('/auth-parameters', catchAsync(async (c) => {
   const { publicKey, urlEndpoint, privateKey } = ikAuth(c);
@@ -32,7 +41,7 @@ router.get('/images', catchAsync(async (c) => {
   const pageSize = parseInt(c.req.query('pageSize') || '50');
   const skip = parseInt(c.req.query('skip') || '0');
   const userId = (c.get('user') as any).userId;
-  const ikFiles: any[] = (await ikRequest(`/files?limit=${pageSize}&offset=${skip}`, c)) || [];
+  const ikFiles: any[] = (await ikRequestV1(`/files?limit=${pageSize}&offset=${skip}`, c)) || [];
   const { results: dbResults } = await c.env.DB.prepare('SELECT * FROM images WHERE photographer_id = ?').bind(userId).all() as any;
   const merged = ikFiles.map((ik: any) => {
     const dbMatch = (dbResults || []).find((d: any) => d.id === ik.fileId);
@@ -46,7 +55,7 @@ router.get('/image/:imageId', catchAsync(async (c) => {
   const imageId = c.req.param('imageId');
   const userId = (c.get('user') as any).userId;
   const dbImage: any = await c.env.DB.prepare('SELECT * FROM images WHERE id = ? AND photographer_id = ?').bind(imageId, userId).first();
-  const ikData: any = await ikRequest(`/files/${imageId}/details`, c);
+  const ikData: any = await ikRequestV1(`/files/${imageId}/details`, c);
   if (!dbImage && !ikData) throw new AppError('Image not found', 404);
   const { publicKey, urlEndpoint } = ikAuth(c);
   const image = {
@@ -69,8 +78,11 @@ router.put('/image/:imageId', catchAsync(async (c) => {
   const imageId = c.req.param('imageId');
   const userId = (c.get('user') as any).userId;
   const { is_slideshow, is_public } = await c.req.json() as any;
-  await c.env.DB.prepare(`INSERT OR IGNORE INTO images (id, path, photographer_id, is_slideshow, is_public)
-    VALUES (?, ?, ?, ?, ?)`).bind(imageId, `/image/${imageId}`, userId, is_slideshow ? 1 : 0, is_public ? 1 : 0).run();
+  const ikData = await ikRequestV1(`/files/${imageId}/details`, c);
+  const imagePath = ikData?.url || `/image/${imageId}`;
+  const imageName = ikData?.name || '';
+  await c.env.DB.prepare(`INSERT OR IGNORE INTO images (id, path, original_name, photographer_id, is_slideshow, is_public)
+    VALUES (?, ?, ?, ?, ?, ?)`).bind(imageId, imagePath, imageName, userId, is_slideshow ? 1 : 0, is_public ? 1 : 0).run();
   const updates: string[] = [];
   const params: any[] = [];
   if (is_slideshow !== undefined) { updates.push('is_slideshow = ?'); params.push(is_slideshow ? 1 : 0); }

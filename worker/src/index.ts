@@ -40,7 +40,6 @@ api.route('/images', protectedImageRoutes);
 api.route('/imagekit', imagekitRoutes);
 
 app.route('/api', api);
-
-app.get('/', (c) => c.redirect('/api'));
+app.route('/', api);
 
 export default { fetch: app.fetch };
