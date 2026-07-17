@@ -178,7 +178,7 @@ const AdminGalleryPage = () => {
 
         // For admin view, fetch all images from the database
         const storedImagesResponse = await api.get('/images/admin-gallery');
-        const storedImages = storedImagesResponse.data;
+        const storedImages = storedImagesResponse.data.images || storedImagesResponse.data;
 
         setImages(storedImages);
       } catch (error) {
